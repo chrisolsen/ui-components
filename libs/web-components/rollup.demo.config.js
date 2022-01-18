@@ -41,14 +41,15 @@ export default {
     svelte({
       // compile only *.wc.svelte files as web components
       include: /\.wc\.svelte$/,
-      preprocess: preprocess({ sourceMap: true}),
+      exclude: /App\.svelte/,
+      preprocess: preprocess({ sourceMap: true }),
       compilerOptions: {
         dev: true,
         customElement: true,
       },
     }),
     svelte({
-      exclude: /\.wc\.svelte$/,
+      include: /App\.svelte$/,
       compilerOptions: {
         dev: true,
       },
