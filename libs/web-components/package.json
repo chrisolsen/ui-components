@@ -6,8 +6,9 @@
     "url": "https://github.com/GovAlta/ui-components/issues"
   },
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c rollup.demo.config.js -w",
+    "build": "rollup -c rollup.config.js",
+    "dev": "rollup -c rollup.config.js -w",
+    "demo": "rollup -c rollup.demo.config.js -w",
     "start": "sirv demo/public",
     "prepublishOnly": "npm run build",
     "check": "svelte-check --tsconfig ./tsconfig.json"
