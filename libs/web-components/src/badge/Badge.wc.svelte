@@ -3,15 +3,21 @@
 <!-- Script -->
 <script lang="ts">
   import { toBoolean } from "../common/utils";
-  import { BadgeType, WCBoolean, WC_FALSE } from "@abgov/shared/common";
+  // import { BadgeType, WCBoolean, WC_FALSE } from "@abgov/shared/common";
+
+
+  export let type: "success" | "warning" | "information" | "emergency" | "inactive" | "dark" | "midtone" | "light";
+
+  // optional
+  export let testId: string = "";
+  export let icon: string;
 
   // required
-  export let type: BadgeType;
+  // export let type: BadgeType;
 
   // optional
   export let content: string = "";
-  export let testId: string = "";
-  export let icon: WCBoolean = WC_FALSE;
+  // export let icon: WCBoolean = WC_FALSE;
 
   $: showIcon = toBoolean(icon);
 
