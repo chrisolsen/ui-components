@@ -38,6 +38,7 @@ export default {
     summary(),
   ],
   watch: {
-    clearScreen: false,
+    clearScreen: true,
+    include: ["src/**/*.ts", "src/**/*.svelte"],
   },
 };
