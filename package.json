@@ -108,7 +108,7 @@
     "@nrwl/storybook": "13.5.1",
     "@nrwl/web": "13.1.4",
     "@nrwl/workspace": "13.1.4",
-    "@nx-plus/vue": "^10.0.0",
+    "@nx-plus/vue": "^12.2.0",
     "@nxext/svelte": "^13.1.3",
     "@nxext/vite": "^13.1.3",
     "@rollup/plugin-commonjs": "^20.0.0",
