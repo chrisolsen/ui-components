@@ -19,7 +19,6 @@
   export let maxheight: number = MAX_HEIGHT;
   export let placeholder: string = "";
 
-  export let multiselect: boolean;
   export let disabled: boolean;
   export let filterable: boolean;
   export let error: boolean;
@@ -53,7 +52,6 @@
       // notify children of value change
       ctx?.notify({
         type: CHANGE,
-        multiSelect: multiselect,
         values: vals,
       });
     }
@@ -75,37 +73,24 @@
 
         case INIT_RESPONSE: {
           const { label } = data as ChangeSelectedMessage
-          if (multiselect) {
-            selectedLabels = [...selectedLabels, label];
-          } else {
-            selectedLabels = [label];
-          }
+          selectedLabels = [label];
           break;
         }
 
         case SELECT: {
           const { label, value } = data as ChangeSelectedMessage
           if (data.selected) {
-            if (multiselect) {
-              selectedLabels = [...selectedLabels, label];
-              selectedValues = [...selectedValues, value];
-            } else {
-              selectedLabels = [label];
-              selectedValues = [value];
-            }
+            selectedLabels = [label];
+            selectedValues = [value];
           } else {
             selectedLabels = selectedLabels.filter(l => l !== label);
             selectedValues = selectedValues.filter(v => v !== value);
           }
 
-          if (!multiselect) {
-            isMenuVisible = false;
-          }
-
           el.dispatchEvent(
             new CustomEvent("_change", {
               composed: true,
-              detail: { name, value: selectedValues }, // TODO: send single value if multiselect is false
+              detail: { name, value: selectedValues },
             }),
           );
           break;

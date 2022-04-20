@@ -8,7 +8,6 @@ export const FILTER = "filter";
 
 export interface BindSelectedMessage extends Message {
   type: "change";
-  multiSelect: boolean;
   values: string[];
 }
 
