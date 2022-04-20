@@ -140,7 +140,7 @@
   };
 
   // Functions
-  async function showMenu() {
+  async function showMenu(e) {
     if (disabled) {
       return;
     }
@@ -151,6 +151,8 @@
     filterEl?.addEventListener("_change", filterOnChangeListener);
     filterEl?.addEventListener("_trailingIconClick", filterOnTrailingIconClickListener);
     filterEl?.focus();
+    console.log(e)
+    e.stopPropagation();
   }
 
   function closeMenu() {
@@ -178,7 +180,10 @@
     {#if !isMenuVisible || !filterable}
       <div data-testid={`${name}-dropdown`}>
         <goa-input
-          on:focus={showMenu}
+          on:click={showMenu}
+          on:blur={() => {
+            setTimeout(closeMenu, 100);
+          }}
           error={isError}
           disabled={disabled}
           {leadingicon}
@@ -187,7 +192,6 @@
           name="search"
           readonly
           trailingicon="chevron-down"
-          handletrailingiconclick
           type="text"
           value={selectedLabels.join(", ")}
         />

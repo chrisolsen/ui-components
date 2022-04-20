@@ -151,7 +151,7 @@
   }
 
   .goa-dropdown-option--selected {
-    background: var(--goa-color-interactive--active);
+    background: var(--goa-color-interactive);
     color: var(--color-white);
   }
 
