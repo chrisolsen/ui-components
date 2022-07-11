@@ -57,7 +57,7 @@
     });
   }
 
-  function onKeyUp(e) {
+  function onKeyUp(e: any) {
     e.target.dispatchEvent(
       new CustomEvent("_change", {
         composed: true,

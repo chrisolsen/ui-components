@@ -36,8 +36,6 @@ build: styles web-components react-components
 
 
 storybook:
-	# while inotifywait -e modify -r libs/web-components/src --exclude spec\.ts; do make build; done &
-	echo "Starting storybook..."
 	npm run run:docs-storybook & (cd libs/web-components && npm run dev)
 
 storybook-new:
