@@ -1,4 +1,4 @@
-<svelte:options tag="goa-input" />
+<svelte:options tag={null}/>
 
 <script lang="ts" context="module">
   export type GoAInputVariant = "goa" | "bare";
@@ -7,6 +7,8 @@
 <script lang="ts">
   import { toBoolean } from "../../common/utils";
   import type { GoAIconType } from "../icon/Icon.svelte";
+
+  export let internals;
 
   export let type:
     "text"
@@ -120,7 +122,7 @@
       readonly={isReadonly}
       disabled={isDisabled}
       data-testid={testid}
-      {name}
+      name={name}
       {type}
       {value}
       {placeholder}

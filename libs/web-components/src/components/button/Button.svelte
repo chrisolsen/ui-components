@@ -1,4 +1,4 @@
-<svelte:options tag="goa-button" />
+<svelte:options tag={null}/>
 
 <script lang="ts">
   import { onMount } from "svelte";
@@ -60,6 +60,7 @@
 
 <button
   class="{type} {size} {variant}"
+  type={type === "submit" ? "submit" : "button"}
   class:leading={leadingicon}
   class:trailing={trailingicon || type === "start"}
   on:click={clickHandler}

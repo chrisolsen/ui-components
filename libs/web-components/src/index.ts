@@ -1,7 +1,6 @@
 export * from "./components/app-header/AppHeader.svelte";
 export * from "./components/badge/Badge.svelte";
 export * from "./components/button-group/ButtonGroup.svelte";
-export * from "./components/button/Button.svelte";
 export * from "./components/callout/Callout.svelte";
 export * from "./components/card-actions/CardActions.svelte";
 export * from "./components/card-content/CardContent.svelte";
@@ -24,7 +23,6 @@ export * from "./components/form-item/FormItem.svelte";
 export * from "./components/hero-banner/HeroBanner.svelte";
 export * from "./components/icon-button/IconButton.svelte";
 export * from "./components/icon/Icon.svelte";
-export * from "./components/input/Input.svelte";
 export * from "./components/microsite-header/MicrositeHeader.svelte";
 export * from "./components/modal/Modal.svelte";
 export * from "./components/notification/Notification.svelte";
@@ -36,6 +34,9 @@ export * from "./components/skeleton/Skeleton.svelte";
 export * from "./components/spinner/Spinner.svelte";
 export * from "./components/text-area/TextArea.svelte";
 export * from "./layouts/FullScreenNavbarLayout.svelte";
+
+export * from "./components/input/input.js";
+export * from "./components/button/button.js";
 
 // Wrappers
 export * from "./components/container/ContainerWrapper.test.svelte";
