@@ -11,7 +11,7 @@ export * from "./components/checkbox/Checkbox.svelte";
 export * from "./components/chip/Chip.svelte";
 export * from "./components/circular-progress/CircularProgress.svelte";
 export * from "./components/container/Container.svelte";
-export * from "./components/dropdown/Dropdown.svelte";
+// export * from "./components/dropdown/Dropdown.svelte";
 export * from "./components/dropdown/DropdownItem.svelte";
 export * from "./components/flex-column/FlexColumn.svelte";
 export * from "./components/flex-row/FlexRow.svelte";
@@ -35,6 +35,7 @@ export * from "./components/spinner/Spinner.svelte";
 export * from "./components/text-area/TextArea.svelte";
 export * from "./layouts/FullScreenNavbarLayout.svelte";
 
+export * from "./components/dropdown/dropdown.js";
 export * from "./components/input/input.js";
 export * from "./components/button/button.js";
 

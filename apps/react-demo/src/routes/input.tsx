@@ -153,9 +153,6 @@ export default function Input() {
       />
 
       <h2>Prefix and Suffix</h2>
-      <GoAInput name="input" value="" prefix="$" onChange={noop} />
-      <GoAInput name="input" value="" suffix="items" onChange={noop} />
-      <GoAInput name="input" value="" prefix="$" suffix="per item" onChange={noop} />
     </>
   );
 }

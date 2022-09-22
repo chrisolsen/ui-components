@@ -1,6 +1,7 @@
 import React, { FC, ReactNode, useEffect, useRef } from 'react';
 import './button.css';
 import { GoAIconType } from '../icons';
+import { useCustomEvent, useCustomEvents } from '../../common/eventBinding';
 
 export type ButtonType = 'primary' | 'submit' | 'secondary' | 'tertiary' | 'start';
 export type ButtonSize = 'compact' | 'normal';
@@ -33,7 +34,7 @@ type ButtonProps = {
   disabled?: boolean;
   leadingIcon?: GoAIconType;
   trailingIcon?: GoAIconType;
-  onClick: (e: any) => void;
+  onClick: (e: Event) => void;
   children?: ReactNode;
 };
 
@@ -44,22 +45,12 @@ export const GoAButton: FC<ButtonProps> = ({
   variant,
   leadingIcon,
   trailingIcon,
+  onClick,
   children,
-  onClick
 }) => {
   const el = useRef<HTMLElement>(null);
-  useEffect(() => {
-    if (!el.current) {
-      return;
-    }
-    const current = el.current;
-    const listener = (e: any) => { onClick(e); };
 
-    current.addEventListener('_click', listener)
-    return () => {
-      current.removeEventListener('_click', listener);
-    }
-  }, [el, onClick])
+  useCustomEvent("_click", onClick, el)
 
   return (
     <goa-button

@@ -8,7 +8,7 @@
   import { toBoolean } from "../../common/utils";
   import type { GoAIconType } from "../icon/Icon.svelte";
 
-  export let internals;
+  export let internals = null;
 
   export let type:
     "text"

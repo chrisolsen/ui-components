@@ -1,4 +1,4 @@
-<svelte:options tag="goa-dropdown" />
+<svelte:options tag={null}/>
 
 <script lang="ts">
   import { deleteContext, ContextStore, createContext } from "../../common/context-store";
@@ -6,15 +6,17 @@
   import { onMount, onDestroy, tick } from "svelte";
   import { BIND, BindMessage, Option } from "./types";
   import { toBoolean } from "../../common/utils";
+ 
+  export let internals = null;
 
   const MAX_HEIGHT = "300px";
 
   // Props
 
-  export let name: string;
+  export let _name: string;
   export let arialabel: string = "";
   export let value: string = "";
-  export let leadingicon: GoAIconType = null;
+  export let leadingicon: GoAIconType = "add";
   export let maxheight: string = MAX_HEIGHT;
   export let placeholder: string = "";
   export let testid: string = "";
@@ -35,46 +37,36 @@
   let maxLetterCount: number = 0;
   let computedWidth: string;
 
-  let el: HTMLElement;
+  let rootEl: HTMLElement;
+  let inputEl: HTMLElement;
   let menuEl: HTMLElement;
   let ctx: ContextStore;
 
   // Hooks
 
-  onMount(() => {
-    const maxAttempts = 10;
-    let attempts = 0; 
-    const fn = setInterval(async () => {
-      attempts++;
-      if (name && el) {
-        addEventListeners();
-        parseValues();
-        bindContext();
-
-        clearInterval(fn);
-      }
-      if (attempts > maxAttempts) {
-        console.error("goa-dropdown: missing the required `name` attribute. It must match the children's name attribute.")
-        clearInterval(fn);
-      }
-    }, 10);
-  })
+  $: {
+    if (_name && rootEl) {
+      addEventListeners();
+      parseValues();
+      bindContext();
+    }
+  }
 
   onDestroy(() => {
     removeEventListeners();
-    deleteContext(name);
+    deleteContext(_name);
   });
 
   // Functions
 
   function addEventListeners() {
-    el.addEventListener("focus", onFocus, true);
-    el.addEventListener("blur", onBlur, true);
+    rootEl.addEventListener("focus", onFocus, true);
+    rootEl.addEventListener("blur", onBlur, true);
   }
 
   function removeEventListeners() {
-    el.removeEventListener("focus", onFocus, true);
-    el.removeEventListener("blur", onBlur, true);
+    rootEl.removeEventListener("focus", onFocus, true);
+    rootEl.removeEventListener("blur", onBlur, true);
   }
 
   function parseValues() {
@@ -91,15 +83,17 @@
   }
 
   function bindContext() {
-    ctx = createContext(name);
+    ctx = createContext(_name);
     ctx.subscribe(data => {
       switch (data?.type) {
         case BIND: {
           const _data = data as BindMessage;
           const selected = _values.includes(_data.value);
 
+          console.log("subscribed", _data, selected)
           options = [...options, { ..._data, selected }];
           if (selected) {
+            console.log("setting label", _data)
             selectedLabel = _data.label;
           }
           if (!width && maxLetterCount < _data.label.length) {
@@ -118,7 +112,6 @@
       return;
     }
     isMenuVisible = true;
-
     await tick();
 
     // hide menu on blur
@@ -149,18 +142,20 @@
     selectedLabel = label;
     if (_multiselect) {
       _values.push(val);
-      el.dispatchEvent(
+      inputEl.dispatchEvent(
         new CustomEvent("_change", {
           composed: true,
-          detail: { name, values: _values },
+          detail: { name: _name, values: _values },
         }),
       );
     } else {
       _values = [val];
-      el.dispatchEvent(
+      value = val;
+      inputEl.dispatchEvent(
         new CustomEvent("_change", {
           composed: true,
-          detail: { name, value: _values[0] },
+          bubbles: true,
+          detail: { name: _name, value: _values[0] },
         }),
       );
     }
@@ -178,12 +173,12 @@
 
   // add required bindings to component
   function onFocus() {
-    el.addEventListener("keydown", onInputKeyDown);
+    rootEl.addEventListener("keydown", onInputKeyDown);
   }
 
   // remove all bindings from component
   function onBlur() {
-    el.removeEventListener("keydown", onInputKeyDown);
+    rootEl.removeEventListener("keydown", onInputKeyDown);
   }
 
   function onMenuKeyDown(e: KeyboardEvent) {
@@ -224,28 +219,29 @@
   data-testid={testid} 
   class="goa-dropdown-box" 
   style={`--width: ${width || computedWidth}`}
-  bind:this={el}>
+  bind:this={rootEl}>
 
   <!-- background -->
   {#if isMenuVisible}
     <div
-      data-testid={`${name}-dropdown-background`}
+      data-testid={`${_name}-dropdown-background`}
       class="goa-dropdown-background"
       on:click={closeMenu}
     />
   {/if}
 
   <!-- readonly input  -->
-  <div data-testid={`${name}-dropdown`}>
+  <div data-testid={`${_name}-dropdown`}>
     <goa-input
+      bind:this={inputEl}
       on:click={showMenu}
       error={error}
       {disabled}
       {leadingicon}
       {placeholder}
       width="100%"
-      id={`${name}-dropdown-input`}
-      aria-label={arialabel || name}
+      id={`${_name}-dropdown-input`}
+      aria-label={arialabel || _name}
       readonly
       trailingicon="chevron-down"
       type="text"

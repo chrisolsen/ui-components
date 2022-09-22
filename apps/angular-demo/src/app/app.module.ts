@@ -25,13 +25,16 @@ import { MicrositeHeaderComponent } from './microsite-header/microsite-header.co
 import { ContainerComponent } from './container/container.component';
 import { SkeletonComponent } from './skeleton/skeleton.component';
 import { FormItemComponent } from './form-item/form-item.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [AppComponent, InputComponentComponent, ButtonComponentComponent, NavigationLinkComponent, TextAreaComponent, CheckboxComponent, RadioComponent, DropdownComponent, ModalComponent, AppFooterComponent, BadgeComponent, CalloutComponent, ChipComponent, CircularProgressComponent, HeroBannerComponent, AppHeaderComponent, MicrositeHeaderComponent, ContainerComponent, SkeletonComponent, FormItemComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    NoopAnimationsModule
+    NoopAnimationsModule,
+    FormsModule,
+    ReactiveFormsModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
