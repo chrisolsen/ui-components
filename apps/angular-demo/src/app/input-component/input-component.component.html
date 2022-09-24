@@ -9,10 +9,9 @@
 ></goa-input>
 
 <h2>Basic</h2>
-<form #f="ngForm" (ngSubmit)="onSubmit(f)" novalidate>
+<form #f="ngForm" novalidate>
   <input name="title" [(ngModel)]="book.title" />
-  <goa-input name="title" [(ngModel)]="book.title"></goa-input>
-  <button type="submit">Submit</button>
+  <goa-input name="title" [(ngModel)]="book.title" formControlName="title" ngDefaultControl></goa-input>
 </form>
 
 <p>Form value: {{ book.title }}</p>
