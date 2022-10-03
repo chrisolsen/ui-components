@@ -3,8 +3,10 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import '@abgov/web-components';
+import '@abgov/angular-components';
+
 import { InputComponentComponent } from './input-component/input-component.component';
 import { ButtonComponentComponent } from './button-component/button-component.component';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -32,7 +34,9 @@ import { TwoColumnLayoutComponent } from './two-column-layout/two-column-layout.
   imports: [
     BrowserModule,
     AppRoutingModule,
-    NoopAnimationsModule
+    NoopAnimationsModule,
+    FormsModule,
+    ReactiveFormsModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

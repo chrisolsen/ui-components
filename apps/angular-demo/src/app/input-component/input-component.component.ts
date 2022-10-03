@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { format } from "date-fns";
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'abgov-input-component',
@@ -8,6 +9,8 @@ import { format } from "date-fns";
 })
 export class InputComponentComponent {
   constructor() { }
+
+  user = new FormControl({});
 
   date = new Date();
   formatDate = format(this.date, "yyyy-MM-dd");
