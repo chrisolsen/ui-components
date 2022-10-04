@@ -1,9 +1,27 @@
 <h1>Input</h1>
 
-<h2>Binding</h2>
-<goa-input [(ngModel)]="user.value.name"></goa-input>
-Your name is {{ user.value.name }}
+<!-- <h2>Binding</h2> -->
+<!-- <form [formGroup]="userForm"> -->
+<!--   <goa-input formControlName="user"></goa-input> -->
+<!--   <!-- <input formControlName="user" /> --> -->
+<!--   Your name is {{ userForm.controls.user.value }} -->
+<!-- </form> -->
 
-<!-- The ControlValueAccess class doesn't seem to be loaded, or linked to goa-input, resulting in-->
 <!-- It is missing the `valueAccessor` -->
+  <!-- The ControlValueAccess class doesn't seem to be loaded, or linked to goa-input, resulting in-->
 <!-- Standalone components? Where do you use these? -->
+
+<h2>Web Component</h2>
+<p>{{wcVal}}</p>
+<goa-input [value]="wcVal" (_change)="updateInput($event)"></goa-input>
+
+
+<h2>Angular Reactive Forms Component using Web Component</h2>
+<p>{{reactiveFormCtrl.value}}</p>
+<p>Valid (min value 0): {{reactiveFormCtrl.valid}}</p>
+<goa-input [formControl]="reactiveFormCtrl"></goa-input>
+
+
+<h2>Angular Template Forms Component using Web Component</h2>
+<p>{{tempDrivenVal }}</p>
+<goa-input [(ngModel)]="tempDrivenVal"></goa-input>

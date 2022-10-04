@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { format } from "date-fns";
-import { FormControl } from '@angular/forms';
+import { FormControl, FormBuilder, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'abgov-input-component',
@@ -8,28 +8,41 @@ import { FormControl } from '@angular/forms';
   styleUrls: ['./input-component.component.css']
 })
 export class InputComponentComponent {
-  constructor() { }
+  wcVal = 'aaa';
+  tempDrivenVal = 'bbb';
+  reactiveFormCtrl = new FormControl('ccc');
 
-  user = new FormControl({});
-
-  date = new Date();
-  formatDate = format(this.date, "yyyy-MM-dd");
-  time = format(this.date, "HH:mm:ss");
-  dateTime = format(this.date, "yyyy-MM-dd HH:mm")
-  minDate = format(this.date, "yyyy-MM-dd");
-  maxDate = format(this.getDateWithMonthOffset(1), "yyyy-MM-dd");
-
-  getDateWithMonthOffset(offset: number) {
-    const d = new Date();
-    d.setMonth(d.getMonth() + offset);
-    return d;
+  updateInput(event: any) {
+    this.wcVal = event.detail.value;
   }
 
-  onInputChangeEvent(event: any) {
-    console.log('onEvent', event.detail);
-  }
 
-  handleTrailingIconClick() {
-    console.log('handleTrailingIconClick');
-  }
+  // constructor(private formBuilder: FormBuilder) {
+  //    this.userForm = this.formBuilder.group({
+  //       user: [],
+  //    });
+  // }
+  //
+  // userForm: FormGroup;
+  //
+  // date = new Date();
+  // formatDate = format(this.date, "yyyy-MM-dd");
+  // time = format(this.date, "HH:mm:ss");
+  // dateTime = format(this.date, "yyyy-MM-dd HH:mm")
+  // minDate = format(this.date, "yyyy-MM-dd");
+  // maxDate = format(this.getDateWithMonthOffset(1), "yyyy-MM-dd");
+  //
+  // getDateWithMonthOffset(offset: number) {
+  //   const d = new Date();
+  //   d.setMonth(d.getMonth() + offset);
+  //   return d;
+  // }
+  //
+  // onInputChangeEvent(event: any) {
+  //   console.log('onEvent', event.detail);
+  // }
+  //
+  // handleTrailingIconClick() {
+  //   console.log('handleTrailingIconClick');
+  // }
 }

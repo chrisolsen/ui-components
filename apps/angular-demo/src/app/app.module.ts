@@ -5,7 +5,7 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import '@abgov/angular-components';
+import '@abgov/web-components';
 
 import { InputComponentComponent } from './input-component/input-component.component';
 import { ButtonComponentComponent } from './button-component/button-component.component';

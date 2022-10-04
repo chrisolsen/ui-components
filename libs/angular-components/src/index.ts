@@ -1,2 +1,2 @@
 export * from './lib/angular-components.module';
-export * from './lib/input-binding';
+// export * from './lib/input-binding';
