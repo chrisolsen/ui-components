@@ -6,6 +6,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import '@abgov/web-components';
+import { InputDirective } from '@abgov/angular-components';
 
 import { InputComponentComponent } from './input-component/input-component.component';
 import { ButtonComponentComponent } from './button-component/button-component.component';
@@ -30,7 +31,10 @@ import { FormItemComponent } from './form-item/form-item.component';
 import { TwoColumnLayoutComponent } from './two-column-layout/two-column-layout.component'
 
 @NgModule({
-  declarations: [TwoColumnLayoutComponent, AppComponent, InputComponentComponent, ButtonComponentComponent, NavigationLinkComponent, TextAreaComponent, CheckboxComponent, RadioComponent, DropdownComponent, ModalComponent, AppFooterComponent, BadgeComponent, CalloutComponent, ChipComponent, CircularProgressComponent, HeroBannerComponent, AppHeaderComponent, MicrositeHeaderComponent, ContainerComponent, SkeletonComponent, FormItemComponent],
+  declarations: [
+    TwoColumnLayoutComponent, AppComponent, InputComponentComponent, ButtonComponentComponent, NavigationLinkComponent, TextAreaComponent, CheckboxComponent, RadioComponent, DropdownComponent, ModalComponent, AppFooterComponent, BadgeComponent, CalloutComponent, ChipComponent, CircularProgressComponent, HeroBannerComponent, AppHeaderComponent, MicrositeHeaderComponent, ContainerComponent, SkeletonComponent, FormItemComponent,
+    InputDirective,
+  ],
   imports: [
     BrowserModule,
     AppRoutingModule,
