@@ -1,19 +1,19 @@
-import { Component } from '@angular/core';
+import { Component } from "@angular/core";
 import { format, parseISO } from "date-fns";
 
 @Component({
-  selector: 'abgov-input-component',
-  templateUrl: './input-component.component.html',
-  styleUrls: ['./input-component.component.css']
+  selector: "abgov-input-component",
+  templateUrl: "./input-component.component.html",
+  styleUrls: ["./input-component.component.css"],
 })
 export class InputComponentComponent {
-  constructor() { }
+  constructor() {}
 
   date = new Date();
   boundDate = format(this.date, "yyyy-MM-dd");
   formatDate = format(this.date, "yyyy-MM-dd");
   time = format(this.date, "HH:mm:ss");
-  dateTime = format(this.date, "yyyy-MM-dd HH:mm")
+  dateTime = format(this.date, "yyyy-MM-dd HH:mm");
   minDate = format(this.date, "yyyy-MM-dd");
   maxDate = format(this.getDateWithMonthOffset(1), "yyyy-MM-dd");
 
@@ -24,7 +24,7 @@ export class InputComponentComponent {
   }
 
   onInputChangeEvent(event: any) {
-    console.log('onEvent', event.detail);
+    console.log("onEvent", event.detail);
   }
 
   setDate(event: any) {
@@ -32,11 +32,11 @@ export class InputComponentComponent {
     if (!raw) {
       return;
     }
-    const d = parseISO(raw)
-    this.boundDate = format(d, "yyyy-MM-dd")
+    const d = parseISO(raw);
+    this.boundDate = format(d, "yyyy-MM-dd");
   }
 
   handleTrailingIconClick() {
-    console.log('handleTrailingIconClick');
+    console.log("handleTrailingIconClick");
   }
 }

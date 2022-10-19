@@ -16,7 +16,12 @@
 </goa-dropdown>
 
 <h2>Error</h2>
-<goa-dropdown arialabel="Select user" name="colors2" placeholder="Select a user" error="true">
+<goa-dropdown
+  arialabel="Select user"
+  name="colors2"
+  placeholder="Select a user"
+  error="true"
+>
   <goa-dropdown-item value="red" name="colors2" label="Red"></goa-dropdown-item>
   <goa-dropdown-item
     value="green"
@@ -30,10 +35,9 @@
   ></goa-dropdown-item>
 </goa-dropdown>
 
-
 <h2>Dynamic</h2>
 <div *ngFor="let group of groups">
-  <h4>{{group.name}}</h4>
+  <h4>{{ group.name }}</h4>
   <goa-dropdown
     [attr.name]="group.name"
     [value]="group.value"

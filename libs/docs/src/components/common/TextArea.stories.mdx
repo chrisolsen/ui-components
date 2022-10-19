@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Meta, Story } from '@storybook/addon-docs';
+import { useState } from "react";
+import { Meta, Story } from "@storybook/addon-docs";
 import {
   SupportInfo,
   Tabs,
@@ -7,8 +7,8 @@ import {
   CodeSnippet,
   Props,
   Prop,
-} from '@abgov/shared/storybook-common';
-import { GoATextArea } from '@abgov/react-components';
+} from "@abgov/shared/storybook-common";
+import { GoATextArea } from "@abgov/react-components";
 
 <Meta title="Components/Text area" component={GoATextArea} />
 
@@ -73,18 +73,19 @@ import { GoATextArea } from '@abgov/react-components';
   />
   <Prop name="maxCharCount" type="number" description="Set the max character count" />
 
-  <Prop
-    name="ariaLabel"
-    type="string"
-    description="Defines how the text will be translated for the screen reader. If not specified it will fall back to the name"
-  />
-  <Prop
-    name="_change"
-    lang="angular"
-    type="CustomEvent<{detail: { name: string, value: string }}>"
-    description="Event triggered on each input value change"
-  />
+{" "}
 
+<Prop
+  name="ariaLabel"
+  type="string"
+  description="Defines how the text will be translated for the screen reader. If not specified it will fall back to the name"
+/>
+<Prop
+  name="_change"
+  lang="angular"
+  type="CustomEvent<{detail: { name: string, value: string }}>"
+  description="Event triggered on each input value change"
+/>
 
   <Prop
     name="onChange"
@@ -104,7 +105,7 @@ export const noop = () => {
   <GoATextArea
     name="comment"
     onChange={(name, value) => {
-      console.log('changed', name, value);
+      console.log("changed", name, value);
     }}
     value="Initial value"
   />
@@ -171,7 +172,7 @@ export const noop = () => {
 #### Character count
 
 export const CharCountTemplate = () => {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
   return (
     <GoATextArea
       name="comment"
@@ -232,7 +233,7 @@ export const CharCountTemplate = () => {
 #### Character count with limit
 
 export const CharCountWithLimitTemplate = () => {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
   return (
     <GoATextArea
       name="comment"
