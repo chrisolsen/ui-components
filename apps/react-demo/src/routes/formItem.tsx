@@ -17,7 +17,7 @@ export default function FormItem() {
 
       <br />
       <h2>Optional</h2>
-      <GoAFormItem label="First name" optional>
+      <GoAFormItem label="First name" requirement="optional">
         <GoAInput
           name="firstName2"
           value=""

@@ -9,7 +9,7 @@ describe("GoAFormItem", () => {
     const { baseElement } = render(
       <GoAFormItem
         label="First Name"
-        requirement='optional'
+        requirement="optional"
         error="This is an error"
         helpText="This is some help text"
       />
