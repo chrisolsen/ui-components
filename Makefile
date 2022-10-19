@@ -22,9 +22,6 @@ story:
 
 #### BUILD
 
-build-lint:
-	npx nx run-many --target=lint --projects=react-components,styles,web-components
-
 build-web-components:
 	npm run build web-components --withDeps --configuration production
 
@@ -56,10 +53,10 @@ react-app:
 ng-app:
 	npx nx run angular-demo:serve 
 
-demo:
-	cd libs/web-components && npm run demo
-
 #### TEST
+
+lint:
+	npx nx run-many --target=lint --projects=react-components,web-components,styles
 
 test:	
 	npm run test:watch
