@@ -1,3 +1,7 @@
+#### PROJECT SETUP
+init:
+	git config core.hooksPath .githooks
+
 #### CREATE
 
 # svelte library 
