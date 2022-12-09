@@ -27,7 +27,7 @@ export class DropdownComponent {
     },
   ];
 
-  constructor() { }
+  constructor() {}
 
   selectColor(event: any) {
     console.log("Select Color", event);
