@@ -67,10 +67,12 @@
     box-sizing: border-box;
     font-family: var(--goa-font-family-sans);
     font-size: var(--goa-font-size-4);
+    display: flex;
   }
 
   .goa-container {
     box-sizing: border-box;
+    display: flex;
   }
 
   .goa-container * {

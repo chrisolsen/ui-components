@@ -25,7 +25,7 @@
 <div
   class="goa-grid"
   style={`
-    ${calculateMargin(mt, mr, mb, ml)}
+    ${calculateMargin(mt, mr, mb, ml)};
     --min-child-width: ${minchildwidth || 0};
     gap: var(--goa-space-${gap})
   `}
