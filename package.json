@@ -132,7 +132,7 @@
     "@storybook/preset-typescript": "^3.0.0",
     "@storybook/react": "^6.5.0-alpha.23",
     "@storybook/svelte": "6.5.0-alpha.23",
-    "@sveltejs/vite-plugin-svelte": "^1.4.0",
+    "@sveltejs/vite-plugin-svelte": "^1.0.9",
     "@svgr/webpack": "^5.4.0",
     "@testing-library/angular": "^10.0.0",
     "@testing-library/jest-dom": "^5.16.5",
