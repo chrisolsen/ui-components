@@ -74,13 +74,6 @@
     }
   }
 
-  @media (--tablet) or (--desktop) {
-    .nav {
-      transform: translateX(0);
-      flex: 0 0 var(--nav-column-width);
-    }
-  }
-
 </style>
 
 <div
