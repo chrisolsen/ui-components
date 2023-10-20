@@ -49,39 +49,41 @@
 </script>
 
 <!-- HTML -->
-<div
-  class="container"
-  style={`
-    ${calculateMargin(mt, mr, mb, ml)};
-    --width: ${width};
-  `}
->
-  <textarea
-    {name}
-    {placeholder}
-    {rows}
-    aria-label={arialabel || name}
-    class="goa-textarea"
-    class:error={isError}
-    disabled={isDisabled}
-    readonly={isReadonly}
-    data-testid={testid}
-    bind:this={_textAreaEl}
-    bind:value={value}
-  />
-  {#if showCounter}
-    {#if maxcharcount > 0}
-      <div
-        class="counter"
-        class:counter-error={value.length > maxcharcount}>
-        {value.length}{`/${maxcharcount}`}
-      </div>
-    {:else if value.length > 0}
-      <div class="counter">
-        {value.length}
-      </div>
+<div id="container">
+  <div
+    class="root"
+    style={`
+      ${calculateMargin(mt, mr, mb, ml)};
+      --width: ${width};
+    `}
+  >
+    <textarea
+      {name}
+      {placeholder}
+      {rows}
+      aria-label={arialabel || name}
+      class="goa-textarea"
+      class:error={isError}
+      disabled={isDisabled}
+      readonly={isReadonly}
+      data-testid={testid}
+      bind:this={_textAreaEl}
+      bind:value={value}
+    />
+    {#if showCounter}
+      {#if maxcharcount > 0}
+        <div
+          class="counter"
+          class:counter-error={value.length > maxcharcount}>
+          {value.length}{`/${maxcharcount}`}
+        </div>
+      {:else if value.length > 0}
+        <div class="counter">
+          {value.length}
+        </div>
+      {/if}
     {/if}
-  {/if}
+  </div>
 </div>
 
 <!-- Style -->
@@ -94,19 +96,17 @@
     font-family: var(--goa-font-family-sans);
   }
 
-  .container {
+  #container {
+    container: self / inline-size;
+  }
+
+  .root {
     position: relative;
     width: 100%;
-  }
-  @media not (--mobile) {
-    .container {
-      max-width: var(--width);
-    }
   }
 
   .goa-textarea {
     display: block;
-    width: 100%;
     box-sizing: border-box;
     outline: none;
     border: 1px solid var(--goa-color-greyscale-700);
@@ -115,16 +115,27 @@
     padding: var(--textarea-padding-vertical) var(--textarea-padding-horizontal);
     font-size: var(--goa-font-size-4);
     font-family: var(--goa-font-family-sans);
-    min-width: 100%;
     resize: vertical;
   }
 
-  @media not (--mobile) {
+  @container self (--container-mobile) {
+    .goa-textarea {
+      width: 100%;
+      min-width: 100%;
+    }
+  }
+
+  @container self (--container-not-mobile) {
+    .root {
+      max-width: var(--width);
+    }
     .goa-textarea {
       min-width: 0;
       width: var(--width);
     }
   }
+
+
 
   .goa-textarea[readonly] {
     cursor: pointer;
