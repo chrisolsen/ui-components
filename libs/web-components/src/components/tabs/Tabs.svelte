@@ -186,7 +186,7 @@
     border-color: var(--goa-color-greyscale-200);
   }
 
-  @container (min-width: 640px) {
+  @container not (--container-mobile) {
     [role="tablist"] {
       border-bottom: none;
     }
@@ -204,7 +204,7 @@
     }
   }
 
-  @container (max-width: 639px) {
+  @container (--container-mobile) {
     [role="tab"] {
       width: 100%;
       padding: var(--goa-space-xs) 0;
