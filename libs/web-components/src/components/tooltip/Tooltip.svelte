@@ -4,12 +4,14 @@
   import { onDestroy, onMount } from "svelte";
   import { typeValidator } from "../../common/utils";
   import { Spacing, calculateMargin } from "../../common/styling";
+
   // Validator
   const [Positions, validatePosition] = typeValidator(
     "Tooltip positions",
     ["top", "bottom", "left", "right"],
     false,
   );
+
   const [Alignment, validateAlignment] = typeValidator(
     "Tooltip alignment",
     ["left", "right", "center"],
@@ -42,7 +44,6 @@
   let _screenSize = 0;
   let _rootEl: HTMLElement;
   let _tooltipEl: HTMLElement;
-  let _tooltipWidth = 0;
   let _initialPosition: Position;
   let _tooltipVisible = false;
   let _showTooltipTimeout = null;
@@ -62,7 +63,6 @@
     }, 1);
     _initialPosition = position;
     _tooltipInstanceId = Math.random().toString(36);
-    _tooltipWidth = _tooltipEl.getBoundingClientRect().width;
     window.addEventListener("resize", checkAndAdjustPosition);
     checkAndAdjustPosition();
   });
@@ -72,6 +72,7 @@
     clearTimeout(_showTooltipTimeout);
     clearTimeout(_hideTooltipTimeout);
   });
+
   $: {
     if (_rootEl && _tooltipEl) {
       _rootEl.style.setProperty(
@@ -80,6 +81,7 @@
       );
     }
   }
+
   // call checkAndAdjustPosition function when content changes
   $: {
     content;
