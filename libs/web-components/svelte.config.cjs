@@ -2,6 +2,7 @@ const sveltePreprocess = require("svelte-preprocess");
 const postcssGlobalData = require("@csstools/postcss-global-data");
 const autoprefixer = require("autoprefixer");
 const postcssCustomMedia = require("postcss-custom-media");
+const postcssReplace = require("postcss-replace");
 
 module.exports = {
   settings: {
@@ -21,29 +22,23 @@ module.exports = {
         }),
         postcssCustomMedia(),
         autoprefixer(),
+        postcssReplace([
+          {
+            pattern: /@container.*(--container-mobile)/g,
+            data: "screen and (max-width: 623px)",
+          },
+          {
+            pattern: /@container.*(--container-tablet)/g,
+            data: "screen and (min-width: 624px) and (max-width: 1023px)",
+          },
+          {
+            pattern: /@container.*(--container-desktop)/g,
+            data: "screen and (min-width: 1024px)",
+          },
+        ])
       ],
     },
   }),
   plugins: [
-    replaceCodePlugin({
-      replacements: [
-        {
-          from: /:global\(([\[\]\(\)\-\.\:\*\w]+)\)/g,
-          to: "$1",
-        },
-        {
-          from: /@container.*(--mobile)/g,
-          to: "screen and (max-width: 623px)",
-        },
-        {
-          from: /@container.*(--tablet)/g,
-          to: "screen and (min-width: 624px) and (max-width: 1023px)",
-        },
-        {
-          from: /@container.*(--desktop)/g,
-          to: "screen and (min-width: 1024px)",
-        },
-      ],
-    }),
   ],
 };

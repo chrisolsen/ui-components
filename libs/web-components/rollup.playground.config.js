@@ -8,6 +8,7 @@ import typescript from "@rollup/plugin-typescript";
 import postcssGlobalData from "@csstools/postcss-global-data";
 import autoprefixer from "autoprefixer";
 import postcssCustomMedia from "postcss-custom-media";
+import postcssReplace from "postcss-replace";
 
 function serve() {
   let server;
@@ -55,8 +56,32 @@ export default {
             postcssGlobalData({
               files: ["./src/assets/css/breakpoints.css"],
             }),
+            postcssReplace({
+              pattern: "@container.*(--container-not-mobile)",
+              data: "screen and (min-width: 624px)",
+            }),
+            postcssReplace({
+              pattern: "@container.*(--container-tablet)",
+              data: "screen and (min-width: 624px) and (max-width: 1023px)",
+            }),
+            postcssReplace({
+              pattern: "@container.*(--container-not-tablet)",
+              data: "screen and (max-width: 623px) or (min-width: 1024px)",
+            }),
+            postcssReplace({
+              pattern: "@container.*(--container-desktop)",
+              data: "screen and (min-width: 1024px)",
+            }),
+            postcssReplace({
+              pattern: "@container.*(--container-not-desktop)",
+              data: "screen and (max-width: 1023px)",
+            }),
             autoprefixer(),
             postcssCustomMedia(),
+            postcssReplace({
+              pattern: /@container.*(--container-mobile)/g,
+              data: "screen and (max-width: 623px)",
+            }),
           ],
         },
       }),
