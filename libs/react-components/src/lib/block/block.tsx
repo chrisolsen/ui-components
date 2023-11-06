@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { Alignment, Direction, Margins, Spacing } from "../../common/styling";
+import type { Alignment, Direction, Margins, Spacing } from "../../common/styling";
 
 export interface WCProps extends Margins {
   gap?: Spacing;

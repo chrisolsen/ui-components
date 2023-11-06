@@ -2,7 +2,8 @@
 
 <!-- Script -->
 <script lang="ts">
-  import { calculateMargin, Spacing } from "../../common/styling";
+  import { calculateMargin } from "../../common/styling";
+  import type { Spacing } from "../../common/styling";
   import { typeValidator } from "../../common/utils";
   import { onMount } from "svelte";
 

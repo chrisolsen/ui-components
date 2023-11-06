@@ -3,7 +3,8 @@
 <!-- Script -->
 <script lang="ts">
   import { onMount } from "svelte";
-  import { calculateMargin, Spacing } from "../../common/styling";
+  import { calculateMargin } from "../../common/styling";
+  import type { Spacing } from "../../common/styling"
   import { typeValidator, toBoolean, validateRequired } from "../../common/utils";
 
   // Validator
@@ -27,7 +28,7 @@
   export let ml: Spacing = null;
 
   let _hovering: boolean = false;
-  let _titleEl: HTMLElement = null;
+  let _titleEl: HTMLElement;
   let _headingContentSlotChildren: Element[] = [];
 
   $: isOpen = toBoolean(open);

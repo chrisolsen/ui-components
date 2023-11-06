@@ -4,7 +4,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import { calculateMargin, Spacing } from "../../common/styling";
+  import { calculateMargin } from "../../common/styling";
+  import type { Spacing } from "../../common/styling";
   import { validateRequired } from "../../common/utils";
 
   export let gap: Spacing = "m";

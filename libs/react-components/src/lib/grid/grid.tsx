@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import { Margins, Spacing } from "../../common/styling";
+import type { Margins, Spacing } from "../../common/styling";
 
 interface WCProps extends Margins {
   gap?: Spacing;

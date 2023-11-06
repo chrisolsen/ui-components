@@ -1,5 +1,5 @@
 import React from "react";
-import { Spacing } from "../../common/styling";
+import type { Spacing } from "../../common/styling";
 
 /* eslint-disable-next-line */
 interface WCProps {

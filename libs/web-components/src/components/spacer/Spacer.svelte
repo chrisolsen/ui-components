@@ -3,7 +3,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import { injectCss, Spacing } from "../../common/styling";
+  import { injectCss } from "../../common/styling";
+  import type { Spacing } from "../../common/styling";
 
   export let hspacing: Spacing | "fill" = "none";
   export let vspacing: Spacing = "none";

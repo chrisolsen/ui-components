@@ -3,7 +3,8 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import { typeValidator } from "../../common/utils";
-  import { Spacing, calculateMargin } from "../../common/styling";
+  import { calculateMargin } from "../../common/styling";
+  import type { Spacing } from "../../common/styling";
 
   // Validator
   const [Positions, validatePosition] = typeValidator(

@@ -3,7 +3,8 @@
 <!-- Script -->
 <script lang="ts">
   import { onMount, tick } from "svelte";
-  import { calculateMargin, Spacing } from "../../common/styling";
+  import { calculateMargin } from "../../common/styling";
+  import type { Spacing } from "../../common/styling";
   import { cssVar, toBoolean } from "../../common/utils";
 
   // Public

@@ -19,7 +19,8 @@ export type Spacing =
   | "6"
   | "7"
   | "8"
-  | "9";
+  | "9"
+  | null;
 
 const conversions = {
   "0": "none",

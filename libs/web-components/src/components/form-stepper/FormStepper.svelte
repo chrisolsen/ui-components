@@ -1,7 +1,8 @@
 <svelte:options tag="goa-form-stepper" />
 
 <script lang="ts">
-  import { calculateMargin, Spacing } from "../../common/styling";
+  import { calculateMargin } from "../../common/styling";
+  import type { Spacing } from "../../common/styling";
   import { onMount, tick } from "svelte";
 
   // ======
