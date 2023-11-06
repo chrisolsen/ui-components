@@ -1,4 +1,4 @@
-<svelte:options tag="goa-spacer" />
+<svelte:options customElement="goa-spacer" />
 
 <script lang="ts">
   import { onMount } from "svelte";

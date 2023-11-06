@@ -1,4 +1,4 @@
-<svelte:options tag="goa-form-item" />
+<svelte:options customElement="goa-form-item" />
 
 <!-- Script -->
 <script lang="ts">

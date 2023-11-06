@@ -1,4 +1,4 @@
-<svelte:options tag="pg-dropdown" />
+<svelte:options customElement="pg-dropdown" />
 
 <script lang="ts">
   let open: boolean = true;
@@ -41,7 +41,7 @@
     <goa-dropdown-item value="silver" label="Silver"></goa-dropdown-item>
     <goa-dropdown-item value="ping" label="Pink"></goa-dropdown-item>
   </goa-dropdown>
-  
+
 <button on:click={() => open = !open}>
   Show
 </button>

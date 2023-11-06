@@ -1,6 +1,6 @@
-<svelte:options tag="pg-date-picker" />
+<svelte:options customElement="pg-date-picker" />
 
-<script lang="ts">  
+<script lang="ts">
   let date = new Date();
   let min = new Date(2010, 0, 1);
   let max = new Date(2030, 0, 1)

@@ -1,4 +1,4 @@
-<svelte:options tag="goa-icon-button" />
+<svelte:options customElement="goa-icon-button" />
 
 <script lang="ts">
   import { typeValidator, toBoolean } from "../../common/utils";

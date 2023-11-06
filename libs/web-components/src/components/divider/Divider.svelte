@@ -1,4 +1,4 @@
-<svelte:options tag="goa-divider" />
+<svelte:options customElement="goa-divider" />
 
 <script lang="ts">
   import { calculateMargin } from "../../common/styling";

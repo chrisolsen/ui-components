@@ -1,4 +1,4 @@
-<svelte:options tag="goa-popover" />
+<svelte:options customElement="goa-popover" />
 
 <!-- Script -->
 <script lang="ts">

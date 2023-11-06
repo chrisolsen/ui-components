@@ -1,4 +1,4 @@
-<svelte:options tag="pg-app-header" />
+<svelte:options customElement="pg-app-header" />
 
 <goa-microsite-header type="alpha"></goa-microsite-header>
 <goa-app-header heading="Child services" url="foo.com" maxcontentwidth="1024px">

@@ -1,4 +1,4 @@
-<svelte:options tag="goa-form-step" />
+<svelte:options customElement="goa-form-step" />
 
 <script lang="ts">
   import { onMount } from "svelte";

@@ -1,4 +1,4 @@
-<svelte:options tag="test-dropdown-wrapper" />
+<svelte:options customElement="test-dropdown-wrapper" />
 
 <!-- Script -->
 <script lang="ts">

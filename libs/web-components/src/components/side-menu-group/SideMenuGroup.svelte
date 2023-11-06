@@ -1,4 +1,4 @@
-<svelte:options tag="goa-side-menu-group" />
+<svelte:options customElement="goa-side-menu-group" />
 
 <script lang="ts">
   import { onMount, tick } from "svelte";

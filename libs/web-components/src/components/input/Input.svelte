@@ -1,4 +1,4 @@
-<svelte:options tag="goa-input" />
+<svelte:options customElement="goa-input" />
 
 <script lang="ts" context="module">
   export type GoAInputVariant = "goa" | "bare";

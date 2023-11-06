@@ -1,4 +1,4 @@
-<svelte:options tag="goa-app-header-menu" />
+<svelte:options customElement="goa-app-header-menu" />
 <svelte:window bind:innerWidth={_innerWidth} />
 
 <script lang="ts">
@@ -9,7 +9,7 @@
 
   // Required
   export let heading: string;
-  
+
   // Optional
   export let leadingicon: GoAIconType;
   export let type: "primary" | "secondary" =  "primary";
@@ -54,13 +54,13 @@
 
     const slot = _slotParentEl.querySelector("slot") as HTMLSlotElement;
     if (!slot) return;
-    
+
     const link = slot.assignedElements()
       .filter(el => el.tagName === "A")
       .find(el => {
         const href = (el as HTMLLinkElement).href;
         const url = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-        return href.endsWith(url)  
+        return href.endsWith(url)
       });
     return !!link;
   }
@@ -96,7 +96,7 @@
 {#if _desktop}
   <goa-popover
     bind:this={_popoverEl}
-    context="app-header-menu" 
+    context="app-header-menu"
     focusborderwidth="0"
     borderradius="0"
     padded="false"
@@ -104,8 +104,8 @@
     width="16rem"
     position="below"
   >
-    <button 
-      slot="target" 
+    <button
+      slot="target"
       style="padding: 0 0.75rem;"
       class={type}
       class:current={_hasCurrentLink}
@@ -116,13 +116,13 @@
       {heading}
       <goa-icon type={_open ? "chevron-up" : "chevron-down" } mt="1" />
     </button>
-    
+
     <div class="desktop" bind:this={_slotParentEl}>
-      <slot />  
+      <slot />
     </div>
   </goa-popover>
 {:else}
-  <button 
+  <button
     class:open={_open}
     on:click={toggleMenu}
     class={type}
@@ -225,7 +225,7 @@
       flex: 0 0 auto;
     }
   }
-  
+
   @media (--desktop) {
     button[slot=target] {
       font-weight: var(--goa-font-weight-bold);
@@ -235,6 +235,6 @@
     }
     button.secondary {
       font-weight: var(--goa-font-weight-regular);
-    }    
+    }
   }
 </style>

@@ -1,4 +1,4 @@
-<svelte:options tag="goa-grid" />
+<svelte:options customElement="goa-grid" />
 
 <!-- Script -->
 <script lang="ts">

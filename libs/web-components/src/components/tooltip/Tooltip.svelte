@@ -1,4 +1,4 @@
-<svelte:options tag="goa-tooltip" />
+<svelte:options customElement="goa-tooltip" />
 
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";

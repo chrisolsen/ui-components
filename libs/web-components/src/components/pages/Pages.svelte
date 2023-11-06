@@ -1,4 +1,4 @@
-<svelte:options tag="goa-pages" />
+<svelte:options customElement="goa-pages" />
 
 <script lang="ts">
   import { onMount, tick } from "svelte";
@@ -40,14 +40,14 @@
       return [...slot.assignedElements()];
     } else {
       return [..._rootEl.children] as Element[];  // unit tests
-    }    
+    }
   }
 </script>
 
 <div
-  bind:this={_rootEl} 
+  bind:this={_rootEl}
   style={calculateMargin(mt, mr, mb, ml)}
   class="pages"
 >
-  <slot />  
+  <slot />
 </div>

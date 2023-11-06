@@ -1,4 +1,4 @@
-<svelte:options tag="goa-date-picker" />
+<svelte:options customElement="goa-date-picker" />
 
 <script lang="ts">
   import { onMount } from "svelte";
@@ -69,9 +69,9 @@
     _showPopover = true;
   }
 
-  function handleKeyDown(e: KeyboardEvent) { 
+  function handleKeyDown(e: KeyboardEvent) {
     if (!_date) return;
-    
+
     if (["Space", "Enter"].includes(e.key)) {
       showCalendar();
       return;

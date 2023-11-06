@@ -1,4 +1,4 @@
-<svelte:options tag="goa-file-upload-input" />
+<svelte:options customElement="goa-file-upload-input" />
 
 <script lang="ts">
   import { onMount } from "svelte";

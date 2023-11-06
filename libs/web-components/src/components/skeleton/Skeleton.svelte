@@ -1,4 +1,4 @@
-<svelte:options tag="goa-skeleton" />
+<svelte:options customElement="goa-skeleton" />
 
 <!-- Script -->
 <script lang="ts">
@@ -115,7 +115,7 @@
   }
 
   #container {
-    container: self / inline-size;  
+    container: self / inline-size;
   }
 
   .skeleton {

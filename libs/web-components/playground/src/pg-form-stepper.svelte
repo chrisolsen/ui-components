@@ -1,4 +1,4 @@
-<svelte:options tag="pg-form-stepper" />
+<svelte:options customElement="pg-form-stepper" />
 
 <script lang="ts">
   import { onMount } from "svelte";
@@ -17,9 +17,9 @@
 
   function change(offset: number) {
     if (step <= 0 || step >= 4) return;
-    
+
     state[`${step}`] = Math.random() > 0.5 ? "complete" : "incomplete"
-    step += offset;    
+    step += offset;
   }
 </script>
 

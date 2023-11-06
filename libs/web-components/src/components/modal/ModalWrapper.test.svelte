@@ -1,4 +1,4 @@
-<svelte:options tag="test-modal-wrapper" />
+<svelte:options customElement="test-modal-wrapper" />
 <!-- Script -->
 <script lang="ts">
   export let heading: string = "";

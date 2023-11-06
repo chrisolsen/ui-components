@@ -1,4 +1,4 @@
-<svelte:options tag="pg-modal" />
+<svelte:options customElement="pg-modal" />
 
 <script lang="ts">
   let open: boolean = false;

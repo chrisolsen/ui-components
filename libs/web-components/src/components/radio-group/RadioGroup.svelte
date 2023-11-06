@@ -1,4 +1,4 @@
-<svelte:options tag="goa-radio-group" />
+<svelte:options customElement="goa-radio-group" />
 
 <script lang="ts">
   import type { Spacing } from "../../common/styling";

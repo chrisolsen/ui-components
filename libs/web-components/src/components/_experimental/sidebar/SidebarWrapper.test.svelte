@@ -1,4 +1,4 @@
-<svelte:options tag="test-left-nav-wrapper" />
+<svelte:options customElement="test-left-nav-wrapper" />
 
 <!-- Script -->
 <script lang="ts">

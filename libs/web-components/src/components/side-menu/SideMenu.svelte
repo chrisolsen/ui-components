@@ -1,4 +1,4 @@
-<svelte:options tag="goa-side-menu" />
+<svelte:options customElement="goa-side-menu" />
 
 <script lang="ts">
   import { onMount, tick } from "svelte";
@@ -12,7 +12,7 @@
     addEventListeners();
   })
 
-  function setCurrentUrl() {  
+  function setCurrentUrl() {
     const slot = _rootEl.querySelector("slot") as HTMLSlotElement;
     if (!slot) {
       return false;
@@ -54,7 +54,7 @@
   ::slotted(a),
   ::slotted(a:visited) {
     /* required to override base styles */
-    color: var(--goa-color-text-default) !important; 
+    color: var(--goa-color-text-default) !important;
 
     display: block;
     font: var(--goa-typography-body-m);
@@ -71,13 +71,13 @@
   ::slotted(a:focus-visible) {
     outline: var(--goa-border-width-l) solid var(--goa-color-interactive-focus);
   }
-  
+
   .side-menu {
     display: block;
   }
 </style>
 
-<div 
+<div
   bind:this={_rootEl}
   class="side-menu"
 >

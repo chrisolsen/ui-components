@@ -1,4 +1,4 @@
-<svelte:options tag="goa-notification" />
+<svelte:options customElement="goa-notification" />
 
 <!-- Script -->
 <script lang="ts">

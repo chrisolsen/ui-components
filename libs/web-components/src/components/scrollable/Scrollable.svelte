@@ -1,4 +1,4 @@
-<svelte:options tag="goa-scrollable" />
+<svelte:options customElement="goa-scrollable" />
 
 <script lang="ts">
   import { onMount, tick } from "svelte";
@@ -15,13 +15,13 @@
   let _el: HTMLElement;
 
   function onScroll(e: Event) {
-    e.target.dispatchEvent(new CustomEvent("_scroll", { 
-      composed: true, 
-      detail: { 
+    e.target.dispatchEvent(new CustomEvent("_scroll", {
+      composed: true,
+      detail: {
         offsetHeight: _el.offsetHeight,
-        scrollHeight: _el.scrollHeight, 
+        scrollHeight: _el.scrollHeight,
         scrollTop: _el.scrollTop,
-      } 
+      }
     }));
     e.stopPropagation();
   }

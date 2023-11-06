@@ -1,4 +1,4 @@
-<svelte:options tag="goa-table-sort-header" />
+<svelte:options customElement="goa-table-sort-header" />
 
 <script context="module" lang="ts">
   export type Direction = "asc" | "desc" | "none"

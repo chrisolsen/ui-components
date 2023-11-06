@@ -1,4 +1,4 @@
-<svelte:options tag="goa-calendar" />
+<svelte:options customElement="goa-calendar" />
 
 <script lang="ts">
   import { onMount, tick } from "svelte";
@@ -54,7 +54,7 @@
   let _nextMonthDayCount: number;
   let _months = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ];
   let _years: number[] = [];
-  let _calendarEl: HTMLElement; 
+  let _calendarEl: HTMLElement;
 
   // *****
   // Hooks
@@ -62,7 +62,7 @@
 
   onMount(() => {
     _calendarDate = _selectedDate = value
-      ? startOfDay(new Date(value)) 
+      ? startOfDay(new Date(value))
       : startOfDay(new Date());
     _min = min && new Date(min) || addYears(_selectedDate, -5);
     _max = max && new Date(max) || addYears(_selectedDate, 5);
@@ -220,7 +220,7 @@
   // **************
   // Event Handlers
   // **************
-  
+
   function setMonth(e: CustomEvent) {
     renderCalendar({ type: "month", value: +e.detail.value });
     e.preventDefault();
@@ -251,7 +251,7 @@
 
 </script>
 
-<div 
+<div
   style={calculateMargin(mt, mr, mb, ml)}
   class:bordered={bordered === "true"}
 >

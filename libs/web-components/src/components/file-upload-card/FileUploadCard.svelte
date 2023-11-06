@@ -1,4 +1,4 @@
-<svelte:options tag="goa-file-upload-card" />
+<svelte:options customElement="goa-file-upload-card" />
 
 <script lang="ts">
   import { getTimestamp } from "../../common/utils";

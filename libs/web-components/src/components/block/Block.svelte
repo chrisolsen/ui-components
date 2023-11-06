@@ -1,4 +1,4 @@
-<svelte:options tag="goa-block" />
+<svelte:options customElement="goa-block" />
 
 <script lang="ts">
   import { calculateMargin } from "../../common/styling";
@@ -33,5 +33,5 @@
     flex-direction: var(--direction);
     align-items: var(--alignment);
     gap: var(--gap);
-  } 
+  }
 </style>

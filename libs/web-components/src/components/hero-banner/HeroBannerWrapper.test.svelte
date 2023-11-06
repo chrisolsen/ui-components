@@ -1,4 +1,4 @@
-<svelte:options tag="test-hero-banner" />
+<svelte:options customElement="test-hero-banner" />
 
 <script lang="ts">
   export let backgroundurl = "";

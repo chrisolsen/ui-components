@@ -1,4 +1,4 @@
-<svelte:options tag="goa-container" />
+<svelte:options customElement="goa-container" />
 
 <!-- Script -->
 <script lang="ts">
@@ -67,7 +67,7 @@
 <!-- Style -->
 <style>
   #container {
-    container: self / inline-size;    
+    container: self / inline-size;
   }
 
   .goa-container {
@@ -161,7 +161,7 @@
   }
 
   /* Override padding in small screens to the compact value */
-  @container self (--container-mobile) {   
+  @container self (--container-mobile) {
     .padding--relaxed header {
       padding: 0 1rem;
       color: red;

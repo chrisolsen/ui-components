@@ -1,4 +1,4 @@
-<svelte:options tag="goa-table" />
+<svelte:options customElement="goa-table" />
 
 <script lang="ts">
   import { onMount, tick } from "svelte";

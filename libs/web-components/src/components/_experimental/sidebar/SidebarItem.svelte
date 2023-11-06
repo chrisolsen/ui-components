@@ -1,1 +1,1 @@
-<svelte:options tag="goax-sidebar-item"/>
+<svelte:options customElement="goax-sidebar-item"/>

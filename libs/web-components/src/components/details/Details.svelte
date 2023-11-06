@@ -1,4 +1,4 @@
-<svelte:options tag="goa-details" />
+<svelte:options customElement="goa-details" />
 
 <script lang="ts">
   import { onMount } from "svelte";

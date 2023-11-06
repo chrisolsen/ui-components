@@ -1,4 +1,4 @@
-<svelte:options tag="goa-focus-trap" />
+<svelte:options customElement="goa-focus-trap" />
 
 <!-- ======================================================================= -->
 <script lang="ts">
@@ -15,7 +15,7 @@
 
   onMount(async () => {
     await tick();
-    // event is attached to the rootEl, eliminating the need to remove the listener since it 
+    // event is attached to the rootEl, eliminating the need to remove the listener since it
     // will be removed when the associated element is removed.
     rootEl.addEventListener("focus", onFocus, true);
     rootEl.addEventListener("keydown", onKeydown, true);
@@ -37,9 +37,9 @@
 
   function isFocusable(node: Node): Node {
     const element = node as HTMLElement;
-    const isTabbable = 
-      element.tabIndex > 0 
-      || element.tabIndex === 0 
+    const isTabbable =
+      element.tabIndex > 0
+      || element.tabIndex === 0
       && element.getAttribute('tabIndex') !== null;
 
     if (isTabbable) return node;
@@ -66,19 +66,19 @@
     }
   }
 
-  // Focus event handler  
+  // Focus event handler
   function onFocus(event: Event): void {
     const el = event.target as HTMLElement;
-        
+
     if (el.dataset.tabBoundry === "start") {
       if (isShiftPressed) {
-        boundryEndEl.focus();        
+        boundryEndEl.focus();
         return
-      } 
+      }
       const next = findFirstNode([el.nextElementSibling], false) as HTMLElement;
       next?.focus()
       return;
-    } 
+    }
 
     if (el.dataset.tabBoundry === "end") {
       if (!isShiftPressed) {
@@ -94,7 +94,7 @@
   function findFirstNode(nodes: NodeList | Node [], reversed: boolean = false): Node {
     const nodeList = reversed ? [...nodes].reverse() : nodes;
     for (const node of nodeList) {
-      const el = 
+      const el =
         isFocusable(node)
         || findFirstNode(node.childNodes, reversed)
         || findFirstNodeOfSlot(node, reversed)
@@ -105,7 +105,7 @@
     }
     return null;
   }
-  
+
   function findFirstNodeOfSlot(node: Node, reversed: boolean): Node {
     if (!(node instanceof HTMLSlotElement)) return null;
     return findFirstNode([...node.assignedNodes()], reversed);

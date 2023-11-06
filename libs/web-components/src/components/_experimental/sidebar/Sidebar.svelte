@@ -1,4 +1,4 @@
-<svelte:options tag="goax-sidebar"/>
+<svelte:options customElement="goax-sidebar"/>
 
 <script lang="ts">
   import {onMount} from "svelte";

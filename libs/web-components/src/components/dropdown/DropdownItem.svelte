@@ -1,4 +1,4 @@
-<svelte:options tag="goa-dropdown-item" />
+<svelte:options customElement="goa-dropdown-item" />
 
 <script lang="ts">
 

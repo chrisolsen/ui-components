@@ -1,4 +1,4 @@
-<svelte:options tag="goa-textarea" />
+<svelte:options customElement="goa-textarea" />
 
 <!-- Script -->
 <script lang="ts">

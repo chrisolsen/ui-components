@@ -1,4 +1,4 @@
-<svelte:options tag="test-container" />
+<svelte:options customElement="test-container" />
 
 <!-- Script -->
 <script lang="ts">

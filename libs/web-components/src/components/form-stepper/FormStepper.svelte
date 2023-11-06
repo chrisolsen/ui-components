@@ -1,4 +1,4 @@
-<svelte:options tag="goa-form-stepper" />
+<svelte:options customElement="goa-form-stepper" />
 
 <script lang="ts">
   import { calculateMargin } from "../../common/styling";

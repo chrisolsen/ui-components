@@ -1,4 +1,4 @@
-<svelte:options tag="goa-tab"/>
+<svelte:options customElement="goa-tab"/>
 
 <script lang="ts">
   import {toBoolean} from "../../common/utils";

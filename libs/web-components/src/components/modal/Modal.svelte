@@ -1,4 +1,4 @@
-<svelte:options tag="goa-modal" />
+<svelte:options customElement="goa-modal" />
 
 <script lang="ts">
   import { fade, fly } from "svelte/transition";
@@ -312,7 +312,7 @@
       padding: var(--goa-space-l) 0 0;
     }
   }
-  
+
   .modal-content {
     margin: 0 -2rem;
     line-height: 1.75rem;

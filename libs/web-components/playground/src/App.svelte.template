@@ -1,4 +1,4 @@
-<svelte:options tag={null} />
+<svelte:options customElement={null} />
 <svelte:head>
   <title>GoA Component Playground</title>
 </svelte:head>

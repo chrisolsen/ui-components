@@ -1,4 +1,4 @@
-<svelte:options tag="goa-spinner" />
+<svelte:options customElement="goa-spinner" />
 
 <script lang="ts" context="module">
   export type SpinnerSize = "small" | "medium" | "large" | "xlarge";

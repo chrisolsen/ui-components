@@ -1,4 +1,4 @@
-<svelte:options tag="goa-dropdown"/>
+<svelte:options customElement="goa-dropdown"/>
 
 <script lang="ts">
   import type {GoAIconType} from "../icon/Icon.svelte";

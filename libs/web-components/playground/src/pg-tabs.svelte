@@ -1,4 +1,4 @@
-<svelte:options tag="pg-tabs" />
+<svelte:options customElement="pg-tabs" />
 
 <script lang="ts">
   function handleClick() {

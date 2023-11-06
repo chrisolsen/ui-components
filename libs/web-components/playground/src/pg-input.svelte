@@ -1,4 +1,4 @@
-<svelte:options tag="pg-input" />
+<svelte:options customElement="pg-input" />
 
 <script lang="ts">
 

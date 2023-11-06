@@ -1,4 +1,4 @@
-<svelte:options tag="goa-microsite-header" />
+<svelte:options customElement="goa-microsite-header" />
 
 <!-- Script -->
 <script lang="ts">

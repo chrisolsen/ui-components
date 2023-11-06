@@ -1,4 +1,4 @@
-<svelte:options tag="goa-tabs"/>
+<svelte:options customElement="goa-tabs"/>
 
 <script lang="ts">
   import { onDestroy, onMount, tick } from 'svelte';

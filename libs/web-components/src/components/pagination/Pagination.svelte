@@ -1,4 +1,4 @@
-<svelte:options tag="goa-pagination" />
+<svelte:options customElement="goa-pagination" />
 
 <script lang="ts">
   import type { Spacing } from "../../common/styling";

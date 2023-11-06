@@ -1,4 +1,4 @@
-<svelte:options tag="goa-badge" />
+<svelte:options customElement="goa-badge" />
 
 <!-- Script -->
 <script lang="ts">

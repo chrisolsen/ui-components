@@ -1,4 +1,4 @@
-<svelte:options tag="pg-file-upload" />
+<svelte:options customElement="pg-file-upload" />
 
 <script lang="ts">
 
@@ -6,7 +6,7 @@
   let progressList = {};
 
   // Uploader
-  
+
   interface Uploader {
     upload: (url: string | ArrayBuffer) => void;
     abort: () => void;
@@ -31,7 +31,7 @@
       this.oncomplete = () => {};
       this.onprogress = (_: number) => {};
     }
-    
+
     upload(_url: string | ArrayBuffer) {
       let progress = 0;
 
@@ -42,7 +42,7 @@
           this.oncomplete();
           clearInterval(this.processId);
         }
-      }, 200)    
+      }, 200)
     }
 
     abort() {
@@ -52,12 +52,12 @@
   }
 
   // Events
-  
+
   function uploadFile(e: CustomEvent) {
     const { file } = e.detail;
     const reader = new FileReader()
     reader.onload = (e) => {
-      const url = e.target.result;  
+      const url = e.target.result;
       const uploader = new S3Uploader();
 
       if (uploads.find(upload => upload.file.name === file.name)) {
@@ -65,9 +65,9 @@
       }
 
       uploads = [...uploads, { file, uploader }]
-    
+
       uploader.oncomplete = () => {
-        console.log("File upload complete")    
+        console.log("File upload complete")
       }
       uploader.onprogress = (percent: number) => {
         progressList[file.name] = percent;
@@ -80,7 +80,7 @@
       }
       uploader.upload(url)
     }
-    reader.readAsDataURL(file)  
+    reader.readAsDataURL(file)
   }
 
   function deleteFile(upload: Upload) {

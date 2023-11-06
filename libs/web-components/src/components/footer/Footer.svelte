@@ -1,4 +1,4 @@
-<svelte:options tag="goa-app-footer" />
+<svelte:options customElement="goa-app-footer" />
 
 <script lang="ts">
   import { onMount, tick } from "svelte";

@@ -1,4 +1,4 @@
-<svelte:options tag="goa-button-group" />
+<svelte:options customElement="goa-button-group" />
 
 <!-- Script -->
 <script lang="ts">

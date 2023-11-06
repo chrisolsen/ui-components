@@ -1,4 +1,4 @@
-<svelte:options tag="goa-accordion" />
+<svelte:options customElement="goa-accordion" />
 
 <!-- Script -->
 <script lang="ts">
@@ -66,7 +66,7 @@
       on:focus={() => _hovering = false}
       on:blur={() => _hovering = false}
     >
-      <goa-icon 
+      <goa-icon
         type="chevron-forward"
         fillcolor={_hovering?"var(--goa-color-interactive-hover)": "var(--goa-color-interactive-default)"}
       />

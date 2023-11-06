@@ -1,4 +1,4 @@
-<svelte:options tag="goa-chip" />
+<svelte:options customElement="goa-chip" />
 
 <!-- Script -->
 <script lang="ts">

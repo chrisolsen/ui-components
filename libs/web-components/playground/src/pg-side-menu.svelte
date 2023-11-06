@@ -1,4 +1,4 @@
-<svelte:options tag="pg-side-menu" />
+<svelte:options customElement="pg-side-menu" />
 
 <script lang="ts">
 

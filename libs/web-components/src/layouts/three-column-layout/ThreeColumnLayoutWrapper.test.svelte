@@ -1,4 +1,4 @@
-<svelte:options tag="test-three-column-layout"/>
+<svelte:options customElement="test-three-column-layout"/>
 
 <!--Script-->
 <script lang="ts">

@@ -1,4 +1,4 @@
-<svelte:options tag="goa-layout-full-nav" />
+<svelte:options customElement="goa-layout-full-nav" />
 
 <style>
   .page {

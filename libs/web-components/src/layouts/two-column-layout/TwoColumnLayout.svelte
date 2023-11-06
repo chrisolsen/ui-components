@@ -1,8 +1,8 @@
-<svelte:options tag="goa-two-column-layout" />
+<svelte:options customElement="goa-two-column-layout" />
 
 <script lang="ts">
   export let navcolumnwidth: string = "";  // blank values falls back to the css var
-  export let maxcontentwidth: string = ""; 
+  export let maxcontentwidth: string = "";
 
 </script>
 

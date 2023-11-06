@@ -1,4 +1,4 @@
-<svelte:options tag="pg-table" />
+<svelte:options customElement="pg-table" />
 
 <script lang="ts">
 

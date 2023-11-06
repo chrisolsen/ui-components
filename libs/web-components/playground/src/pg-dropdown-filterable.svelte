@@ -1,4 +1,4 @@
-<svelte:options tag="pg-dropdown-filterable"/>
+<svelte:options customElement="pg-dropdown-filterable"/>
 <script lang="ts">
     const countries = [
       {

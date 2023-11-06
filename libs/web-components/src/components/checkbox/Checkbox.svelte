@@ -1,4 +1,4 @@
-<svelte:options tag="goa-checkbox" />
+<svelte:options customElement="goa-checkbox" />
 
 <!-- Script -->
 <script lang="ts">

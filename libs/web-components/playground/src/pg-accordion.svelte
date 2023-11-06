@@ -1,4 +1,4 @@
-<svelte:options tag="pg-accordion" />
+<svelte:options customElement="pg-accordion" />
 
 <script lang="ts">
 </script>

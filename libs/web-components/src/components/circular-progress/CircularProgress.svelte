@@ -1,4 +1,4 @@
-<svelte:options tag="goa-circular-progress" />
+<svelte:options customElement="goa-circular-progress" />
 
 <!-- Script -->
 <script lang="ts">

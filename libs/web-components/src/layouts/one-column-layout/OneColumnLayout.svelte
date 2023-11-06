@@ -1,4 +1,4 @@
-<svelte:options tag="goa-one-column-layout" />
+<svelte:options customElement="goa-one-column-layout" />
 
 <script lang="ts">
 </script>

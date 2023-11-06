@@ -1,4 +1,4 @@
-<svelte:options tag="goa-side-menu-heading" />
+<svelte:options customElement="goa-side-menu-heading" />
 
 <script lang="ts">
   import type { GoAIconType } from "../icon/Icon.svelte";

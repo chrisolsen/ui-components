@@ -1,4 +1,4 @@
-<svelte:options tag="goa-page-block" />
+<svelte:options customElement="goa-page-block" />
 
 <!-- Script -->
 <script lang="ts">

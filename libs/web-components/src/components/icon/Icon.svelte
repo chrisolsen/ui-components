@@ -1,4 +1,4 @@
-<svelte:options tag="goa-icon" />
+<svelte:options customElement="goa-icon" />
 
 <script lang="ts" context="module">
   export type IconSize = "small" | "medium" | "large" | "xlarge";

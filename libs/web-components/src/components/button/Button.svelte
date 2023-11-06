@@ -1,4 +1,4 @@
-<svelte:options tag="goa-button" />
+<svelte:options customElement="goa-button" />
 
 <script lang="ts">
   import { onMount } from "svelte";
@@ -93,7 +93,7 @@
     box-sizing: border-box;
     font-family: var(--goa-font-family-sans);
   }
-  
+
   @container (--container-mobile) {
     /* expand the button and :host container on small screens  */
     :host {

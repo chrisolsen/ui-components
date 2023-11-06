@@ -1,4 +1,4 @@
-<svelte:options tag="goa-callout" />
+<svelte:options customElement="goa-callout" />
 
 <!-- Script -->
 <script lang="ts">
