@@ -94,7 +94,7 @@
     margin: 0 auto;
   }
 
-  @media not (--mobile) {
+  @media (--not-mobile) {
     .goa-official-site-header {
       padding: 0.25rem 2rem;
     }

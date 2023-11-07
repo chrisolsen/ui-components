@@ -208,7 +208,7 @@
     color: var(--goa-color-interactive-default);
   }
 
-  @media not (--desktop) {
+  @media (--not-desktop) {
     button {
       box-shadow: inset 0 1px 0 0 var(--goa-color-greyscale-200);
       height: 3rem;

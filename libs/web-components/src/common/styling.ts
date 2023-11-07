@@ -73,7 +73,9 @@ export function calculateMargin(
     mr && `margin-right:var(--goa-space-${mr});`,
     mb && `margin-bottom:var(--goa-space-${mb});`,
     ml && `margin-left:var(--goa-space-${ml});`,
-  ].join(" ");
+  ]
+    .join(" ")
+    .trim();
 }
 
 /**

@@ -295,7 +295,7 @@
     }
   }
 
-  @media not (--mobile) {
+  @media (--not-mobile) {
     *, ::slotted(*) {
       font: var(--goa-typography-body-m);
     }

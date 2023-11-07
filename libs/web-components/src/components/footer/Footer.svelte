@@ -88,7 +88,7 @@
     width: 100%;
   }
 
-  @media not (--mobile) {
+  @media (--not-mobile) {
     .meta-section {
       flex-direction: row;
       gap: 2rem;
@@ -110,7 +110,7 @@
     width: unset;
   }
 
-  @media not (--mobile) {
+  @media (--not-mobile) {
     .abgov.with-meta-links {
       align-items: flex-end;
     }

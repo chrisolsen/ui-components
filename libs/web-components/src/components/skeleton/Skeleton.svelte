@@ -52,7 +52,8 @@
 <div
   id="container"
   data-testid={testid}
-  style="{calculateMargin(mt, mr, mb, ml)};">
+  style={calculateMargin(mt, mr, mb, ml)}
+>
   {#if type === "card"}
     <div
       class="card card-{size}"

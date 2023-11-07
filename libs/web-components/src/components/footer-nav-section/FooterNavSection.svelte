@@ -83,7 +83,7 @@
     padding-left: 0;
   }
 
-  @media not (--mobile) {
+  @media (--not-mobile) {
     .links {
       list-style-type: none;
       padding-left: 0;

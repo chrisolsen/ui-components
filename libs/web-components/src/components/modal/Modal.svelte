@@ -162,9 +162,9 @@
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div data-testid="modal-overlay" class="modal-overlay" on:click={close} />
       <div
+        class="modal-pane"
         in:fly={{ duration: _transitionTime, y: 200 }}
         out:fly={{ delay: _transitionTime, duration: _transitionTime, y: -100 }}
-        class="modal-pane"
       >
         {#if calloutvariant !== null}
           <div class="callout-bar {calloutvariant}">
@@ -280,6 +280,7 @@
   .content :global(header.has-content) {
     margin-bottom: var(--goa-space-l);
   }
+
 
   @media (--mobile) {
     .content {

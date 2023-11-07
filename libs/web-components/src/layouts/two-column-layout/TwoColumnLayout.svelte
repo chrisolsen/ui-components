@@ -46,7 +46,7 @@
     padding: 0.5rem 0;
   }
 
-  @media not (--mobile) {
+  @media (--not-mobile) {
     .page {
       gap: 2rem;
     }
