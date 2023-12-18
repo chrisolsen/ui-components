@@ -16,10 +16,6 @@ sc:
 rc:
 	npx nx generate @nrwl/react:component $(name) --project=react-components --style=none --export --no-interactive
 
-# storybook
-story:
-	cp libs/docs/src/_stories.mdx.template libs/docs/src/components/common/$(name).stories.mdx
-
 # new component
 component: sc rc story
 
@@ -52,9 +48,6 @@ playground:
 
 dev:
 	cd libs/web-components && npm run dev
-
-storybook:
-	npm run run:docs-storybook
 
 react-app:
 	npx nx run react-demo:serve 

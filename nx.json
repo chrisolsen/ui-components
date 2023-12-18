@@ -22,8 +22,7 @@
           "build",
           "lint",
           "test",
-          "e2e",
-          "build-storybook"
+          "e2e"
         ]
       }
     }
@@ -58,9 +57,6 @@
       },
       "library": {
         "style": "css",
-        "linter": "eslint"
-      },
-      "storybook-configuration": {
         "linter": "eslint"
       },
       "component": {
