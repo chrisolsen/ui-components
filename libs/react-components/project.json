@@ -1,0 +1,112 @@
+{
+  "name": "react-components",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/react-components/src",
+  "projectType": "library",
+  "generators": {},
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:lint",
+      "options": {
+        "linter": "eslint",
+        "tsConfig": [
+          "libs/react-components/tsconfig.lib.json",
+          "libs/react-components/tsconfig.lib-exp.json",
+          "libs/react-components/tsconfig.spec.json"
+        ],
+        "exclude": ["**/node_modules/**", "!libs/react-components/**/*"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "options": {
+        "jestConfig": "libs/react-components/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "storybook": {
+      "executor": "@nrwl/storybook:storybook",
+      "options": {
+        "uiFramework": "@storybook/react",
+        "port": 4400,
+        "staticDir": ["libs/shared/storybook-common/assets"],
+        "config": {
+          "configFolder": "libs/react-components/.storybook"
+        }
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
+      }
+    },
+    "build": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          "nx run react-components:build-lib",
+          "nx run react-components:build-experimental"
+        ]
+      }
+    },
+    "build-lib": {
+      "executor": "@nrwl/web:package",
+      "options": {
+        "outputPath": "dist/libs/react-components",
+        "tsConfig": "libs/react-components/tsconfig.lib.json",
+        "project": "libs/react-components/package.json",
+        "entryFile": "libs/react-components/src/index.ts",
+        "external": ["react", "react-dom"],
+        "babelConfig": "@nrwl/react/plugins/bundle-babel",
+        "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
+        "extractCss": false,
+        "assets": [
+          {
+            "glob": "libs/react-components/README.md",
+            "input": ".",
+            "output": "."
+          }
+        ]
+      }
+    },
+    "build-experimental": {
+      "executor": "@nrwl/web:package",
+      "options": {
+        "outputPath": "dist/libs/react-components/experimental",
+        "tsConfig": "libs/react-components/tsconfig.lib-exp.json",
+        "project": "libs/react-components/package.exp.json",
+        "entryFile": "libs/react-components/src/experimental/index.ts",
+        "entryRoot": "libs/react-components/src/",
+        "external": ["react", "react-dom"],
+        "babelConfig": "@nrwl/react/plugins/bundle-babel",
+        "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
+        "extractCss": false,
+        "assets": []
+      }
+    },
+    "build-storybook": {
+      "executor": "@nrwl/storybook:build",
+      "options": {
+        "uiFramework": "@storybook/react",
+        "outputPath": "dist/storybook/react-components",
+        "staticDir": ["libs/shared/storybook-common/assets"],
+        "config": {
+          "configFolder": "libs/react-components/.storybook"
+        }
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
+      }
+    },
+    "release": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "npx semantic-release -e ./libs/react-components/.releaserc.json"
+      }
+    }
+  },
+  "tags": []
+}

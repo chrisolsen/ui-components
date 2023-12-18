@@ -1,0 +1,49 @@
+{
+  "name": "angular-components",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/angular-components/src",
+  "prefix": "goa",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:package",
+      "outputs": ["dist/libs/angular-components"],
+      "options": {
+        "project": "libs/angular-components/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/angular-components/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/angular-components/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/angular-components"],
+      "options": {
+        "jestConfig": "libs/angular-components/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/angular-components/src/**/*.ts",
+          "libs/angular-components/src/**/*.html"
+        ]
+      }
+    },
+    "release": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "npx semantic-release -e ./libs/angular-components/.releaserc.json"
+      }
+    }
+  },
+  "tags": []
+}
