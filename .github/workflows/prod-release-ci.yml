@@ -35,10 +35,6 @@ jobs:
           npx nx run-many --target=post --all
       - name: Update VsCode documentation
         run: npm run build:vscode-doc
-      - name: Build Storybooks
-        run: |
-          npm run build:docs-storybook
-          cp nginx.conf dist/storybook
       - name: Oc login
         uses: redhat-actions/oc-login@v1
         with:

@@ -7,9 +7,13 @@
   "targets": {
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["libs/web-components/**/*.{ts,svelte,spec.ts}"]
+        "lintFilePatterns": [
+          "libs/web-components/**/*.{ts,svelte,spec.ts}"
+        ]
       }
     },
     "check": {
@@ -20,8 +24,10 @@
       }
     },
     "build": {
-      "executor": "@nxext/vite:package",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nrwl/vite:package",
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "entryFile": "src/index.ts",
         "frameworkConfigFile": "@nxext/svelte/plugins/vite",
@@ -41,40 +47,11 @@
         "production": {}
       }
     },
-    "storybook": {
-      "executor": "@nrwl/storybook:storybook",
-      "options": {
-        "port": 4400,
-        "config": {
-          "configFolder": "libs/web-components/.storybook"
-        },
-        "uiFramework": "@storybook/svelte"
-      },
-      "configurations": {
-        "ci": {
-          "quiet": true
-        }
-      }
-    },
-    "build-storybook": {
-      "executor": "@nrwl/storybook:build",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/storybook/web-components",
-        "config": {
-          "configFolder": "libs/web-components/.storybook"
-        },
-        "uiFramework": "@storybook/svelte"
-      },
-      "configurations": {
-        "ci": {
-          "quiet": true
-        }
-      }
-    },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/web-components"],
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/web-components"
+      ],
       "options": {
         "jestConfig": "libs/web-components/jest.config.js",
         "passWithNoTests": true

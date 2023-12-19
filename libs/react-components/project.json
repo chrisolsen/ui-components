@@ -14,7 +14,10 @@
           "libs/react-components/tsconfig.lib-exp.json",
           "libs/react-components/tsconfig.spec.json"
         ],
-        "exclude": ["**/node_modules/**", "!libs/react-components/**/*"]
+        "exclude": [
+          "**/node_modules/**",
+          "!libs/react-components/**/*"
+        ]
       }
     },
     "test": {
@@ -22,22 +25,6 @@
       "options": {
         "jestConfig": "libs/react-components/jest.config.js",
         "passWithNoTests": true
-      }
-    },
-    "storybook": {
-      "executor": "@nrwl/storybook:storybook",
-      "options": {
-        "uiFramework": "@storybook/react",
-        "port": 4400,
-        "staticDir": ["libs/shared/storybook-common/assets"],
-        "config": {
-          "configFolder": "libs/react-components/.storybook"
-        }
-      },
-      "configurations": {
-        "ci": {
-          "quiet": true
-        }
       }
     },
     "build": {
@@ -57,7 +44,10 @@
         "tsConfig": "libs/react-components/tsconfig.lib.json",
         "project": "libs/react-components/package.json",
         "entryFile": "libs/react-components/src/index.ts",
-        "external": ["react", "react-dom"],
+        "external": [
+          "react",
+          "react-dom"
+        ],
         "babelConfig": "@nrwl/react/plugins/bundle-babel",
         "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
         "extractCss": false,
@@ -78,27 +68,14 @@
         "project": "libs/react-components/package.exp.json",
         "entryFile": "libs/react-components/src/experimental/index.ts",
         "entryRoot": "libs/react-components/src/",
-        "external": ["react", "react-dom"],
+        "external": [
+          "react",
+          "react-dom"
+        ],
         "babelConfig": "@nrwl/react/plugins/bundle-babel",
         "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
         "extractCss": false,
         "assets": []
-      }
-    },
-    "build-storybook": {
-      "executor": "@nrwl/storybook:build",
-      "options": {
-        "uiFramework": "@storybook/react",
-        "outputPath": "dist/storybook/react-components",
-        "staticDir": ["libs/shared/storybook-common/assets"],
-        "config": {
-          "configFolder": "libs/react-components/.storybook"
-        }
-      },
-      "configurations": {
-        "ci": {
-          "quiet": true
-        }
       }
     },
     "release": {

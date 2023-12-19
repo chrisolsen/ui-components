@@ -22,9 +22,6 @@
     - Unit Tests.
       Use your judgement, but aim to test each configurable input/output of the component. We have been using testing-library to provide a consistent test authoring experience across all library types, but if it is not sufficient feel free to use a different one.
 
-    - Storybook documentation.
-      If it helps test feel free to add a stories.mdx file to add the new component to the storybook. Otherwise leave that to the platform team member who finalizes implementation.
-
 4) **_Mark the feature request as ready._**
 
    Using a comment on the feature request, notify the component team that the feature is ready to be integrated. The backlog item created for the feature request will be prioritized and pulled into a sprint.
