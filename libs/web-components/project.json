@@ -74,7 +74,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/web-components"],
+      "outputs": ["{workspaceRoot}/coverage/libs/web-components"],
       "options": {
         "jestConfig": "libs/web-components/jest.config.js",
         "passWithNoTests": true

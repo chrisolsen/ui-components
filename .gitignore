@@ -103,3 +103,5 @@ apps/angular-demo-e2e/src/cucumber-json/button-component.cucumber.json
 .angular
 
 libs/web-components/playground/src/App.svelte
+
+.nx/cache

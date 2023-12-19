@@ -13,18 +13,10 @@
   "affected": {
     "defaultBase": "origin/main"
   },
-  "npmScope": "abgov",
   "tasksRunnerOptions": {
     "default": {
       "runner": "@nrwl/workspace/tasks-runners/default",
-      "options": {
-        "cacheableOperations": [
-          "build",
-          "lint",
-          "test",
-          "e2e"
-        ]
-      }
+      "options": {}
     }
   },
   "targetDependencies": {
@@ -34,9 +26,6 @@
         "projects": "dependencies"
       }
     ]
-  },
-  "cli": {
-    "defaultCollection": "@nrwl/react"
   },
   "generators": {
     "@nrwl/workspace": {
@@ -119,5 +108,19 @@
       "style": "css"
     }
   },
-  "defaultProject": "react-demo"
+  "defaultProject": "react-demo",
+  "targetDefaults": {
+    "build": {
+      "cache": true
+    },
+    "lint": {
+      "cache": true
+    },
+    "test": {
+      "cache": true
+    },
+    "e2e": {
+      "cache": true
+    }
+  }
 }
