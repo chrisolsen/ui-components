@@ -22,7 +22,7 @@ component: sc rc story
 #### BUILD
 
 build-web-components:
-	npm run build web-components --withDeps --configuration production
+	npm run build web-components --withDeps --configuration production --verbose
 
 build-styles:
 	npm run build styles --withDeps --configuration production

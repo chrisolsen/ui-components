@@ -7,9 +7,13 @@
   "targets": {
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["libs/web-components/**/*.{ts,svelte,spec.ts}"]
+        "lintFilePatterns": [
+          "libs/web-components/**/*.{ts,svelte,spec.ts}"
+        ]
       }
     },
     "check": {
@@ -20,8 +24,10 @@
       }
     },
     "build": {
-      "executor": "@nrwl/vite:package",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nrwl/vite:build",
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "entryFile": "src/index.ts",
         "frameworkConfigFile": "@nxext/svelte/plugins/vite",
@@ -43,7 +49,9 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/web-components"],
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/web-components"
+      ],
       "options": {
         "jestConfig": "libs/web-components/jest.config.js",
         "passWithNoTests": true
