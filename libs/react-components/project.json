@@ -14,10 +14,7 @@
           "libs/react-components/tsconfig.lib-exp.json",
           "libs/react-components/tsconfig.spec.json"
         ],
-        "exclude": [
-          "**/node_modules/**",
-          "!libs/react-components/**/*"
-        ]
+        "exclude": ["**/node_modules/**", "!libs/react-components/**/*"]
       }
     },
     "test": {
@@ -44,10 +41,7 @@
         "tsConfig": "libs/react-components/tsconfig.lib.json",
         "project": "libs/react-components/package.json",
         "entryFile": "libs/react-components/src/index.ts",
-        "external": [
-          "react",
-          "react-dom"
-        ],
+        "external": ["react", "react-dom"],
         "babelConfig": "@nrwl/react/plugins/bundle-babel",
         "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
         "extractCss": false,
@@ -68,10 +62,7 @@
         "project": "libs/react-components/package.exp.json",
         "entryFile": "libs/react-components/src/experimental/index.ts",
         "entryRoot": "libs/react-components/src/",
-        "external": [
-          "react",
-          "react-dom"
-        ],
+        "external": ["react", "react-dom"],
         "babelConfig": "@nrwl/react/plugins/bundle-babel",
         "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
         "extractCss": false,

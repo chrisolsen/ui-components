@@ -1,15 +1,4 @@
 {
-  "implicitDependencies": {
-    "workspace.json": "*",
-    "package.json": {
-      "dependencies": "*",
-      "devDependencies": "*"
-    },
-    "nx.json": "*",
-    "tsconfig.base.json": "*",
-    "nginx.conf": "*",
-    ".github/**/*.yml": "*"
-  },
   "affected": {
     "defaultBase": "origin/main"
   },
@@ -111,7 +100,11 @@
   "defaultProject": "react-demo",
   "targetDefaults": {
     "build": {
-      "cache": true
+      "cache": true,
+      "inputs": [
+        "production",
+        "^production"
+      ]
     },
     "lint": {
       "cache": true
@@ -122,5 +115,21 @@
     "e2e": {
       "cache": true
     }
+  },
+  "namedInputs": {
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
+    "sharedGlobals": [
+      "{workspaceRoot}/workspace.json",
+      "{workspaceRoot}/nx.json",
+      "{workspaceRoot}/tsconfig.base.json",
+      "{workspaceRoot}/nginx.conf",
+      "{workspaceRoot}/.github/**/*.yml"
+    ],
+    "production": [
+      "default"
+    ]
   }
 }
