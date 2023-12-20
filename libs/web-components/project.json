@@ -17,7 +17,7 @@
       }
     },
     "check": {
-      "executor": "@nrwl/workspace:run-commands",
+      "executor": "@nx/run-commands",
       "options": {
         "command": "svelte-check",
         "cwd": "libs/web-components"
@@ -58,7 +58,7 @@
       }
     },
     "release": {
-      "executor": "@nrwl/workspace:run-commands",
+      "executor": "@nx/run-commands",
       "options": {
         "command": "npx semantic-release -e ./libs/web-components/.releaserc.json"
       }
