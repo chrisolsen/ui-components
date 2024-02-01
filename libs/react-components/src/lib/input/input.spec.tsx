@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react";
 import { fireEvent } from "@testing-library/dom";
-import { GoAInputDateTime, GoAInputText, GoAInputProps } from "./input";
+import {GoAInputDateTime, GoAInputText, GoAInputProps, GoAInputNumber} from "./input";
 import { GoAIconType } from "../icon/icon";
 import { describe, it, expect, vi } from "vitest";
 
@@ -122,4 +122,25 @@ describe("Input", () => {
     );
     expect(mockOnChangeHandler).toBeCalledWith("dateInput", new Date(newDate));
   });
+
+  it("should handle decimal number for GoAInputNumber", () => {
+    const mockOnChangeHandler = vi.fn();
+    const {container} = render(
+      <GoAInputNumber onChange={mockOnChangeHandler} name="numberInput" value={1}/>
+    );
+
+    const inputElement = container.querySelector("goa-input[type='number']");
+    expect(inputElement).toBeTruthy();
+    const decimalValue = 1.3;
+    inputElement && fireEvent(
+      inputElement,
+      new CustomEvent("_change", {
+        detail: {
+          name: "numberInput",
+          value: decimalValue
+        }
+      })
+    );
+    expect(mockOnChangeHandler).toBeCalledWith("numberInput", decimalValue);
+  })
 });
