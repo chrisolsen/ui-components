@@ -1,4 +1,9 @@
-<svelte:options customElement="goa-popover" />
+<svelte:options customElement={{
+  tag: "goa-popover",
+  props: {
+    open: { reflect: true, type: "String" }
+  }
+}} />
 
 <!-- Script -->
 <script lang="ts">

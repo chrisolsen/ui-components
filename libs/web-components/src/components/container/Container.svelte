@@ -86,7 +86,7 @@
   .goa-container {
     box-sizing: border-box;
     display: flex;
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     flex-direction: column;
   }
 

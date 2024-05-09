@@ -5,14 +5,9 @@
 
   import type { GoAIconType } from "../icon/Icon.svelte";
   import type { Spacing } from "../../common/styling";
+  import type { Option } from "./DropdownItem.svelte";
   import { fromBoolean, toBoolean } from "../../common/utils";
   import { calculateMargin } from "../../common/styling";
-
-  interface Option {
-    label: string;
-    value: string;
-    filter: string;
-  }
 
   interface EventHandler {
     handleKeyUp: (e: KeyboardEvent) => void;
@@ -52,13 +47,14 @@
   let _wrapperEl: HTMLElement;
   let _rootEl: HTMLElement;
   let _menuEl: HTMLElement;
-  let _selectEl: HTMLSelectElement;
   let _inputEl: HTMLInputElement;
   let _eventHandler: EventHandler;
 
   let _isDirty: boolean = false;
   let _filteredOptions: Option[] = [];
   let _values: string[] = [];
+
+  let _bindTimeoutId: any;
 
   //
   // Reactive
@@ -86,57 +82,54 @@
   // Hooks
   //
 
-  onMount(async () => {
-    await tick();
+  onMount(() => {
+    getChildren();
+
     _eventHandler = _filterable
       ? new ComboboxKeyUpHandler(_inputEl)
       : new DropdownKeyUpHandler(_inputEl);
-
-    // the following is required to appease the unit testing gods in that they don't respond
-    // to the slotchange event
-    _options = getOptions();
-
-    if (!_native) {
-      _inputEl.value = _options.find((o) => o.value === value)?.label ?? "";
-
-      if (width) {
-        _width = width;
-        if (width.endsWith("%")) {
-          calculatePercentWidth();
-        } else {
-          _width = width;
-        }
-      }
-
-      // This is only here to allow the tests to pass :(
-      if (!width && _options.length > 0) {
-        _width = getLongestChildWidth(_options);
-      }
-    }
-
-    syncFilteredOptions();
-
-    // watch for DOM changes within the slot => dynamic binding
-    const slot = _rootEl.querySelector("slot");
-    slot?.addEventListener("slotchange", () => {
-      if (!_rootEl) return;
-
-      _options = getOptions();
-      syncFilteredOptions();
-
-      if (!width) {
-        _width = getLongestChildWidth(_options);
-      }
-
-      if (!_native) {
-        setDisplayedValue();
-      }
-    });
   });
 
   //
   // Functions
   //
+
+  function getChildren() {
+    _rootEl?.addEventListener("dropdown-item:mounted", (e: Event) => {
+      const ce = e as CustomEvent<Option>;
+      _options = [..._options, ce.detail];
+
+      // ensure bind only runs once for all children
+      if (_bindTimeoutId) {
+        clearTimeout(_bindTimeoutId);
+      }
+      _bindTimeoutId = setTimeout(bind);
+    });
+  }
+
+  function bind() {
+    syncFilteredOptions();
+    if (!width) {
+      _width = getLongestChildWidth(_options);
+    }
+    if (_native) return;
+
+    setDisplayedValue();
+
+    if (width) {
+      _width = width;
+      if (width.endsWith("%")) {
+        calculatePercentWidth();
+      } else {
+        _width = width;
+      }
+    }
+
+    // This is only here to allow the tests to pass :(
+    if (!width && _options.length > 0) {
+      _width = getLongestChildWidth(_options);
+    }
+  }
 
   function calculatePercentWidth() {
     const rootWidth = _wrapperEl.getBoundingClientRect()?.width;
@@ -163,35 +156,6 @@
     const rawValues = typeof rawValue === "object" ? rawValue : [rawValue];
     // convert all values to strings to avoid later type comparison issues
     return rawValues.map((val: unknown) => `${val}`);
-  }
-
-  function getChildren(): Element[] {
-    const slot = _rootEl.querySelector("slot") as HTMLSlotElement;
-    if (slot) {
-      // default
-      return slot.assignedElements();
-    }
-    // unit tests
-    const el = _native ? _selectEl : _rootEl;
-    // @ts-expect-error
-    return [...el.children] as Element[];
-  }
-
-  // Create a list of the options based on the children within the slot
-  // The children don't have to be goa-dropdown-item elements. Any child element
-  // work as long as it has a value and label content
-  function getOptions(): Option[] {
-    return getChildren()
-      .filter((child: Element) => child.tagName === "GOA-DROPDOWN-ITEM")
-      .map((el: Element) => {
-        const option = el as unknown as Option;
-        const value = el.getAttribute("value") || option.value || "";
-        const label =
-          el.getAttribute("label") || option.label || el.innerHTML || value;
-        const filter = el.getAttribute("filter") || label || value || "";
-
-        return { value, label, filter } as Option;
-      });
   }
 
   // compute the required width to ensure all children fit
@@ -274,6 +238,7 @@
   }
 
   function isFilterMatch(option: Option, filter: string) {
+    // empty string matches all
     if (filter.length === 0) return true;
 
     let value = option.filter || option.label || option.value;
@@ -289,7 +254,8 @@
       : { name, value: value };
 
     setTimeout(() => {
-      _rootEl.dispatchEvent(
+      console.log("dispatching change")
+      _rootEl?.dispatchEvent(
         new CustomEvent("_change", { composed: true, detail }),
       );
       _isDirty = false;
@@ -549,7 +515,6 @@
         class:error={_error}
         disabled={_disabled}
         id={name}
-        bind:this={_selectEl}
         on:change={onNativeSelect}
       >
         <slot />
@@ -560,8 +525,8 @@
         {/each}
       </select>
     {:else}
-      <!-- list and filter -->
       <slot />
+      <!-- list and filter -->
       <goa-popover
         {disabled}
         {relative}
@@ -635,7 +600,7 @@
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <goa-icon
               role="button"
-              tabindex="-1"
+              tabindex="0"
               id={name}
               arialabel={arialabel || name}
               ariacontrols={`menu-${name}`}
@@ -668,9 +633,9 @@
             <li
               id={option.value}
               aria-selected={_inputEl.value === (option.label || option.value)}
+              class:selected={_inputEl.value === (option.label || option.value)}
               class="dropdown-item"
               class:dropdown-item--highlighted={index === _highlightedIndex}
-              class:selected={_inputEl.value === (option.label || option.value)}
               data-index={index}
               data-testid={`dropdown-item-${option.value}`}
               data-value={option.value}

@@ -1,5 +1,6 @@
 import FileUploadInput from './FileUploadInput.svelte'
 import { fireEvent, render, waitFor } from '@testing-library/svelte'
+import { tick } from 'svelte';
 import { describe, it, expect, vi } from "vitest";
 
 it('it renders', async () => {
@@ -9,11 +10,12 @@ it('it renders', async () => {
   const maxFileSize = queryByTestId("max-file-size");
 
   expect(input).toBeTruthy();
-  expect(maxFileSize.innerHTML).toContain("5MB") // default
+  expect(maxFileSize?.innerHTML).toContain("5MB") // default
 })
 
 describe("File selection", () => {
 
+  // 1MB file
   const file = new File([new ArrayBuffer(1e6)], 'file.jpg', { type: "image/jpg" });
 
   it("reads the selected file and triggers the _selectFile event", async () => {
@@ -25,7 +27,7 @@ describe("File selection", () => {
     const input = queryByTestId("input") as HTMLInputElement;
 
     input.addEventListener("change", onChange)
-    dragdrop.addEventListener("_selectFile", onFileSelect)
+    dragdrop?.addEventListener("_selectFile", onFileSelect)
 
     fireEvent.change(input, { target: { files: [file] } });
 
@@ -37,10 +39,12 @@ describe("File selection", () => {
     const { queryByTestId } = render(FileUploadInput, { maxfilesize: "100KB" })
     const input = queryByTestId("input") as HTMLInputElement;
 
+    expect(input).toBeTruthy();
     fireEvent.change(input, { target: { files: [file] } });
 
+    await tick();
     await waitFor(() => {
-      expect(queryByTestId("error").innerHTML).toContain("100KB")
+      expect(queryByTestId("error")?.innerHTML).toContain("100KB")
     })
   })
 
