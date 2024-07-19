@@ -3,27 +3,32 @@
 <script lang="ts" context="module">
   export type FieldsetDetail = {
     id: string;
-    el: HTMLFieldSetElement;
+    el: HTMLElement;
   };
 </script>
 
 <script lang="ts">
   import { onMount } from "svelte";
+  import { calculateMargin, Spacing } from "../../common/styling";
 
   export let id: string = "";
   export let heading: string = "";
   export let buttonText: string = "";
+  export let mt: Spacing = null;
+  export let mr: Spacing = null;
+  export let mb: Spacing = null;
+  export let ml: Spacing = null;
+  export let last: boolean = false;
 
-  let _fieldsetEl: HTMLFieldSetElement;
+  let _rootEl: HTMLElement;
+  let _firstElement: boolean;
   let _active: boolean = false;
   let _detail: FieldsetDetail;
 
-  $: {
-    if (_active) {
-      const url = new URL(location.href);
-      url.searchParams.set("page", id);
-      history.pushState({page: id}, "", url)
-    }
+  $: if (_active) {
+    const url = new URL(location.href);
+    url.searchParams.set("page", id);
+    history.pushState({page: id}, "", url)
   }
 
   onMount(() => {
@@ -32,13 +37,13 @@
 
     _detail = {
       id,
-      el: _fieldsetEl,
+      el: _rootEl,
     };
   });
   
   function dispatchBindMsg() {
     setTimeout(() => {
-      _fieldsetEl.dispatchEvent(
+      _rootEl.dispatchEvent(
         new CustomEvent("bind", {
           composed: true,
           bubbles: true,
@@ -49,14 +54,16 @@
   }
 
   function addToggleActiveStateListener() {
-    _fieldsetEl.addEventListener("fieldset:toggle-active", (e: Event) => {
-      _active = (e as CustomEvent).detail.active;
+    _rootEl.addEventListener("fieldset:toggle-active", (e: Event) => {
+      const {first, active} = (e as CustomEvent).detail;
+      _firstElement = first;
+      _active = active;
     });
   }
 
   function handleClick() {
-    _fieldsetEl.dispatchEvent(
-      new CustomEvent("continue", {
+    _rootEl.dispatchEvent(
+      new CustomEvent("_continue", {
         composed: true,
         bubbles: true,
         detail: _detail,
@@ -64,26 +71,57 @@
     );
   }
 
-  function back() {
+  function back(e: Event) {
     history.back();
+    e.stopPropagation();
   }
+
 </script>
 
-<fieldset bind:this={_fieldsetEl}>
+<section bind:this={_rootEl}>
   {#if _active}
-    <h3>{heading}</h3>
+    <fieldset style={calculateMargin(mt, mr, mb, ml)}>
+        {#if !_firstElement}
+          <button on:click={back}>
+            <goa-link
+              type="tertiary" 
+              leadingicon="chevron-back" 
+              mb="2xl"
+            >
+              Back
+            </goa-link>
+          </button>
+        {:else}
+          <div style="visibility: hidden">&nbsp;</div>
+          <goa-spacer vSpacing="2xl" />
+        {/if}
 
-    <slot />
+        <slot name="errors" />
+    
+        <goa-text as="h2" size="heading-l">{heading}</goa-text>
 
-    <goa-button type="tertiary" on:_click={back}>Back</goa-button>
-    <goa-button on:_click={handleClick} type="primary">
-      {buttonText || "Save and continue"}
-    </goa-button>
+        <slot />
+
+        {#if !last}
+          <goa-block mt="xl">
+            <goa-button on:_click={handleClick} type="primary">
+              {buttonText || "Save and continue"}
+            </goa-button>
+          </goa-block>
+        {/if}
+    </fieldset>
   {/if}
-</fieldset>
+</section>
 
 <style>
   fieldset {
+    border: none;
+    padding: 0;
+  }
+
+  button {
+    background: transparent;
+    padding: 0;
     border: none;
   }
 </style>
