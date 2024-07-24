@@ -1,5 +1,18 @@
 <svelte:options customElement="goa-form" />
 
+<script lang="ts" context="module">
+  export type FormState = {
+    form: Record<string, string>;
+    history: string[];
+    lastModified?: Date;
+  };
+
+  type ChangeEvent = {
+    name: string;
+    value: string;
+  };
+</script>
+
 <script lang="ts">
   import { onMount } from "svelte";
   import { FieldsetDetail } from "./Fieldset.svelte";
@@ -11,42 +24,63 @@
   export let mb: Spacing = null;
   export let ml: Spacing = null;
 
-  let _form: HTMLFormElement;
-  let _fieldsets: Record<string, HTMLElement> = {};
+  let _formEl: HTMLFormElement;
+  let _fieldsets: Record<string, FieldsetDetail> = {};
   let _firstElement: string;
+
+  let state: FormState = {
+    form: {},
+    history: [],
+    lastModified: undefined,
+  };
 
   $: _fieldsets && sendToggleActiveStateMsg(page);
 
   onMount(() => {
     addBindListener();
-    // listen to url changes or location back
     addWindowPopStateListener();
+    addChildChangeListener();
   });
 
-  function addBindListener() {
-    _form.addEventListener("bind", (e: Event) => {
-      const detail = (e as CustomEvent<FieldsetDetail>).detail;
-      _fieldsets[detail.id] = detail.el;
-      if (!_firstElement) {
-        _firstElement = detail.id;
-      }
+  // listen to `_change` events by input elemented nested within fieldsets
+  // and update the state
+  function addChildChangeListener() {
+    _formEl.addEventListener("_change", (e: Event) => {
+      const { name, value } = (e as CustomEvent<ChangeEvent>).detail;
+      state.form[name] = value;
+      state.lastModified = new Date()
       e.stopPropagation();
     });
   }
 
+  // listen for child fieldsets
+  function addBindListener() {
+    _formEl.addEventListener("fieldset:bind", (e: Event) => {
+      const detail = (e as CustomEvent<FieldsetDetail>).detail;
+      _fieldsets[detail.id] = detail;
+      if (!_firstElement) {
+        _firstElement = detail.id;
+      }
+
+      e.stopPropagation();
+    });
+  }
+
+  // listen to url changes or location back
   function addWindowPopStateListener() {
     window.addEventListener("popstate", (e: PopStateEvent) => {
-      _form.dispatchEvent(new CustomEvent("_formPopState", {
-        composed: true,
-        bubbles: true,
-      }))
+
+      const history = [...state.history];
+      history.pop();
+      state.history = history;
+    
       e.stopPropagation();
-    })
+    });
   }
 
   function sendToggleActiveStateMsg(page: string) {
     Object.keys(_fieldsets).map((key) => {
-      _fieldsets[key].dispatchEvent(
+      _fieldsets[key].el.dispatchEvent(
         new CustomEvent("fieldset:toggle-active", {
           composed: true,
           detail: {
@@ -57,12 +91,8 @@
       );
     });
   }
-
 </script>
 
-<form 
-  bind:this={_form}
-  style={calculateMargin(mt, mr, mb, ml)}
->
+<form bind:this={_formEl} style={calculateMargin(mt, mr, mb, ml)}>
   <slot />
 </form>

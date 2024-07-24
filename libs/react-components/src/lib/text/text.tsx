@@ -1,11 +1,14 @@
 import { ReactNode } from "react";
-import { Margins, Spacing } from "../../common/styling";
+import { Margins } from "../../common/styling";
 
 // TODO: move these types into the common lib for the upcoming major release
+
+type MaxWidth = string | "none";
 
 interface WCProps extends Margins {
   as?: TextElement;
   size?: Size;
+  maxwidth?: MaxWidth;
 }
 
 declare global {
@@ -18,38 +21,45 @@ declare global {
   }
 }
 
-export type TextProps = {
-  as?: TextElement;
-  mt?: Spacing;
-  mb?: Spacing;
-  ml?: Spacing;
-  mr?: Spacing;
-}
+export type HeadingElement = "h1" | "h2" | "h3" | "h4" | "h5"
+export type TextElement = "span" | "div" | "p";
 
-export type TextElement = "h1" | "h2" | "h3" | "h4" | "h5" | "span" | "div";
-
-export type Size 
+type HeadingSize
   = "heading-xl"
   | "heading-l"
   | "heading-m"
   | "heading-s"
   | "heading-xs"
-  | "body-l"
+
+type BodySize
+  = "body-l"
   | "body-m"
   | "body-s"
   | "body-xs";
 
-  
+export type Size = HeadingSize | BodySize;
+
 interface GoATextProps extends Margins {
   as?: TextElement;
   size?: Size;
+  maxWidth?: MaxWidth;
   children: ReactNode;
 }
 
 export function GoAText(props: GoATextProps): JSX.Element {
   return (
-    <goa-text as={props.as} size={props.size} mt={props.mt} mb={props.mb} ml={props.ml} mr={props.mr}>
+    <goa-text
+      as={props.as}
+      size={props.size}
+      maxwidth={props.maxWidth}
+      mt={props.mt}
+      mb={props.mb}
+      ml={props.ml}
+      mr={props.mr}
+    >
       {props.children}
     </goa-text>
   );
 }
+
+export default GoAText;

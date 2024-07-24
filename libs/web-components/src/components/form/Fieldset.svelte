@@ -3,7 +3,13 @@
 <script lang="ts" context="module">
   export type FieldsetDetail = {
     id: string;
+    heading: string;
     el: HTMLElement;
+  };
+
+  export type BindingType = {
+    el: HTMLElement;
+    type: "form-item" | "form-field";
   };
 </script>
 
@@ -25,6 +31,8 @@
   let _active: boolean = false;
   let _detail: FieldsetDetail;
 
+  let _errors: Record<string, string> = {};
+
   $: if (_active) {
     const url = new URL(location.href);
     url.searchParams.set("page", id);
@@ -32,19 +40,20 @@
   }
 
   onMount(() => {
-    dispatchBindMsg();
-    addToggleActiveStateListener();
-
     _detail = {
       id,
+      heading,
       el: _rootEl,
     };
+  
+    dispatchBindMsg();
+    addToggleActiveStateListener();
   });
   
   function dispatchBindMsg() {
     setTimeout(() => {
       _rootEl.dispatchEvent(
-        new CustomEvent("bind", {
+        new CustomEvent("fieldset:bind", {
           composed: true,
           bubbles: true,
           detail: _detail,
@@ -96,7 +105,15 @@
           <goa-spacer vSpacing="2xl" />
         {/if}
 
-        <slot name="errors" />
+        {#if Object.keys(_errors).length}
+          <goa-callout type="emergency" heading="Please correct the following errors on this page:">
+            <ul>
+            {#each Object.keys(_errors) as key}
+              <li>{_errors[key]}</li>
+            {/each}
+            </ul>
+          </goa-callout>
+        {/if}
     
         <goa-text as="h2" size="heading-l">{heading}</goa-text>
 

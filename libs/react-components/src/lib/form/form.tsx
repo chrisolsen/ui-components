@@ -19,14 +19,30 @@ declare global {
 }
 
 interface GoAFormProps extends Margins {
+  ref: React.MutableRefObject<HTMLElement>;
   page: string;
   onFormPopState: () => void;
+  onChange: (name: string, value: string) => void;
   children: ReactNode;
 }
 
 export function GoAForm(props: GoAFormProps) {
   const ref = useRef<HTMLInputElement>(null);
 
+  // onChange
+  useEffect(() => {
+    const handle = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      props.onChange(detail.name, detail.value);
+    }
+
+    ref.current?.addEventListener("_change", handle);
+    return () => {
+      ref.current?.removeEventListener("_change", handle);
+    }
+  }, [props.onChange])
+
+  // onFormPopState
   useEffect(() => {
     ref.current?.addEventListener("_formPopState", props.onFormPopState);
     return () => {

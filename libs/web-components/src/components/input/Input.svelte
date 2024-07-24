@@ -180,7 +180,7 @@
 
     setTimeout(() => {
       _rootEl?.dispatchEvent(
-        new CustomEvent<FormItemChannelProps>("input:mounted", {
+        new CustomEvent<FormItemChannelProps>("form-field:mounted", {
           composed: true,
           bubbles: true,
           detail: { el: inputEl },

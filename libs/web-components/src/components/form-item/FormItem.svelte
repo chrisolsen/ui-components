@@ -12,6 +12,7 @@
   import type { Spacing } from "../../common/styling";
   import { calculateMargin } from "../../common/styling";
   import { typeValidator } from "../../common/utils";
+  import { BindingType } from "../form/Fieldset.svelte";
 
   // Validators
   const [REQUIREMENT_TYPES, validateRequirementType] = typeValidator(
@@ -28,8 +29,6 @@
   type RequirementType = (typeof REQUIREMENT_TYPES)[number];
   type LabelSizeType = (typeof LABEL_SIZE_TYPES)[number];
 
-  export let testid: string = "";
-
   // margin
   export let mt: Spacing = null;
   export let mr: Spacing = null;
@@ -37,6 +36,7 @@
   export let ml: Spacing = null;
 
   // Optional
+  export let testid: string = "";
   export let label: string = "";
   export let labelsize: LabelSizeType = "regular";
   export let helptext: string = "";
@@ -50,9 +50,23 @@
   onMount(() => {
     validateRequirementType(requirement);
     validateLabelSize(labelsize);
+    bindElement();
 
-    _rootEl?.addEventListener("input:mounted", handleInputMounted);
+    _rootEl?.addEventListener("form-field:mounted", handleInputMounted);
   });
+
+  // Allows binding to Fieldset components
+  function bindElement() {
+    setTimeout(() => {
+      _rootEl.dispatchEvent(new CustomEvent("form-item:mounted", {
+        composed: true,
+        bubbles: true,
+        detail: {
+          el: _rootEl,
+        }
+      }))
+    }, 10);
+  }
 
   function handleInputMounted(e: Event) {
     const ce = e as CustomEvent<FormItemChannelProps>;

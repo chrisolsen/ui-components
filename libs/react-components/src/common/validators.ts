@@ -1,5 +1,75 @@
 export type FieldValidator = (value: unknown) => string;
 
+export class FormValidator {
+  private validators: Record<string, FieldValidator[]>;
+  constructor(validators?: Record<string, FieldValidator[]>) {
+    this.validators = validators || {};
+  }
+
+  add(fieldName: string, ...validators: FieldValidator[]) {
+    this.validators[fieldName] = validators;
+  }
+
+  validate(data: Record<string, string>): Record<string, string> {
+    const errors: Record<string, string> = {};
+
+    Object.entries(this.validators).forEach(([name, validators]) => {
+      const err = validators
+        .map((validatorFn) => {
+          const errMsg = validatorFn(data[name]);
+          return errMsg;
+        })
+        .find((msg) => !!msg);
+      if (err) {
+        errors[name] = err;
+      }
+    });
+
+    return errors;
+  }
+}
+
+// **********
+// Validators
+// **********
+
+export function birthDayValidator(): FieldValidator[] {
+  return [
+    requiredValidator("Day is required"),
+    numericValidator({
+      min: 1,
+      max: 31,
+      minMsg: "Day must be between 1 and 31",
+      maxMsg: "Day must be between 1 and 31",
+    }),
+  ];
+}
+
+export function birthMonthValidator(): FieldValidator[] {
+  return [
+    requiredValidator("Month is required"),
+    numericValidator({
+      min: 1,
+      max: 12,
+      minMsg: "Month must be between Jan and Dec",
+      maxMsg: "Month must be between Jan and Dec",
+    }),
+  ];
+}
+
+export function birthYearValidator(): FieldValidator[] {
+  const maxYear = new Date().getFullYear();
+  return [
+    requiredValidator("Year is required"),
+    numericValidator({
+      min: 1900,
+      max: maxYear,
+      minMsg: "Year must be greater than 1900",
+      maxMsg: `Year must be less than ${maxYear}`,
+    }),
+  ];
+}
+
 export function requiredValidator(msg?: string): FieldValidator {
   return (value: unknown) => {
     msg = msg || "Required";
@@ -144,33 +214,4 @@ export function lengthValidator({
 
     return "";
   };
-}
-
-export class FormValidator {
-  private validators: Record<string, FieldValidator[]>;
-  constructor(validators?: Record<string, FieldValidator[]>) {
-    this.validators = validators || {};
-  }
-
-  add(fieldName: string, ...validators: FieldValidator[]) {
-    this.validators[fieldName] = validators;
-  }
-
-  validate(data: Record<string, string>): Record<string, string> {
-    const errors: Record<string, string> = {};
-
-    Object.entries(this.validators).forEach(([name, validators]) => {
-      const err = validators
-        .map((validatorFn) => {
-          const errMsg = validatorFn(data[name]);
-          return errMsg;
-        })
-        .find((msg) => !!msg);
-      if (err) {
-        errors[name] = err;
-      }
-    });
-
-    return errors;
-  }
 }
