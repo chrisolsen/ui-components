@@ -106,7 +106,7 @@
       input.dispatchEvent(
         new CustomEvent("_change", {
           composed: true,
-          bubbles: false,
+          bubbles: true,
           cancelable: true,
           detail: { name, value: input.value },
         }),
@@ -155,13 +155,38 @@
 
     validateType(type);
     validateAutoCapitalize(autocapitalize);
+    addSetValueListener();
+    showDeprecationWarnings();
+    checkSlots();
+    sendMountedMessage();
+    addSetErrorListener();
+  });
 
-    if (prefix != "" || suffix != "") {
-      console.warn(
-        "GoAInput [prefix] and [suffix] properties are deprecated. Instead use leadingContent and trailingContent.",
-      );
-    }
+  function addSetErrorListener() {
+    inputEl.addEventListener("set:error", (_e: Event) => {
+      error = "true"
+    })
+  }
 
+  function addSetValueListener() {
+    inputEl.addEventListener("set:value", (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (name === detail.name) {
+        value = detail.value;
+
+        inputEl.dispatchEvent(
+          new CustomEvent("_change", {
+            composed: true,
+            bubbles: true,
+            cancelable: true,
+            detail: { name, value },
+          }),
+        );
+      }
+    })
+  }
+
+  function checkSlots() {
     const leadingContentSlot = _rootEl.querySelector(
       "slot[name=leadingContent]",
     ) as HTMLSlotElement;
@@ -176,18 +201,28 @@
 
     if (trailingContentSlot && trailingContentSlot.assignedNodes().length > 0) {
       _trailingContentSlot = true;
-    }
+    }    
+  }
 
+  function showDeprecationWarnings() {
+    if (prefix != "" || suffix != "") {
+      console.warn(
+        "GoAInput [prefix] and [suffix] properties are deprecated. Instead use leadingContent and trailingContent.",
+      );
+    }
+  }
+
+  function sendMountedMessage() {
     setTimeout(() => {
       _rootEl?.dispatchEvent(
         new CustomEvent<FormItemChannelProps>("form-field:mounted", {
           composed: true,
           bubbles: true,
-          detail: { el: inputEl },
+          detail: { name, el: inputEl },
         }),
       );
     }, 10);
-  });
+  }
 </script>
 
 <!-- HTML -->
@@ -234,7 +269,7 @@
       {autocapitalize}
       {name}
       {type}
-      {value}
+      value={value || ""}
       {placeholder}
       {min}
       {max}

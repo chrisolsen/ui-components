@@ -18,10 +18,7 @@ export interface GoATabsProps {
 
 export function GoATabs({ initialTab, children, testId }: GoATabsProps): JSX.Element {
   return (
-    <goa-tabs
-      initialtab={initialTab}
-      data-testid={testId}
-    >
+    <goa-tabs initialtab={initialTab} data-testid={testId}>
       {children}
     </goa-tabs>
   );

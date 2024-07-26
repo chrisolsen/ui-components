@@ -3,6 +3,7 @@
 <!-- Script -->
 <script lang="ts" context="module">
   export type FormItemChannelProps = {
+    name: string;
     el: HTMLElement;
   };
 </script>
@@ -43,7 +44,7 @@
   export let error: string = "";
   export let requirement: RequirementType = "";
   export let maxwidth: string = "none";
-  export let id: string = ""; // @deprecated: no longer used
+  export let id: string = "";
 
   let _rootEl: HTMLElement;
 
@@ -51,9 +52,17 @@
     validateRequirementType(requirement);
     validateLabelSize(labelsize);
     bindElement();
+    addSetErrorListener();
 
     _rootEl?.addEventListener("form-field:mounted", handleInputMounted);
   });
+
+  
+  function addSetErrorListener() {
+    _rootEl.addEventListener("set:error", (e: Event) => {
+      error = (e as CustomEvent).detail.error
+    })
+  }
 
   // Allows binding to Fieldset components
   function bindElement() {
@@ -62,6 +71,7 @@
         composed: true,
         bubbles: true,
         detail: {
+          id,
           el: _rootEl,
         }
       }))
