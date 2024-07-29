@@ -173,9 +173,10 @@
       _state = JSON.parse(raw);
       for (const [name, detail] of Object.entries(_fieldsets)) {
         detail.el.dispatchEvent(
-          new CustomEvent("set:fieldset", {
+          new CustomEvent("send", {
             composed: true,
             detail: {
+              type: "set:fieldset",
               name,
               value: _state.form,
             },

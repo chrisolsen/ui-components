@@ -63,31 +63,65 @@
     addErrorListener();
     addResetErrorsListener();
 
-    addSetListener();
+    bindChannel()
   });
 
-  function addSetListener() {
-    _rootEl.addEventListener("set:fieldset", (e: Event) => {
-      const detail = (e as CustomEvent).detail;
+  type PayloadTypes =
+    | "set:fieldset"
+    | "__resetErrors"
+    | "error"
+    | "_validate"
+    | "form-item:mounted"
+    | "fieldset:mounted";
+
+  type Payload = {
+    type: PayloadTypes;
+    detail: unknown;
+  };
+
+  function bindChannel() {
+    _rootEl.addEventListener("send", (e: Event) => {
+      const payload = (e as CustomEvent<Payload>).detail;
+      switch (payload.type) {
+        case "set:fieldset":
+          setFieldSet(payload.detail)
+          break;
+        case "__resetErrors":
+          break;
+        case "_validate":
+          break;
+        case "error":
+          break;
+        case "form-item:mounted":
+          break;
+        case "fieldset:mounted":
+          break;
+      }
+    });
+  }
+
+  function setFieldSet(detail: unknown) {
+      const data = detail as Record<string, Record<string, string>>;
       setTimeout(() => {
-        for (const [_, values] of Object.entries(detail)) {
-          for (const [propName, value] of Object.entries(values as Record<string, string>)) {
+        for (const [_, values] of Object.entries(data)) {
+          for (const [propName, value] of Object.entries(values)) {
             if (Object.keys(_formFields).includes(propName)) {
               // set internal state
               _fieldState[propName] = value as string;
               // dispatch to form field component
-              _formFields[propName].dispatchEvent(new CustomEvent("set:value", {
-                composed: true,
-                detail: {
-                  name: propName,
-                  value  
-                }
-              }));
+              _formFields[propName].dispatchEvent(
+                new CustomEvent("set:value", {
+                  composed: true,
+                  detail: {
+                    name: propName,
+                    value,
+                  },
+                }),
+              );
             }
           }
         }
-      }, 100)
-    })
+      }, 100);
   }
 
   function addResetErrorsListener() {
@@ -102,15 +136,19 @@
       _errors[name] = msg;
 
       // dispatch error down to form items and fields
-      _formItems[name].dispatchEvent(new CustomEvent("set:error", {
-        composed: true,
-        detail: {
-          error: msg
-        }
-      }))
-      _formFields[name].dispatchEvent(new CustomEvent("set:error", {
-        composed: true
-      }))
+      _formItems[name].dispatchEvent(
+        new CustomEvent("set:error", {
+          composed: true,
+          detail: {
+            error: msg,
+          },
+        }),
+      );
+      _formFields[name].dispatchEvent(
+        new CustomEvent("set:error", {
+          composed: true,
+        }),
+      );
     });
   }
 
@@ -126,7 +164,7 @@
   function addChildChangeListener() {
     _rootEl.addEventListener("_change", (e: Event) => {
       const { name, value } = (e as CustomEvent).detail;
-      console.log("receiving change enve", name, value)
+      console.log("receiving change enve", name, value);
       _fieldState[name] = value;
     });
   }
@@ -134,12 +172,12 @@
   function addChildMountedListeners() {
     _rootEl.addEventListener("form-item:mounted", (e: Event) => {
       const { id, el } = (e as CustomEvent).detail;
-      console.log("saving form item", id, el)
+      console.log("saving form item", id, el);
       _formItems[id] = el;
     });
     _rootEl.addEventListener("form-field:mounted", (e: Event) => {
       const { name, el } = (e as CustomEvent).detail;
-      console.log("setting form fields", (e as CustomEvent).detail)
+      console.log("setting form fields", (e as CustomEvent).detail);
       _formFields[name] = el;
     });
   }
