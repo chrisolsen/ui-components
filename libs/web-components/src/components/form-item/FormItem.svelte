@@ -54,6 +54,7 @@
     bindElement();
     addSetErrorListener();
 
+    // here
     _rootEl?.addEventListener("form-field:mounted", handleInputMounted);
   });
 
@@ -67,6 +68,7 @@
   // Allows binding to Fieldset components
   function bindElement() {
     setTimeout(() => {
+      // here
       _rootEl.dispatchEvent(new CustomEvent("form-item:mounted", {
         composed: true,
         bubbles: true,

@@ -17,11 +17,26 @@
     valid: boolean;
     msg: string;
   };
+
+  export type FieldsetPayloadTypes =
+    | "set:fieldset"
+    | "__resetErrors"
+    | "error"
+    | "_validate"
+    | "form-item:mounted"
+    | "fieldset:mounted"
+    | "fieldset:toggle-active";
+
+  export type FieldsetPayload = {
+    action: FieldsetPayloadTypes;
+    data: unknown;
+  };
 </script>
 
 <script lang="ts">
   import { onMount } from "svelte";
   import { calculateMargin, Spacing } from "../../common/styling";
+  import { dispatch } from "../../common/utils";
 
   export let id: string = "";
   export let heading: string = "";
@@ -56,110 +71,115 @@
     };
 
     dispatchBindMsg();
-    addToggleActiveStateListener();
     addChildChangeListener();
-    addChildMountedListeners();
-    addValidationListener();
-    addErrorListener();
-    addResetErrorsListener();
-
-    bindChannel()
+    bindChannel();
   });
 
-  type PayloadTypes =
-    | "set:fieldset"
-    | "__resetErrors"
-    | "error"
-    | "_validate"
-    | "form-item:mounted"
-    | "fieldset:mounted";
-
-  type Payload = {
-    type: PayloadTypes;
-    detail: unknown;
-  };
-
   function bindChannel() {
-    _rootEl.addEventListener("send", (e: Event) => {
-      const payload = (e as CustomEvent<Payload>).detail;
-      switch (payload.type) {
+    _rootEl.addEventListener("msg", (e: Event) => {
+      const payload = (e as CustomEvent<FieldsetPayload>).detail;
+      console.log("fieldset incoming message:", payload);
+      switch (payload.action) {
         case "set:fieldset":
-          setFieldSet(payload.detail)
+          onData(payload.data);
           break;
         case "__resetErrors":
+          onErrorReset();
           break;
         case "_validate":
+          onValidate(payload.data);
           break;
         case "error":
+          onError(payload.data);
           break;
         case "form-item:mounted":
+          onFormItemMount(payload.data);
           break;
         case "fieldset:mounted":
+          onFieldsetMount(payload.data);
+          break;
+        case "fieldset:toggle-active":
+          onToggleActiveState(payload.data);
           break;
       }
     });
   }
 
-  function setFieldSet(detail: unknown) {
-      const data = detail as Record<string, Record<string, string>>;
-      setTimeout(() => {
-        for (const [_, values] of Object.entries(data)) {
-          for (const [propName, value] of Object.entries(values)) {
-            if (Object.keys(_formFields).includes(propName)) {
-              // set internal state
-              _fieldState[propName] = value as string;
-              // dispatch to form field component
-              _formFields[propName].dispatchEvent(
-                new CustomEvent("set:value", {
-                  composed: true,
-                  detail: {
-                    name: propName,
-                    value,
-                  },
-                }),
-              );
-            }
+  // Dispatch handlers
+
+  function onToggleActiveState(detail: unknown) {
+    const { first, active } = detail as { first: boolean; active: boolean };
+    _firstElement = first;
+    _active = active;
+  }
+
+  function onFormItemMount(detail: unknown) {
+    const { id, el } = detail as { id: string; el: HTMLElement };
+    _formItems[id] = el;
+  }
+
+  function onFieldsetMount(detail: unknown) {
+    const { name, el } = detail as { name: string; el: HTMLElement };
+    console.log("setting form fields", name, el);
+    _formFields[name] = el;
+  }
+
+  type ErrorMsg = {
+    error: string;
+  };
+  function onError(detail: unknown) {
+    console.log('onError', detail)
+    const { name, msg } = detail as {name: string, msg: string};
+    _errors[name] = msg;
+
+    // dispatch error down to form items and fields
+    dispatch<ErrorMsg>(
+      _formFields[name],
+      "set:error",
+      {
+        error: msg,
+      },
+      { bubbles: true },
+    );
+  }
+
+  function onErrorReset() {
+    _errors = {};
+  }
+
+  function onValidate(detail: unknown) {
+    const { name, valid, msg } = detail as Record<string, string>;
+    if (!valid) {
+      _errors[name] = msg;
+    }
+  }
+
+  // Set the child form elements values
+  function onData(detail: unknown) {
+    const data = detail as Record<string, Record<string, string>>;
+    setTimeout(() => {
+      for (const [_, values] of Object.entries(data)) {
+        for (const [propName, value] of Object.entries(values)) {
+          if (Object.keys(_formFields).includes(propName)) {
+            // set internal state
+            _fieldState[propName] = value as string;
+            // dispatch to form field component
+            _formFields[propName].dispatchEvent(
+              new CustomEvent("set:value", {
+                composed: true,
+                detail: {
+                  name: propName,
+                  value,
+                },
+              }),
+            );
           }
         }
-      }, 100);
-  }
-
-  function addResetErrorsListener() {
-    _rootEl.addEventListener("__resetErrors", () => {
-      _errors = {};
-    });
-  }
-
-  function addErrorListener() {
-    _rootEl.addEventListener("error", (e: Event) => {
-      const { name, msg } = (e as CustomEvent).detail;
-      _errors[name] = msg;
-
-      // dispatch error down to form items and fields
-      _formItems[name].dispatchEvent(
-        new CustomEvent("set:error", {
-          composed: true,
-          detail: {
-            error: msg,
-          },
-        }),
-      );
-      _formFields[name].dispatchEvent(
-        new CustomEvent("set:error", {
-          composed: true,
-        }),
-      );
-    });
-  }
-
-  function addValidationListener() {
-    _rootEl.addEventListener("validate", (e: Event) => {
-      const { name, valid, msg } = (e as CustomEvent<ValidationDetail>).detail;
-      if (!valid) {
-        _errors[name] = msg;
       }
-    });
+    }, 100);
   }
+
+  // Functions
 
   function addChildChangeListener() {
     _rootEl.addEventListener("_change", (e: Event) => {
@@ -169,53 +189,18 @@
     });
   }
 
-  function addChildMountedListeners() {
-    _rootEl.addEventListener("form-item:mounted", (e: Event) => {
-      const { id, el } = (e as CustomEvent).detail;
-      console.log("saving form item", id, el);
-      _formItems[id] = el;
-    });
-    _rootEl.addEventListener("form-field:mounted", (e: Event) => {
-      const { name, el } = (e as CustomEvent).detail;
-      console.log("setting form fields", (e as CustomEvent).detail);
-      _formFields[name] = el;
-    });
-  }
-
   function dispatchBindMsg() {
     setTimeout(() => {
-      dispatch("fieldset:bind", _detail);
+      dispatch(_rootEl, "fieldset:bind", _detail, { bubbles: true });
     }, 10);
   }
 
-  function addToggleActiveStateListener() {
-    _rootEl.addEventListener("fieldset:toggle-active", (e: Event) => {
-      const { first, active } = (e as CustomEvent).detail;
-      _firstElement = first;
-      _active = active;
-    });
-  }
-
-  // Handled the app's on:_continue handler
   function handleClick() {
-    dispatch("_continue", {
-      el: _rootEl,
-      state: _fieldState,
-    });
+    dispatch(_rootEl, "_continue", { el: _rootEl, state: _fieldState }, { bubbles: true });
   }
 
   function handleSubmit() {
-    dispatch("__submit", {});
-  }
-
-  function dispatch(eventName: string, detail: Record<string, unknown>) {
-    _rootEl.dispatchEvent(
-      new CustomEvent(eventName, {
-        composed: true,
-        bubbles: true,
-        detail,
-      }),
-    );
+    dispatch(_rootEl, "__submit", {}, { bubbles: true });
   }
 
   function back(e: Event) {

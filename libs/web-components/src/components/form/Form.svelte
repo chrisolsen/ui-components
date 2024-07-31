@@ -15,7 +15,7 @@
 
 <script lang="ts">
   import { onMount } from "svelte";
-  import { FieldsetDetail } from "./Fieldset.svelte";
+  import { FieldsetDetail, FieldsetPayload, FieldsetPayloadTypes } from "./Fieldset.svelte";
   import { calculateMargin, Spacing } from "../../common/styling";
 
   // Required
@@ -53,6 +53,7 @@
   function addFormFieldListener() {
     _formEl.addEventListener("form-field:mounted", (e: Event) => {
       // TODO: add CustomEvent typing
+      console.log("fielset mounted!")
       const { el } = (e as CustomEvent).detail;
       _formFields[el.name] = el;
     });
@@ -76,9 +77,11 @@
   // Listening for the event dispatched from the app's form page within the on:continue handler
   function addChangePageListener() {
     _formEl.addEventListener("_next", (e: Event) => {
+      console.log("next event handler")
       const { next } = (e as CustomEvent).detail;
 
       // clear most recent fieldset's errors 
+      console.log("page change listener")
       resetFieldsetErrors(_state.history[_state.history.length - 1])
       
       _state.history.push(next);
@@ -88,9 +91,9 @@
   }
 
   function resetFieldsetErrors(name: string) {
-    _fieldsets[name].el.dispatchEvent(new CustomEvent("__resetErrors", {
-      composed: true,
-    }))
+    // here
+    console.log("resetting errors")
+    sendMessage(_fieldsets[name].el, "__resetErrors", null)
   }
 
   // listen to `_change` events by input elemented nested within fieldsets
@@ -114,7 +117,9 @@
     if (historyPageCount) {
       lastPage = _state.history[historyPageCount - 1];
     }
+    console.log("fieldset:bind", "adding")
     _formEl.addEventListener("fieldset:bind", (e: Event) => {
+      console.log("fieldset:bind", "listening")
       const detail = (e as CustomEvent<FieldsetDetail>).detail;
       _fieldsets[detail.id] = detail;
 
@@ -136,6 +141,18 @@
     });
   }
 
+  function sendToggleActiveStateMsg(page: string) {
+    const keys = Object.keys(_fieldsets);
+    console.log("sendToggleActiveState", keys)
+    keys.map((key) => {
+      // here
+      sendMessage(_fieldsets[key].el,"fieldset:toggle-active", {
+        first: key === keys[0],
+        active: key === page,
+      });
+    });
+  }
+
   // listen to url changes or location back
   function addWindowPopStateListener() {
     window.addEventListener("popstate", (e: PopStateEvent) => {
@@ -148,21 +165,6 @@
     });
   }
 
-  function sendToggleActiveStateMsg(page: string) {
-    const keys = Object.keys(_fieldsets);
-    keys.map((key) => {
-      _fieldsets[key].el.dispatchEvent(
-        new CustomEvent("fieldset:toggle-active", {
-          composed: true,
-          detail: {
-            first: key === keys[0],
-            active: key === page,
-          },
-        }),
-      );
-    });
-  }
-
   function saveState(state: FormState) {
     localStorage.setItem(name, JSON.stringify(state));
   }
@@ -172,18 +174,27 @@
     if (raw) {
       _state = JSON.parse(raw);
       for (const [name, detail] of Object.entries(_fieldsets)) {
-        detail.el.dispatchEvent(
-          new CustomEvent("send", {
-            composed: true,
-            detail: {
-              type: "set:fieldset",
-              name,
-              value: _state.form,
-            },
-          }),
-        );
+        // here
+        sendMessage(detail.el, "set:fieldset", {
+          name,
+          value: _state.form,
+        })
       }
     }
+  }
+
+  // TODO: make this a global method
+  function sendMessage(sender: HTMLElement, msg: FieldsetPayloadTypes, data: unknown) {
+    console.log("sending message", sender, msg, data)
+    sender.dispatchEvent(
+      new CustomEvent<FieldsetPayload>("msg", {
+        composed: true,
+        detail: {
+          action: msg,
+          data
+        },
+      }),
+    );
   }
 
   // function resetState() {
