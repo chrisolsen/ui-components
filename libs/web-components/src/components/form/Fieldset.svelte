@@ -19,12 +19,11 @@
   };
 
   export type FieldsetPayloadTypes =
-    | "set:fieldset"
-    | "__resetErrors"
-    | "error"
-    | "_validate"
-    | "form-item:mounted"
-    | "fieldset:mounted"
+    | "form::set:fieldset"
+    | "form::reset:errors"
+    | "external::set:error"
+    | "form-item::on:mount"
+    | "form-field::on:mount"
     | "fieldset:toggle-active";
 
   export type FieldsetPayload = {
@@ -36,7 +35,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { calculateMargin, Spacing } from "../../common/styling";
-  import { dispatch } from "../../common/utils";
+  import { dispatch, receive, relay } from "../../common/utils";
 
   export let id: string = "";
   export let heading: string = "";
@@ -76,36 +75,34 @@
   });
 
   function bindChannel() {
-    _rootEl.addEventListener("msg", (e: Event) => {
-      const payload = (e as CustomEvent<FieldsetPayload>).detail;
-      console.log("fieldset incoming message:", payload);
-      switch (payload.action) {
-        case "set:fieldset":
-          onData(payload.data);
+    receive(_rootEl, (action, data) => {
+      console.log(`  RECEIVE(Fieldset:${action}):`, data);
+      switch (action as FieldsetPayloadTypes) {
+        case "form::set:fieldset":
+          onData(data);
           break;
-        case "__resetErrors":
+        case "form::reset:errors":
           onErrorReset();
           break;
-        case "_validate":
-          onValidate(payload.data);
+        case "external::set:error":
+          onError(data);
           break;
-        case "error":
-          onError(payload.data);
+        case "form-item::on:mount":
+          onFormItemMount(data);
           break;
-        case "form-item:mounted":
-          onFormItemMount(payload.data);
-          break;
-        case "fieldset:mounted":
-          onFieldsetMount(payload.data);
+        case "form-field::on:mount":
+          onFieldsetMount(data);
           break;
         case "fieldset:toggle-active":
-          onToggleActiveState(payload.data);
+          onToggleActiveState(data);
           break;
       }
     });
   }
 
+  // *****************
   // Dispatch handlers
+  // *****************
 
   function onToggleActiveState(detail: unknown) {
     const { first, active } = detail as { first: boolean; active: boolean };
@@ -120,7 +117,6 @@
 
   function onFieldsetMount(detail: unknown) {
     const { name, el } = detail as { name: string; el: HTMLElement };
-    console.log("setting form fields", name, el);
     _formFields[name] = el;
   }
 
@@ -128,92 +124,79 @@
     error: string;
   };
   function onError(detail: unknown) {
-    console.log('onError', detail)
-    const { name, msg } = detail as {name: string, msg: string};
+    const { name, msg } = detail as { name: string; msg: string };
     _errors[name] = msg;
 
     // dispatch error down to form items and fields
-    dispatch<ErrorMsg>(
-      _formFields[name],
-      "set:error",
-      {
-        error: msg,
-      },
-      { bubbles: true },
-    );
+    relay<ErrorMsg>(_formFields[name], "fieldset::set:error", { error: msg });
   }
 
   function onErrorReset() {
     _errors = {};
   }
 
-  function onValidate(detail: unknown) {
-    const { name, valid, msg } = detail as Record<string, string>;
-    if (!valid) {
-      _errors[name] = msg;
-    }
-  }
-
   // Set the child form elements values
-  function onData(detail: unknown) {
-    const data = detail as Record<string, Record<string, string>>;
+  function onData(d: unknown) {
+    const { name, value: values } = d as {
+      name: string;
+      value: Record<string, string>;
+    };
+
+    if (name !== id) return;
+
     setTimeout(() => {
-      for (const [_, values] of Object.entries(data)) {
-        for (const [propName, value] of Object.entries(values)) {
-          if (Object.keys(_formFields).includes(propName)) {
-            // set internal state
-            _fieldState[propName] = value as string;
-            // dispatch to form field component
-            _formFields[propName].dispatchEvent(
-              new CustomEvent("set:value", {
-                composed: true,
-                detail: {
-                  name: propName,
-                  value,
-                },
-              }),
-            );
-          }
+      for (const [propName, value] of Object.entries(values)) {
+        if (Object.keys(_formFields).includes(propName)) {
+          _fieldState[propName] = value;
         }
       }
     }, 100);
   }
 
+  // **************
+  // Event handlers
+  // **************
+  
+  function handleClick() {
+    dispatch(
+      _rootEl,
+      "_continue",
+      { el: _rootEl, state: _fieldState },
+      { bubbles: true },
+    );
+  }
+
+  function handleSubmit() {
+    relay(_rootEl, "__submit", {}, { bubbles: true });
+  }
+
+  function handleBack(e: Event) {
+    history.back();
+    e.stopPropagation();
+  }
+
+  // *********
   // Functions
+  // *********
 
   function addChildChangeListener() {
     _rootEl.addEventListener("_change", (e: Event) => {
       const { name, value } = (e as CustomEvent).detail;
-      console.log("receiving change enve", name, value);
       _fieldState[name] = value;
     });
   }
 
   function dispatchBindMsg() {
-    setTimeout(() => {
-      dispatch(_rootEl, "fieldset:bind", _detail, { bubbles: true });
-    }, 10);
+    relay(_rootEl, "fieldset::on:bind", _detail, { bubbles: true, timeout: 10 });
   }
 
-  function handleClick() {
-    dispatch(_rootEl, "_continue", { el: _rootEl, state: _fieldState }, { bubbles: true });
-  }
-
-  function handleSubmit() {
-    dispatch(_rootEl, "__submit", {}, { bubbles: true });
-  }
-
-  function back(e: Event) {
-    history.back();
-    e.stopPropagation();
-  }
 </script>
 
 <section bind:this={_rootEl}>
   {#if _active}
     <fieldset style={calculateMargin(mt, mr, mb, ml)}>
       {#if !_firstElement}
-        <button on:click={back}>
+        <button on:click={handleBack}>
           <goa-link type="tertiary" leadingicon="chevron-back" mb="2xl">
             Back
           </goa-link>

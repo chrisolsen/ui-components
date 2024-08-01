@@ -15,8 +15,13 @@
 
 <script lang="ts">
   import { onMount } from "svelte";
-  import { FieldsetDetail, FieldsetPayload, FieldsetPayloadTypes } from "./Fieldset.svelte";
+  import {
+    FieldsetDetail,
+    FieldsetPayload,
+    FieldsetPayloadTypes,
+  } from "./Fieldset.svelte";
   import { calculateMargin, Spacing } from "../../common/styling";
+  import { dispatch, receive, relay } from "../../common/utils";
 
   // Required
   export let name: string;
@@ -38,63 +43,88 @@
     lastModified: undefined,
   };
 
+  let lastPage: string;
+
   onMount(() => {
-    restoreState()
-    addFieldsetBindListener();
+    restoreState();
+
+    // js events
     addWindowPopStateListener();
     addChildChangeListener();
-    addChangePageListener();
-    addFormSubmitListener();
-    addFormFieldListener();
+
+    addRelayListener();
 
     setTimeout(restoreState, 100);
   });
 
-  function addFormFieldListener() {
-    _formEl.addEventListener("form-field:mounted", (e: Event) => {
-      // TODO: add CustomEvent typing
-      console.log("fielset mounted!")
-      const { el } = (e as CustomEvent).detail;
-      _formFields[el.name] = el;
+  // TODO: move message types into a single file for easy import at the source and destination
+  function addRelayListener() {
+    receive(_formEl, (type, data) => {
+      console.log(`  RECEIVE(Form:${type}):`, type, data);
+      switch (type) {
+        case "form-field::on:mount":
+          onFormFieldMount(data);
+          break;
+        case "fieldset::on:bind":
+          onFieldsetBind(data);
+          break;
+        case "_next":
+          onChangePage(data);
+          break;
+        case "__submit":
+          onFormSubmit();
+      }
     });
   }
 
-  function addFormSubmitListener() {
-    _formEl.addEventListener("__submit", (e: Event) => {
-      _formEl.dispatchEvent(
-        new CustomEvent("_submit", {
-          composed: true,
-          bubbles: true,
-          detail: {
-            form: _state.form,
-          },
-        }),
-      );
-      e.stopPropagation();
-    });
+  // ***************
+  // Relay listeners
+  // ***************
+
+  function onFormFieldMount(d: unknown) {
+    const { name, el } = d as { name: string; el: HTMLElement };
+    _formFields[name] = el;
+  }
+
+  // listen for child fieldsets
+  function onFieldsetBind(d: unknown) {
+    const detail = d as { id: string; heading: string; el: HTMLElement };
+
+    _fieldsets[detail.id] = detail;
+
+    // no previous history and first child event (first child in list)
+    if (!lastPage && !_firstElement) {
+      _firstElement = detail.id;
+      sendToggleActiveStateMsg(detail.id);
+      if (_state.history.length === 0) {
+        _state.history.push(detail.id);
+        saveState(_state);
+      }
+    } else if (lastPage === detail.id) {
+      _firstElement = detail.id;
+      sendToggleActiveStateMsg(detail.id);
+    }
   }
 
   // Listening for the event dispatched from the app's form page within the on:continue handler
-  function addChangePageListener() {
-    _formEl.addEventListener("_next", (e: Event) => {
-      console.log("next event handler")
-      const { next } = (e as CustomEvent).detail;
+  function onChangePage(d: unknown) {
+    const { next } = d as { next: string };
 
-      // clear most recent fieldset's errors 
-      console.log("page change listener")
-      resetFieldsetErrors(_state.history[_state.history.length - 1])
-      
-      _state.history.push(next);
-      saveState(_state);
-      sendToggleActiveStateMsg(next);
-    });
+    // clear most recent fieldset's errors
+    resetFieldsetErrors(_state.history[_state.history.length - 1]);
+
+    _state.history.push(next);
+    saveState(_state);
+    sendToggleActiveStateMsg(next);
   }
 
-  function resetFieldsetErrors(name: string) {
-    // here
-    console.log("resetting errors")
-    sendMessage(_fieldsets[name].el, "__resetErrors", null)
+  function onFormSubmit() {
+    dispatch(_formEl, "_submit", { form: _state.form }, { bubbles: true });
   }
+
+  // ****************
+  // Native listeners
+  // ****************
 
   // listen to `_change` events by input elemented nested within fieldsets
   // and update the state
@@ -110,43 +140,18 @@
     });
   }
 
-  // listen for child fieldsets
-  function addFieldsetBindListener() {
-    let lastPage = undefined;
-    let historyPageCount = _state.history.length;
-    if (historyPageCount) {
-      lastPage = _state.history[historyPageCount - 1];
-    }
-    console.log("fieldset:bind", "adding")
-    _formEl.addEventListener("fieldset:bind", (e: Event) => {
-      console.log("fieldset:bind", "listening")
-      const detail = (e as CustomEvent<FieldsetDetail>).detail;
-      _fieldsets[detail.id] = detail;
+  // *********
+  // Functions
+  // *********
 
-      // 
-        // no previous history and first child event (first child in list)
-      if (!lastPage && !_firstElement) {
-        _firstElement = detail.id;
-        sendToggleActiveStateMsg(detail.id);
-        if (_state.history.length === 0) {
-          _state.history.push(detail.id);
-          saveState(_state)
-        }
-      } else if (lastPage === detail.id) {
-        _firstElement = detail.id;  
-        sendToggleActiveStateMsg(detail.id);
-      }
-
-      e.stopPropagation();
-    });
+  function resetFieldsetErrors(name: string) {
+    relay(_fieldsets[name].el, "form::reset:errors", null);
   }
 
   function sendToggleActiveStateMsg(page: string) {
     const keys = Object.keys(_fieldsets);
-    console.log("sendToggleActiveState", keys)
     keys.map((key) => {
-      // here
-      sendMessage(_fieldsets[key].el,"fieldset:toggle-active", {
+      relay(_fieldsets[key].el, "fieldset:toggle-active", {
         first: key === keys[0],
         active: key === page,
       });
@@ -160,7 +165,7 @@
       history.pop();
       _state.history = history;
       saveState(_state);
-      sendToggleActiveStateMsg(history[history.length - 1])
+      sendToggleActiveStateMsg(history[history.length - 1]);
       e.stopPropagation();
     });
   }
@@ -171,30 +176,34 @@
 
   function restoreState() {
     const raw = localStorage.getItem(name);
-    if (raw) {
-      _state = JSON.parse(raw);
-      for (const [name, detail] of Object.entries(_fieldsets)) {
-        // here
-        sendMessage(detail.el, "set:fieldset", {
-          name,
-          value: _state.form,
-        })
-      }
+    if (!raw) {
+      return;
     }
-  }
 
-  // TODO: make this a global method
-  function sendMessage(sender: HTMLElement, msg: FieldsetPayloadTypes, data: unknown) {
-    console.log("sending message", sender, msg, data)
-    sender.dispatchEvent(
-      new CustomEvent<FieldsetPayload>("msg", {
-        composed: true,
-        detail: {
-          action: msg,
-          data
-        },
-      }),
-    );
+    _state = JSON.parse(raw);
+
+    // restore state in fieldsets
+    for (const [name, detail] of Object.entries(_fieldsets)) {
+      relay(detail.el, "form::set:fieldset", {
+        name,
+        value: _state.form,
+      });
+    }
+
+    // restore state in form items
+    console.log("formfields", _formFields)
+    for (const [name, el] of Object.entries(_formFields)) {
+      relay(el, "form::set:value", {
+        name,
+        value: _state.form[name],
+      });
+    }
+
+    // initialize history with first page if history is empty
+    let historyPageCount = _state.history.length;
+    if (historyPageCount === 0) {
+      lastPage = _state.history[historyPageCount - 1];
+    }
   }
 
   // function resetState() {

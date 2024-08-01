@@ -5,7 +5,7 @@
 </script>
 
 <script lang="ts">
-  import { typeValidator, toBoolean } from "../../common/utils";
+  import { typeValidator, toBoolean, relay, receive } from "../../common/utils";
   import type { GoAIconType } from "../icon/Icon.svelte";
   import type { Spacing } from "../../common/styling";
   import { calculateMargin } from "../../common/styling";
@@ -124,6 +124,7 @@
 
   function onFocus(e: Event) {
     const input = e.target as HTMLInputElement;
+    // TODO: create `dispatch` util function
     input.dispatchEvent(
       new CustomEvent("_focus", {
         composed: true,
@@ -155,35 +156,44 @@
 
     validateType(type);
     validateAutoCapitalize(autocapitalize);
-    addSetValueListener();
+    addRelayListener();
+
     showDeprecationWarnings();
     checkSlots();
     sendMountedMessage();
-    addSetErrorListener();
   });
 
-  function addSetErrorListener() {
-    inputEl.addEventListener("set:error", (_e: Event) => {
-      error = "true"
+  function addRelayListener() {
+    receive(inputEl, (action, data) => {
+      switch (action) {
+        case "form::set:value":
+          onSetValue(data);
+          break;
+        case "fieldset::set:error":
+          onSetError();
+          break;
+      }
     })
   }
 
-  function addSetValueListener() {
-    inputEl.addEventListener("set:value", (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      if (name === detail.name) {
-        value = detail.value;
+  function onSetValue(d: unknown) {
+    const data = d as {name: string, value: string};
 
-        inputEl.dispatchEvent(
-          new CustomEvent("_change", {
-            composed: true,
-            bubbles: true,
-            cancelable: true,
-            detail: { name, value },
-          }),
-        );
-      }
-    })
+    if (name === data.name) {
+      value = data.value;
+      inputEl.dispatchEvent(
+        new CustomEvent("_change", {
+          composed: true,
+          bubbles: true,
+          cancelable: true,
+          detail: { name, value },
+        }),
+      );
+    }
+  }
+
+  function onSetError() {
+    error = "true";  
   }
 
   function checkSlots() {
@@ -201,7 +211,7 @@
 
     if (trailingContentSlot && trailingContentSlot.assignedNodes().length > 0) {
       _trailingContentSlot = true;
-    }    
+    }
   }
 
   function showDeprecationWarnings() {
@@ -213,15 +223,12 @@
   }
 
   function sendMountedMessage() {
-    setTimeout(() => {
-      _rootEl?.dispatchEvent(
-        new CustomEvent<FormItemChannelProps>("form-field:mounted", {
-          composed: true,
-          bubbles: true,
-          detail: { name, el: inputEl },
-        }),
-      );
-    }, 10);
+    relay<FormItemChannelProps>(
+      _rootEl,
+      "form-field::on:mount",
+      { name, el: inputEl },
+      { bubbles: true, timeout: 10 },
+    );
   }
 </script>
 

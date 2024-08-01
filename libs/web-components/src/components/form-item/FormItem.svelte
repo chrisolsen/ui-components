@@ -12,8 +12,7 @@
   import { onMount } from "svelte";
   import type { Spacing } from "../../common/styling";
   import { calculateMargin } from "../../common/styling";
-  import { typeValidator } from "../../common/utils";
-  import { BindingType } from "../form/Fieldset.svelte";
+  import { receive, relay, typeValidator } from "../../common/utils";
 
   // Validators
   const [REQUIREMENT_TYPES, validateRequirementType] = typeValidator(
@@ -52,41 +51,40 @@
     validateRequirementType(requirement);
     validateLabelSize(labelsize);
     bindElement();
-    addSetErrorListener();
 
-    // here
-    _rootEl?.addEventListener("form-field:mounted", handleInputMounted);
+    receive(_rootEl, (action, data) => {
+      switch (action) {
+        case "form-field::on:mount":
+          onInputMount(data);
+          break;
+        case "fieldset::set:error":
+          onSetError(data);
+          break;
+      }
+    })
   });
 
-  
-  function addSetErrorListener() {
-    _rootEl.addEventListener("set:error", (e: Event) => {
-      error = (e as CustomEvent).detail.error
-    })
+  function onSetError(d: unknown) {
+    error = (d as Record<string, string>)["error"];
   }
 
   // Allows binding to Fieldset components
   function bindElement() {
-    setTimeout(() => {
-      // here
-      _rootEl.dispatchEvent(new CustomEvent("form-item:mounted", {
-        composed: true,
-        bubbles: true,
-        detail: {
-          id,
-          el: _rootEl,
-        }
-      }))
-    }, 10);
+    relay(
+      _rootEl,
+      "form-item::on:mount",
+      { id, el: _rootEl },
+      { bubbles: true, timeout: 10 },
+    );
   }
 
-  function handleInputMounted(e: Event) {
-    const ce = e as CustomEvent<FormItemChannelProps>;
+  function onInputMount(d: unknown) {
+    const { el } = d as FormItemChannelProps;
 
     // Check if aria-label is present and has a value in the child element
-    const ariaLabel = ce.detail.el.getAttribute("aria-label");
+    const ariaLabel = el.getAttribute("aria-label");
     if (!ariaLabel || ariaLabel.trim() === "") {
-      ce.detail.el.setAttribute("aria-label", label);
+      el.setAttribute("aria-label", label);
     }
   }
 </script>
