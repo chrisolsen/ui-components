@@ -35,7 +35,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { calculateMargin, Spacing } from "../../common/styling";
-  import { dispatch, receive, relay } from "../../common/utils";
+  import { dispatch, receive, relay, styles } from "../../common/utils";
 
   export let id: string = "";
   export let heading: string = "";
@@ -193,8 +193,11 @@
 </script>
 
 <section bind:this={_rootEl}>
-  {#if _active}
-    <fieldset style={calculateMargin(mt, mr, mb, ml)}>
+    <fieldset style={styles(
+      calculateMargin(mt, mr, mb, ml),
+      `display: ${_active ? "block" : "none"}`
+    )
+    }>
       {#if !_firstElement}
         <button on:click={handleBack}>
           <goa-link type="tertiary" leadingicon="chevron-back" mb="2xl">
@@ -237,7 +240,6 @@
         </goa-block>
       {/if}
     </fieldset>
-  {/if}
 </section>
 
 <style>
