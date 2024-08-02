@@ -1,18 +1,19 @@
 <svelte:options customElement="goa-form-item" />
 
 <!-- Script -->
-<script lang="ts" context="module">
-  export type FormItemChannelProps = {
-    name: string;
-    el: HTMLElement;
-  };
-</script>
 
 <script lang="ts">
   import { onMount } from "svelte";
   import type { Spacing } from "../../common/styling";
   import { calculateMargin } from "../../common/styling";
   import { receive, relay, typeValidator } from "../../common/utils";
+  import {
+    FieldsetErrorRelayDetail,
+    FieldsetSetErrorMsg,
+    FormFieldMountMsg,
+    FormFieldMountRelayDetail,
+    FormItemMountRelayDetail,
+  } from "../../types/relay-types";
 
   // Validators
   const [REQUIREMENT_TYPES, validateRequirementType] = typeValidator(
@@ -53,33 +54,35 @@
     bindElement();
 
     receive(_rootEl, (action, data) => {
+      console.log("FormItem", action, data)
       switch (action) {
-        case "form-field::on:mount":
-          onInputMount(data);
+        case FormFieldMountMsg:
+          onInputMount(data as FormFieldMountRelayDetail);
           break;
-        case "fieldset::set:error":
-          onSetError(data);
+        case FieldsetSetErrorMsg:
+          onSetError(data as FieldsetErrorRelayDetail);
           break;
       }
-    })
+    });
   });
 
-  function onSetError(d: unknown) {
+  function onSetError(d: FieldsetErrorRelayDetail) {
+    console.log("FOrm item set error")
     error = (d as Record<string, string>)["error"];
   }
 
   // Allows binding to Fieldset components
   function bindElement() {
-    relay(
+    relay<FormItemMountRelayDetail>(
       _rootEl,
-      "form-item::on:mount",
+      "form-item::mount",
       { id, el: _rootEl },
       { bubbles: true, timeout: 10 },
     );
   }
 
-  function onInputMount(d: unknown) {
-    const { el } = d as FormItemChannelProps;
+  function onInputMount(props: FormFieldMountRelayDetail) {
+    const { el } = props;
 
     // Check if aria-label is present and has a value in the child element
     const ariaLabel = el.getAttribute("aria-label");

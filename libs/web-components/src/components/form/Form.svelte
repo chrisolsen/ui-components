@@ -6,27 +6,34 @@
     history: string[];
     lastModified?: Date;
   };
-
-  type ChangeEvent = {
-    name: string;
-    value: string;
-  };
 </script>
 
 <script lang="ts">
   import { onMount } from "svelte";
-  import {
-    FieldsetDetail,
-    FieldsetPayload,
-    FieldsetPayloadTypes,
-  } from "./Fieldset.svelte";
   import { calculateMargin, Spacing } from "../../common/styling";
   import { dispatch, receive, relay } from "../../common/utils";
+  import {
+    ExternalContinueMsg,
+    ExternalContinueRelayDetail,
+    FieldsetBindMsg,
+    FieldsetBindRelayDetail,
+    FieldsetSubmitMsg,
+    FieldsetToggleActiveMsg,
+    FieldsetToggleActiveRelayDetail,
+    FormFieldMountMsg,
+    FormFieldMountRelayDetail,
+    FormResetErrorsMsg,
+    FormSetFieldsetMsg,
+    FormSetFieldsetRelayDetail,
+    FormSetValueMsg,
+    FormSetValueRelayDetail,
+  } from "../../types/relay-types";
 
   // Required
   export let name: string;
 
   // Optional
+  export let storage: "none" | "local" | "session" = "none";
   export let mt: Spacing = null;
   export let mr: Spacing = null;
   export let mb: Spacing = null;
@@ -34,7 +41,7 @@
 
   // Private
   let _formEl: HTMLFormElement;
-  let _fieldsets: Record<string, FieldsetDetail> = {};
+  let _fieldsets: Record<string, FieldsetBindRelayDetail> = {};
   let _formFields: Record<string, HTMLElement> = {};
   let _firstElement: string;
   let _state: FormState = {
@@ -48,30 +55,28 @@
   onMount(() => {
     restoreState();
 
-    // js events
     addWindowPopStateListener();
     addChildChangeListener();
-
     addRelayListener();
 
-    setTimeout(restoreState, 100);
+    setTimeout(bindChildren, 100);
   });
 
   // TODO: move message types into a single file for easy import at the source and destination
   function addRelayListener() {
     receive(_formEl, (type, data) => {
-      console.log(`  RECEIVE(Form:${type}):`, type, data);
+      // console.log(`  RECEIVE(Form:${type}):`, type, data);
       switch (type) {
-        case "form-field::on:mount":
-          onFormFieldMount(data);
+        case FormFieldMountMsg:
+          onFormFieldMount(data as FormFieldMountRelayDetail);
           break;
-        case "fieldset::on:bind":
-          onFieldsetBind(data);
+        case FieldsetBindMsg:
+          onFieldsetBind(data as FieldsetBindRelayDetail);
           break;
-        case "_next":
-          onChangePage(data);
+        case ExternalContinueMsg:
+          onChangePage(data as ExternalContinueRelayDetail);
           break;
-        case "__submit":
+        case FieldsetSubmitMsg:
           onFormSubmit();
       }
     });
@@ -81,15 +86,13 @@
   // Relay listeners
   // ***************
 
-  function onFormFieldMount(d: unknown) {
-    const { name, el } = d as { name: string; el: HTMLElement };
+  function onFormFieldMount(detail: FormFieldMountRelayDetail) {
+    const { name, el } = detail;
     _formFields[name] = el;
   }
 
   // listen for child fieldsets
-  function onFieldsetBind(d: unknown) {
-    const detail = d as { id: string; heading: string; el: HTMLElement };
-
+  function onFieldsetBind(detail: FieldsetBindRelayDetail) {
     _fieldsets[detail.id] = detail;
 
     // no previous history and first child event (first child in list)
@@ -107,11 +110,12 @@
   }
 
   // Listening for the event dispatched from the app's form page within the on:continue handler
-  function onChangePage(d: unknown) {
-    const { next } = d as { next: string };
+  function onChangePage(props: ExternalContinueRelayDetail) {
+    const { next } = props;
 
     // clear most recent fieldset's errors
-    resetFieldsetErrors(_state.history[_state.history.length - 1]);
+    const page = _state.history[_state.history.length - 1];
+    resetFieldsetErrors(page);
 
     _state.history.push(next);
     saveState(_state);
@@ -126,11 +130,12 @@
   // Native listeners
   // ****************
 
-  // listen to `_change` events by input elemented nested within fieldsets
-  // and update the state
+  // listen to `_change` events by input elemented nested within fieldsets and update the state
   function addChildChangeListener() {
     _formEl.addEventListener("_change", (e: Event) => {
-      const { name, value } = (e as CustomEvent<ChangeEvent>).detail;
+      const { name, value } = (
+        e as CustomEvent<{ name: string; value: string }>
+      ).detail;
 
       _state.form[name] = value;
       _state.lastModified = new Date();
@@ -145,16 +150,20 @@
   // *********
 
   function resetFieldsetErrors(name: string) {
-    relay(_fieldsets[name].el, "form::reset:errors", null);
+    relay(_fieldsets[name].el, FormResetErrorsMsg, null);
   }
 
   function sendToggleActiveStateMsg(page: string) {
     const keys = Object.keys(_fieldsets);
     keys.map((key) => {
-      relay(_fieldsets[key].el, "fieldset:toggle-active", {
-        first: key === keys[0],
-        active: key === page,
-      });
+      relay<FieldsetToggleActiveRelayDetail>(
+        _fieldsets[key].el,
+        FieldsetToggleActiveMsg,
+        {
+          first: key === keys[0],
+          active: key === page,
+        },
+      );
     });
   }
 
@@ -170,50 +179,64 @@
     });
   }
 
+  function getStorage(): Storage | null {
+    if (storage === "none") return null;
+    return storage === "local" ? localStorage : sessionStorage;
+  }
+
   function saveState(state: FormState) {
-    localStorage.setItem(name, JSON.stringify(state));
+    const storage = getStorage();
+    storage?.setItem(name, JSON.stringify(state));
   }
 
   function restoreState() {
-    const raw = localStorage.getItem(name);
+    const storage = getStorage();
+    const raw = storage?.getItem(name);
+
     if (!raw) {
       return;
     }
 
     _state = JSON.parse(raw);
 
+    // initialize history with first page if history is empty
+    let historyPageCount = _state.history.length;
+    if (historyPageCount > 0) {
+      lastPage = _state.history[historyPageCount - 1];
+    }
+  }
+
+  function bindChildren() {
     // restore state in fieldsets
     for (const [name, detail] of Object.entries(_fieldsets)) {
-      relay(detail.el, "form::set:fieldset", {
+      relay<FormSetFieldsetRelayDetail>(detail.el, FormSetFieldsetMsg, {
         name,
         value: _state.form,
       });
     }
 
     // restore state in form items
-    console.log("formfields", _formFields)
     for (const [name, el] of Object.entries(_formFields)) {
-      relay(el, "form::set:value", {
+      relay<FormSetValueRelayDetail>(el, FormSetValueMsg, {
         name,
         value: _state.form[name],
       });
     }
-
-    // initialize history with first page if history is empty
-    let historyPageCount = _state.history.length;
-    if (historyPageCount === 0) {
-      lastPage = _state.history[historyPageCount - 1];
-    }
   }
 
-  // function resetState() {
-  //   localStorage.removeItem(name);
-  //   state = {
-  //     form: {},
-  //     history: ["name"],
-  //     lastModified: undefined,
-  //   };
-  // }
+  // TODO: talk to Tom to when form first loads, and storage data exists, whether a modal should
+  // ask user whether or not to restore the previous data
+  function resetState() {
+    const storage = getStorage();
+    if (!storage) return;
+
+    storage.removeItem(name);
+    _state = {
+      form: {},
+      history: [_fieldsets[0]?.id],
+      lastModified: undefined,
+    };
+  }
 </script>
 
 <form bind:this={_formEl} style={calculateMargin(mt, mr, mb, ml)}>

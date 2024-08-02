@@ -19,9 +19,61 @@ export function styles(...css: (string | boolean)[]): string {
     .join(";");
 }
 
-// creates a style attribute/value or empty string
-export function style(name: string, value: string | number): string {
-  return value ? `${name}: ${value}` : "";
+export function relay<T>(
+  el: HTMLElement | Element | null | undefined,
+  eventName: string,
+  data: T,
+  opts?: { bubbles?: boolean; timeout?: number },
+) {
+  // console.log(`RELAY(${eventName}):`, data, el);
+
+  const dispatch = () => {
+    el?.dispatchEvent(
+      new CustomEvent<{ action: string; data: T }>("msg", {
+        composed: true,
+        bubbles: opts?.bubbles,
+        detail: {
+          action: eventName,
+          data,
+        },
+      }),
+    );
+  };
+
+  if (opts?.timeout) {
+    setTimeout(dispatch, opts.timeout);
+  } else {
+    dispatch();
+  }
+}
+
+export function dispatch<T>(
+  el: HTMLElement | Element | null | undefined,
+  eventName: string,
+  detail: T,
+  opts?: { bubbles?: boolean; timeout?: number },
+) {
+  // console.log(`DISPATCH(${eventName}):`, detail, el);
+
+  const dispatch = () => {
+    el?.dispatchEvent(
+      new CustomEvent<T>(eventName, {
+        composed: true,
+        bubbles: opts?.bubbles,
+        detail,
+      }),
+    );
+  };
+
+  if (opts?.timeout) {
+    setTimeout(dispatch, opts.timeout);
+  } else {
+    dispatch();
+  }
+}
+
+export function styles(...input: string[]): string {
+  return input.join(";");
 }
 
 export function getSlottedChildren(

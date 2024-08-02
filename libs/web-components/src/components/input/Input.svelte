@@ -5,12 +5,26 @@
 </script>
 
 <script lang="ts">
-  import { typeValidator, toBoolean, relay, receive } from "../../common/utils";
+  import {
+    typeValidator,
+    toBoolean,
+    relay,
+    receive,
+    dispatch,
+  } from "../../common/utils";
   import type { GoAIconType } from "../icon/Icon.svelte";
   import type { Spacing } from "../../common/styling";
   import { calculateMargin } from "../../common/styling";
   import { onMount, tick } from "svelte";
-  import { FormItemChannelProps } from "../form-item/FormItem.svelte";
+  import {
+    FieldsetResetErrorsMsg,
+    FieldsetSetErrorMsg,
+    FormFieldMountMsg,
+    FormFieldMountRelayDetail,
+    FormSetValueMsg,
+    FormSetValueRelayDetail,
+  } from "../../types/relay-types";
+  import { format, isValid } from "date-fns";
 
   // Validators
   const [Types, validateType] = typeValidator("Input type", [
@@ -74,6 +88,10 @@
   let inputEl: HTMLElement;
   let _rootEl: HTMLElement;
 
+  // ========
+  // Reactive
+  // ========
+
   $: handlesTrailingIconClick = toBoolean(handletrailingiconclick);
   $: isFocused = toBoolean(focused);
   $: isReadonly = toBoolean(readonly);
@@ -90,6 +108,56 @@
     inputEl.addEventListener("search", (e) => {
       onKeyUp(e);
     });
+  }
+
+  // =====
+  // Hooks
+  // =====
+
+  onMount(async () => {
+    await tick();
+
+    validateType(type);
+    validateAutoCapitalize(autocapitalize);
+    addRelayListener();
+
+    showDeprecationWarnings();
+    checkSlots();
+    sendMountedMessage();
+  });
+
+  // =========
+  // Functions
+  // =========
+
+  function addRelayListener() {
+    receive(inputEl, (action, data) => {
+      switch (action) {
+        case FormSetValueMsg:
+          onSetValue(data as FormSetValueRelayDetail);
+          break;
+        case FieldsetSetErrorMsg:
+          error = "true";
+          break;
+        case FieldsetResetErrorsMsg:
+          error = "false";
+          break;
+      }
+    });
+  }
+
+  function onSetValue(detail: FormSetValueRelayDetail) {
+    value = detail.value;
+    dispatch(inputEl, "_change", { name, value: detail.value }, { bubbles: true });
+  }
+
+  function sendMountedMessage() {
+    relay<FormFieldMountRelayDetail>(
+      _rootEl,
+      FormFieldMountMsg,
+      { name, el: inputEl },
+      { bubbles: true, timeout: 10 },
+    );
   }
 
   function onKeyUp(e: Event) {
@@ -151,51 +219,6 @@
     );
   }
 
-  onMount(async () => {
-    await tick();
-
-    validateType(type);
-    validateAutoCapitalize(autocapitalize);
-    addRelayListener();
-
-    showDeprecationWarnings();
-    checkSlots();
-    sendMountedMessage();
-  });
-
-  function addRelayListener() {
-    receive(inputEl, (action, data) => {
-      switch (action) {
-        case "form::set:value":
-          onSetValue(data);
-          break;
-        case "fieldset::set:error":
-          onSetError();
-          break;
-      }
-    })
-  }
-
-  function onSetValue(d: unknown) {
-    const data = d as {name: string, value: string};
-
-    if (name === data.name) {
-      value = data.value;
-      inputEl.dispatchEvent(
-        new CustomEvent("_change", {
-          composed: true,
-          bubbles: true,
-          cancelable: true,
-          detail: { name, value },
-        }),
-      );
-    }
-  }
-
-  function onSetError() {
-    error = "true";  
-  }
-
   function checkSlots() {
     const leadingContentSlot = _rootEl.querySelector(
       "slot[name=leadingContent]",
@@ -220,15 +243,6 @@
         "GoAInput [prefix] and [suffix] properties are deprecated. Instead use leadingContent and trailingContent.",
       );
     }
-  }
-
-  function sendMountedMessage() {
-    relay<FormItemChannelProps>(
-      _rootEl,
-      "form-field::on:mount",
-      { name, el: inputEl },
-      { bubbles: true, timeout: 10 },
-    );
   }
 </script>
 

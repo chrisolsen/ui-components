@@ -1,41 +1,28 @@
 <svelte:options customElement="goa-fieldset" />
 
-<script lang="ts" context="module">
-  export type FieldsetDetail = {
-    id: string;
-    heading: string;
-    el: HTMLElement;
-  };
-
-  export type BindingType = {
-    el: HTMLElement;
-    type: "form-item" | "form-field";
-  };
-
-  export type ValidationDetail = {
-    name: string;
-    valid: boolean;
-    msg: string;
-  };
-
-  export type FieldsetPayloadTypes =
-    | "form::set:fieldset"
-    | "form::reset:errors"
-    | "external::set:error"
-    | "form-item::on:mount"
-    | "form-field::on:mount"
-    | "fieldset:toggle-active";
-
-  export type FieldsetPayload = {
-    action: FieldsetPayloadTypes;
-    data: unknown;
-  };
-</script>
-
 <script lang="ts">
   import { onMount } from "svelte";
   import { calculateMargin, Spacing } from "../../common/styling";
   import { dispatch, receive, relay, styles } from "../../common/utils";
+  import {
+    ExternalErrorRelayDetail,
+    ExternalSetErrorMsg,
+    FieldsetBindMsg,
+    FieldsetBindRelayDetail,
+    FieldsetErrorRelayDetail,
+    FieldsetResetErrorsMsg,
+    FieldsetSetErrorMsg,
+    FieldsetSubmitMsg,
+    FieldsetToggleActiveMsg,
+    FieldsetToggleActiveRelayDetail,
+    FormFieldMountMsg,
+    FormFieldMountRelayDetail,
+    FormItemMountMsg,
+    FormItemMountRelayDetail,
+    FormResetErrorsMsg,
+    FormSetFieldsetMsg,
+    FormSetFieldsetRelayDetail,
+  } from "../../types/relay-types";
 
   export let id: string = "";
   export let heading: string = "";
@@ -49,7 +36,7 @@
   let _rootEl: HTMLElement;
   let _firstElement: boolean;
   let _active: boolean = false;
-  let _detail: FieldsetDetail;
+  let _detail: FieldsetBindRelayDetail;
 
   let _errors: Record<string, string> = {};
   let _fieldState: Record<string, string> = {};
@@ -76,25 +63,25 @@
 
   function bindChannel() {
     receive(_rootEl, (action, data) => {
-      console.log(`  RECEIVE(Fieldset:${action}):`, data);
-      switch (action as FieldsetPayloadTypes) {
-        case "form::set:fieldset":
-          onData(data);
+      // console.log(`  RECEIVE(Fieldset:${action}):`, data);
+      switch (action) {
+        case FormSetFieldsetMsg:
+          onData(data as FormSetFieldsetRelayDetail);
           break;
-        case "form::reset:errors":
+        case FormResetErrorsMsg:
           onErrorReset();
           break;
-        case "external::set:error":
-          onError(data);
+        case FormItemMountMsg:
+          onFormItemMount(data as FormItemMountRelayDetail);
           break;
-        case "form-item::on:mount":
-          onFormItemMount(data);
+        case FormFieldMountMsg:
+          onFieldsetMount(data as FormFieldMountRelayDetail);
           break;
-        case "form-field::on:mount":
-          onFieldsetMount(data);
+        case FieldsetToggleActiveMsg:
+          onToggleActiveState(data as FieldsetToggleActiveRelayDetail);
           break;
-        case "fieldset:toggle-active":
-          onToggleActiveState(data);
+        case ExternalSetErrorMsg:
+          onError(data as ExternalErrorRelayDetail);
           break;
       }
     });
@@ -104,43 +91,44 @@
   // Dispatch handlers
   // *****************
 
-  function onToggleActiveState(detail: unknown) {
-    const { first, active } = detail as { first: boolean; active: boolean };
-    _firstElement = first;
-    _active = active;
+  function onToggleActiveState(detail: FieldsetToggleActiveRelayDetail) {
+    _firstElement = detail.first;
+    _active = detail.active;
   }
 
-  function onFormItemMount(detail: unknown) {
-    const { id, el } = detail as { id: string; el: HTMLElement };
-    _formItems[id] = el;
+  function onFormItemMount(detail: FormItemMountRelayDetail) {
+    _formItems[detail.id] = detail.el;
   }
 
-  function onFieldsetMount(detail: unknown) {
-    const { name, el } = detail as { name: string; el: HTMLElement };
-    _formFields[name] = el;
+  function onFieldsetMount(detail: FormFieldMountRelayDetail) {
+    _formFields[detail.name] = detail.el;
   }
 
-  type ErrorMsg = {
-    error: string;
-  };
-  function onError(detail: unknown) {
-    const { name, msg } = detail as { name: string; msg: string };
-    _errors[name] = msg;
+  function onError(detail: ExternalErrorRelayDetail) {
+    _errors[detail.name] = detail.msg;
 
     // dispatch error down to form items and fields
-    relay<ErrorMsg>(_formFields[name], "fieldset::set:error", { error: msg });
+    relay<FieldsetErrorRelayDetail>(_formFields[detail.name], FieldsetSetErrorMsg, {
+      error: detail.msg,
+    });
+    relay<FieldsetErrorRelayDetail>(_formItems[detail.name], FieldsetSetErrorMsg, {
+      error: detail.msg,
+    });
   }
 
   function onErrorReset() {
+    // fieldset error summar
     _errors = {};
+
+    // reset children
+    for (const [_, el] of Object.entries(_formFields)) {
+      relay(el, FieldsetResetErrorsMsg, null);
+    }
   }
 
   // Set the child form elements values
-  function onData(d: unknown) {
-    const { name, value: values } = d as {
-      name: string;
-      value: Record<string, string>;
-    };
+  function onData(props: FormSetFieldsetRelayDetail) {
+    const { name, value: values } = props;
 
     if (name !== id) return;
 
@@ -156,7 +144,7 @@
   // **************
   // Event handlers
   // **************
-  
+
   function handleClick() {
     dispatch(
       _rootEl,
@@ -167,7 +155,7 @@
   }
 
   function handleSubmit() {
-    relay(_rootEl, "__submit", {}, { bubbles: true });
+    relay(_rootEl, FieldsetSubmitMsg, {}, { bubbles: true });
   }
 
   function handleBack(e: Event) {
@@ -187,59 +175,62 @@
   }
 
   function dispatchBindMsg() {
-    relay(_rootEl, "fieldset::on:bind", _detail, { bubbles: true, timeout: 10 });
+    relay<FieldsetBindRelayDetail>(_rootEl, FieldsetBindMsg, _detail, {
+      bubbles: true,
+      timeout: 10,
+    });
   }
-
 </script>
 
 <section bind:this={_rootEl}>
-    <fieldset style={styles(
+  <fieldset
+    style={styles(
       calculateMargin(mt, mr, mb, ml),
-      `display: ${_active ? "block" : "none"}`
-    )
-    }>
-      {#if !_firstElement}
-        <button on:click={handleBack}>
-          <goa-link type="tertiary" leadingicon="chevron-back" mb="2xl">
-            Back
-          </goa-link>
-        </button>
-      {:else}
-        <div style="visibility: hidden">&nbsp;</div>
-        <goa-spacer vSpacing="2xl" />
-      {/if}
+      `display: ${_active ? "block" : "none"}`,
+    )}
+  >
+    {#if !_firstElement}
+      <button on:click={handleBack}>
+        <goa-link type="tertiary" leadingicon="chevron-back" mb="2xl">
+          Back
+        </goa-link>
+      </button>
+    {:else}
+      <div style="visibility: hidden">&nbsp;</div>
+      <goa-spacer vspacing="2xl" />
+    {/if}
 
-      {#if Object.keys(_errors).length}
-        <goa-callout
-          type="emergency"
-          heading="Please correct the following errors on this page:"
-        >
-          <ul>
-            {#each Object.keys(_errors) as key}
-              <li>{_errors[key]}</li>
-            {/each}
-          </ul>
-        </goa-callout>
-      {/if}
+    {#if Object.keys(_errors).length}
+      <goa-callout
+        type="emergency"
+        heading="Please correct the following errors on this page:"
+      >
+        <ul>
+          {#each Object.keys(_errors) as key}
+            <li>{_errors[key]}</li>
+          {/each}
+        </ul>
+      </goa-callout>
+    {/if}
 
-      <goa-text as="h2" size="heading-l">{heading}</goa-text>
+    <goa-text as="h2" size="heading-l">{heading}</goa-text>
 
-      <slot />
+    <slot />
 
-      {#if last}
-        <goa-block mt="xl">
-          <goa-button on:_click={handleSubmit} type="primary">
-            {buttonText || "Submit"}
-          </goa-button>
-        </goa-block>
-      {:else}
-        <goa-block mt="xl">
-          <goa-button on:_click={handleClick} type="primary">
-            {buttonText || "Save and continue"}
-          </goa-button>
-        </goa-block>
-      {/if}
-    </fieldset>
+    {#if last}
+      <goa-block mt="xl">
+        <goa-button on:_click={handleSubmit} type="primary">
+          {buttonText || "Submit"}
+        </goa-button>
+      </goa-block>
+    {:else}
+      <goa-block mt="xl">
+        <goa-button on:_click={handleClick} type="primary">
+          {buttonText || "Save and continue"}
+        </goa-button>
+      </goa-block>
+    {/if}
+  </fieldset>
 </section>
 
 <style>

@@ -11,12 +11,16 @@
     startOfDay,
   } from "date-fns";
   import type { Spacing } from "../../common/styling";
+  import { receive, dispatch, relay } from "../../common/utils";
+  import { FormSetValueMsg, FormSetValueRelayDetail, FieldsetSetErrorMsg, FieldsetResetErrorsMsg, FormFieldMountMsg, FormFieldMountRelayDetail } from "../../types/relay-types";
 
   type DateValue = {
     type: "date";
+    name: string;
     value: Date;
   };
 
+  export let name: string = "";
   export let value: string = "";
   export let error: string = "false";
   export let min: string = "";
@@ -30,15 +34,17 @@
   export let ml: Spacing = null;
 
   // re-initializes the date if the value is changed externally
-  // $: value && initDate();
+  // $: formatDate(value);
 
   let _oldValue: Date;
-  let _rootEl: Element;
+  let _rootEl: HTMLElement;
   let _date: Date | null;
   let _showPopover: boolean = false;
 
   onMount(async () => {
     await initDate();
+    addRelayListener();
+    sendMountedMessage();
   });
 
   // FIXME: This breaks keyboard entry
@@ -48,6 +54,36 @@
       initDate();
     }
   });
+  
+  function addRelayListener() {
+    receive(_rootEl, (action, data) => {
+      switch (action) {
+        case FormSetValueMsg:
+          onSetValue(data as FormSetValueRelayDetail);
+          break;
+        case FieldsetSetErrorMsg:
+          error = "true";
+          break;
+        case FieldsetResetErrorsMsg:
+          error = "false";
+          break;
+      }
+    });
+  }
+
+  function onSetValue(detail: FormSetValueRelayDetail) {
+    value = detail.value;
+    dispatch(_rootEl, "_change", { name, value: detail.value }, { bubbles: true });
+  }
+
+  function sendMountedMessage() {
+    relay<FormFieldMountRelayDetail>(
+      _rootEl,
+      FormFieldMountMsg,
+      { name, el: _rootEl},
+      { bubbles: true, timeout: 10 },
+    );
+  }
 
   async function initDate() {
     _date = (value && startOfDay(new Date(value))) || null;
@@ -75,6 +111,7 @@
         composed: true,
         bubbles: true,
         detail: {
+          name,
           type: "date",
           value: date,
         },
@@ -173,6 +210,7 @@
     on:keydown={handleKeyDown}
   />
   <goa-calendar
+    {name}
     {value}
     {min}
     {max}

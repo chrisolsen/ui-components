@@ -6,8 +6,9 @@
   import type { GoAIconType } from "../icon/Icon.svelte";
   import type { Spacing } from "../../common/styling";
   import type { Option } from "./DropdownItem.svelte";
-  import { fromBoolean, toBoolean } from "../../common/utils";
+  import { dispatch, fromBoolean, receive, relay, toBoolean } from "../../common/utils";
   import { calculateMargin } from "../../common/styling";
+  import { FieldsetResetErrorsMsg, FieldsetSetErrorMsg, FormFieldMountMsg, FormFieldMountRelayDetail, FormSetValueMsg, FormSetValueRelayDetail } from "../../types/relay-types";
 
   interface EventHandler {
     handleKeyUp: (e: KeyboardEvent) => void;
@@ -83,6 +84,8 @@
 
   onMount(() => {
     getChildren();
+    addRelayListener();
+    sendMountedMessage();
 
     _eventHandler = _filterable
       ? new ComboboxKeyUpHandler(_inputEl)
@@ -92,6 +95,36 @@
   //
   // Functions
   //
+
+  function addRelayListener() {
+    receive(_rootEl, (action, data) => {
+      switch (action) {
+        case FormSetValueMsg:
+          onSetValue(data as FormSetValueRelayDetail);
+          break;
+        case FieldsetSetErrorMsg:
+          error = "true";
+          break;
+        case FieldsetResetErrorsMsg:
+          error = "false";
+          break;
+      }
+    });
+  }
+
+  function onSetValue(detail: FormSetValueRelayDetail) {
+    value = detail.value
+    dispatch(_rootEl, "_change", { name, value }, { bubbles: true });
+  }
+
+  function sendMountedMessage() {
+    relay<FormFieldMountRelayDetail>(
+      _rootEl,
+      FormFieldMountMsg,
+      { name, el: _rootEl},
+      { bubbles: true, timeout: 10 },
+    );
+  }
 
   function getChildren() {
     _rootEl?.addEventListener("dropdown-item:mounted", (e: Event) => {
@@ -248,7 +281,7 @@
 
     setTimeout(() => {
       _rootEl?.dispatchEvent(
-        new CustomEvent("_change", { composed: true, detail }),
+        new CustomEvent("_change", { composed: true, detail, bubbles: true }),
       );
       _isDirty = false;
     }, 1);

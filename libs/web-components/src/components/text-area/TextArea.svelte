@@ -2,9 +2,11 @@
 
 <!-- Script -->
 <script lang="ts">
-  import { pluralize, toBoolean } from "../../common/utils";
+  import { dispatch, pluralize, receive, relay, toBoolean } from "../../common/utils";
   import type { Spacing } from "../../common/styling";
   import { calculateMargin } from "../../common/styling";
+  import { onMount } from "svelte";
+  import { FieldsetResetErrorsMsg, FieldsetSetErrorMsg, FormFieldMountMsg, FormFieldMountRelayDetail, FormSetValueMsg, FormSetValueRelayDetail } from "../../types/relay-types";
 
   export let name: string;
   export let value: string = "";
@@ -39,7 +41,44 @@
 
   let _textareaEl: HTMLTextAreaElement;
 
+  // Hooks
+
+  onMount(() => {
+    addRelayListener();
+    sendMountedMessage();
+  })
+
   // functions
+  
+  function addRelayListener() {
+    receive(_textareaEl, (action, data) => {
+      switch (action) {
+        case FormSetValueMsg:
+          onSetValue(data as FormSetValueRelayDetail);
+          break;
+        case FieldsetSetErrorMsg:
+          error = "true";
+          break;
+        case FieldsetResetErrorsMsg:
+          error = "false";
+          break;
+      }
+    });
+  }
+
+  function onSetValue(detail: FormSetValueRelayDetail) {
+    value = detail.value;
+    dispatch(_textareaEl, "_change", { name, value }, { bubbles: true });
+  }
+
+  function sendMountedMessage() {
+    relay<FormFieldMountRelayDetail>(
+      _textareaEl,
+      FormFieldMountMsg,
+      { name, el: _textareaEl},
+      { bubbles: true, timeout: 10 },
+    );
+  }
 
   function onChange(e: KeyboardEvent) {
     if (isDisabled) return;
@@ -57,6 +96,7 @@
       new CustomEvent("_change", {
         composed: true,
         detail: { name, value: _textareaEl.value },
+        bubbles: true,
       }),
     );
   }
