@@ -54,7 +54,6 @@
     bindElement();
 
     receive(_rootEl, (action, data) => {
-      console.log("FormItem", action, data)
       switch (action) {
         case FormFieldMountMsg:
           onInputMount(data as FormFieldMountRelayDetail);
@@ -67,7 +66,6 @@
   });
 
   function onSetError(d: FieldsetErrorRelayDetail) {
-    console.log("FOrm item set error")
     error = (d as Record<string, string>)["error"];
   }
 

@@ -80,7 +80,7 @@
     );
   }
 
-  function onChange(e: KeyboardEvent) {
+  function onChange(e: Event) {
     if (isDisabled) return;
     dispatchChange(e);
   }
@@ -91,7 +91,7 @@
     dispatchChange(e);
   }
 
-  function dispatchChange(_: KeyboardEvent) {
+  function dispatchChange(_: Event) {
     _textareaEl.dispatchEvent(
       new CustomEvent("_change", {
         composed: true,

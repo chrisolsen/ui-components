@@ -19,6 +19,25 @@ export function styles(...css: (string | boolean)[]): string {
     .join(";");
 }
 
+// creates a style attribute/value or empty string
+export function style(name: string, value: string | number): string {
+  return value ? `${name}: ${value}` : "";
+}
+
+export function receive(
+  el: HTMLElement | Element | null | undefined,
+  handler: (action: string, data: Record<string, unknown>) => void,
+) {
+  if (!el) {
+    console.warn("receive() el is null | undefined");
+  }
+
+  el?.addEventListener("msg", (e: Event) => {
+    const ce = e as CustomEvent;
+    handler(ce.detail.action, ce.detail.data);
+  });
+}
+
 export function relay<T>(
   el: HTMLElement | Element | null | undefined,
   eventName: string,
@@ -70,10 +89,6 @@ export function dispatch<T>(
   } else {
     dispatch();
   }
-}
-
-export function styles(...input: string[]): string {
-  return input.join(";");
 }
 
 export function getSlottedChildren(
