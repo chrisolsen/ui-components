@@ -1,4 +1,4 @@
-<svelte:options customElement="goa-form" />
+<svelte:options customElement="goa-simple-form" />
 
 <script lang="ts" context="module">
   export type FormState = {
