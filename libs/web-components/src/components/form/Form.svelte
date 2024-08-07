@@ -1,13 +1,5 @@
 <svelte:options customElement="goa-simple-form" />
 
-<script lang="ts" context="module">
-  export type FormState = {
-    form: Record<string, string>;
-    history: string[];
-    lastModified?: Date;
-  };
-</script>
-
 <script lang="ts">
   import { onMount } from "svelte";
   import { calculateMargin, Spacing } from "../../common/styling";
@@ -17,17 +9,27 @@
     ExternalContinueRelayDetail,
     FieldsetBindMsg,
     FieldsetBindRelayDetail,
+    FieldsetChangeMsg,
+    FieldsetChangeRelayDetail,
+    FieldsetMountFormItemMsg,
+    FieldsetMountFormRelayDetail,
     FieldsetSubmitMsg,
     FieldsetToggleActiveMsg,
     FieldsetToggleActiveRelayDetail,
-    FormFieldMountMsg,
-    FormFieldMountRelayDetail,
+    FormDispatchStateMsg,
+    FormDispatchStateRelayDetail,
     FormResetErrorsMsg,
     FormSetFieldsetMsg,
     FormSetFieldsetRelayDetail,
     FormSetValueMsg,
     FormSetValueRelayDetail,
+    FormState,
+    FormSummaryBindMsg,
+    FormSummaryBindRelayDetail,
+    FormSummaryEditPageMsg,
+    FormSummaryEditPageRelayDetail,
   } from "../../types/relay-types";
+  import FormSummary from "./FormSummary.svelte";
 
   // Required
   export let name: string;
@@ -42,11 +44,13 @@
   // Private
   let _formEl: HTMLFormElement;
   let _fieldsets: Record<string, FieldsetBindRelayDetail> = {};
-  let _formFields: Record<string, HTMLElement> = {};
+  let _formFields: Record<string, Record<string, HTMLElement>> = {};
+  let _formSummary: HTMLElement;
   let _firstElement: string;
   let _state: FormState = {
     form: {},
     history: [],
+    editting: "",
     lastModified: undefined,
   };
 
@@ -56,25 +60,32 @@
     restoreState();
 
     addWindowPopStateListener();
-    addChildChangeListener();
     addRelayListener();
 
     setTimeout(bindChildren, 100);
   });
 
-  // TODO: move message types into a single file for easy import at the source and destination
   function addRelayListener() {
     receive(_formEl, (type, data) => {
-      // console.log(`  RECEIVE(Form:${type}):`, type, data);
+      console.log(`  RECEIVE(Form:${type}):`, type, data);
       switch (type) {
-        case FormFieldMountMsg:
-          onFormFieldMount(data as FormFieldMountRelayDetail);
-          break;
         case FieldsetBindMsg:
           onFieldsetBind(data as FieldsetBindRelayDetail);
           break;
+        case FieldsetChangeMsg:
+          onFieldsetChange(data as FieldsetChangeRelayDetail);
+          break;
+        case FieldsetMountFormItemMsg:
+          onFieldsetMountFormItem(data as FieldsetMountFormRelayDetail);
+          break;
+        case FormSummaryBindMsg:
+          onFormSummaryBind(data as FormSummaryBindRelayDetail);
+          break;
         case ExternalContinueMsg:
-          onChangePage(data as ExternalContinueRelayDetail);
+          onContinue(data as ExternalContinueRelayDetail);
+          break;
+        case FormSummaryEditPageMsg:
+          onSetPage(data as FormSummaryEditPageRelayDetail);
           break;
         case FieldsetSubmitMsg:
           onFormSubmit();
@@ -86,9 +97,15 @@
   // Relay listeners
   // ***************
 
-  function onFormFieldMount(detail: FormFieldMountRelayDetail) {
-    const { name, el } = detail;
-    _formFields[name] = el;
+  function onFormSummaryBind(detail: FormSummaryBindRelayDetail) {
+    _formSummary = detail.el;
+    syncFormSummaryState();
+  }
+
+  function onFieldsetMountFormItem(detail: FieldsetMountFormRelayDetail) {
+    const { name, el, id } = detail;
+    const old = _formFields[id] || {};
+    _formFields[id] = { ...old, [name]: el };
   }
 
   // listen for child fieldsets
@@ -99,6 +116,7 @@
     if (!lastPage && !_firstElement) {
       _firstElement = detail.id;
       sendToggleActiveStateMsg(detail.id);
+
       if (_state.history.length === 0) {
         _state.history.push(detail.id);
         saveState(_state);
@@ -109,40 +127,78 @@
     }
   }
 
+  // listen to `_change` events by input elemented nested within fieldsets and update the state
+  function onFieldsetChange(detail: FieldsetChangeRelayDetail) {
+    const { id, name, value } = detail;
+    const old = _state.form[id] || {};
+
+    _state.form[id] = { ...old, [name]: value };
+    _state.lastModified = new Date();
+
+    saveState(_state);
+  }
+
   // Listening for the event dispatched from the app's form page within the on:continue handler
-  function onChangePage(props: ExternalContinueRelayDetail) {
-    const { next } = props;
+  function onContinue(detail: ExternalContinueRelayDetail) {
+    const { next } = detail;
 
     // clear most recent fieldset's errors
     const page = _state.history[_state.history.length - 1];
     resetFieldsetErrors(page);
 
-    _state.history.push(next);
+    // if no page is currently being editted just go to the next page
+    if (!_state.editting) {
+      _state.history.push(next);
+      sendToggleActiveStateMsg(next);
+    } else {
+      // when editting a previous value, we need to determine if the `next` page is in the same
+      // "direction" as was previously followed, and if so send them back to the last page in their
+      // history (summary). If the `next` is different then the previous history must be cleared
+      // from that point on.
+      const oldNextIndex = _state.history.indexOf(_state.editting) + 1;
+
+      // user input did not affect their path, so forward them back to the end, otherwise the user
+      // has altered their path and the history must be clear from this point forward
+      if (_state.history[oldNextIndex] === next) {
+        const last = _state.history[_state.history.length - 1];
+        sendToggleActiveStateMsg(last);
+      } else {
+        _state.history = [..._state.history.slice(0, oldNextIndex), next];
+        saveState(_state);
+        sendToggleActiveStateMsg(next);
+        sendEdittingStateMsg();
+      }
+      _state.editting = "";
+    }
+
+    syncFormSummaryState();
     saveState(_state);
-    sendToggleActiveStateMsg(next);
+  }
+
+  function syncFormSummaryState() {
+    relay<FormDispatchStateRelayDetail>(_formSummary, FormDispatchStateMsg, _state);
+  }
+
+  function onSetPage(detail: FormSummaryEditPageRelayDetail) {
+    _state.editting = detail.id; // editting mode is an ephemoral value and is *not* saved to local storage
+
+    sendToggleActiveStateMsg(detail.id);
+    sendEdittingStateMsg();
+  }
+
+  // notify fieldsets of editting state to allow it to not show the `back` link
+  function sendEdittingStateMsg() {
+    for (const fieldset of Object.values(_fieldsets)) {
+      relay<FormDispatchStateRelayDetail>(
+        fieldset.el,
+        FormDispatchStateMsg,
+        _state,
+      );
+    }
   }
 
   function onFormSubmit() {
     dispatch(_formEl, "_submit", { form: _state.form }, { bubbles: true });
-  }
-
-  // ****************
-  // Native listeners
-  // ****************
-
-  // listen to `_change` events by input elemented nested within fieldsets and update the state
-  function addChildChangeListener() {
-    _formEl.addEventListener("_change", (e: Event) => {
-      const { name, value } = (
-        e as CustomEvent<{ name: string; value: string }>
-      ).detail;
-
-      _state.form[name] = value;
-      _state.lastModified = new Date();
-      saveState(_state);
-
-      e.stopPropagation();
-    });
   }
 
   // *********
@@ -155,7 +211,7 @@
 
   function sendToggleActiveStateMsg(page: string) {
     const keys = Object.keys(_fieldsets);
-    keys.map((key) => {
+    keys.forEach((key) => {
       relay<FieldsetToggleActiveRelayDetail>(
         _fieldsets[key].el,
         FieldsetToggleActiveMsg,
@@ -211,16 +267,18 @@
     for (const [name, detail] of Object.entries(_fieldsets)) {
       relay<FormSetFieldsetRelayDetail>(detail.el, FormSetFieldsetMsg, {
         name,
-        value: _state.form,
+        value: _state.form[name],
       });
     }
 
     // restore state in form items
-    for (const [name, el] of Object.entries(_formFields)) {
-      relay<FormSetValueRelayDetail>(el, FormSetValueMsg, {
-        name,
-        value: _state.form[name],
-      });
+    for (const id of Object.keys(_formFields)) {
+      for (const [name, el] of Object.entries(_formFields[id])) {
+        relay<FormSetValueRelayDetail>(el, FormSetValueMsg, {
+          name,
+          value: _state.form[id][name],
+        });
+      }
     }
   }
 
@@ -234,6 +292,7 @@
     _state = {
       form: {},
       history: [_fieldsets[0]?.id],
+      editting: "",
       lastModified: undefined,
     };
   }

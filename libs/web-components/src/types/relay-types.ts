@@ -1,3 +1,10 @@
+export type FormState = {
+  form: Record<string, Record<string, string>>;
+  history: string[];
+  editting: string;
+  lastModified?: Date;
+};
+
 // ====
 // Form
 // ====
@@ -5,6 +12,7 @@
 export const FormResetErrorsMsg = "form::reset:errors";
 export const FormSetFieldsetMsg = "form::set:fieldset";
 export const FormSetValueMsg = "form::set:value";
+export const FormDispatchStateMsg = "form::dispatch:state";
 
 export type FormFieldMountRelayDetail = {
   name: string;
@@ -21,14 +29,21 @@ export type FormSetValueRelayDetail = {
   value: string;
 };
 
+export type FormDispatchStateRelayDetail = FormState;
+
 // ========
 // Fieldset
 // ========
+
 export const FieldsetToggleActiveMsg = "fieldset:toggle-active";
 export const FieldsetResetErrorsMsg = "fieldset::reset:errors";
 export const FieldsetBindMsg = "fieldset::bind";
 export const FieldsetSubmitMsg = "fieldset::submit";
 export const FieldsetSetErrorMsg = "fieldset::set:error";
+// Sent after fieldset handles _change events from goa input-like components
+export const FieldsetChangeMsg = "fieldset::change";
+// Sent to form containing the name and el of the mounted child, along with the fieldset id
+export const FieldsetMountFormItemMsg = "fieldset::mount:form-item";
 
 export type FieldsetBindRelayDetail = {
   id: string;
@@ -43,6 +58,18 @@ export type FieldsetErrorRelayDetail = {
 export type FieldsetToggleActiveRelayDetail = {
   first: boolean;
   active: boolean;
+};
+
+export type FieldsetChangeRelayDetail = {
+  id: string;
+  name: string;
+  value: string;
+};
+
+export type FieldsetMountFormRelayDetail = {
+  id: string;
+  name: string;
+  el: HTMLElement;
 };
 
 // ========
@@ -77,3 +104,18 @@ export type ExternalErrorRelayDetail = {
 // =========
 
 export const FormFieldMountMsg = "form-field::mount";
+
+// ===========
+// FormSummary
+// ===========
+
+export const FormSummaryBindMsg = "form-summary::bind";
+export const FormSummaryEditPageMsg = "form-summary::edit:page";
+
+export type FormSummaryBindRelayDetail = {
+  el: HTMLElement;
+};
+
+export type FormSummaryEditPageRelayDetail = {
+  id: string;
+};

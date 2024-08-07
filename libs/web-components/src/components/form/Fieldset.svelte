@@ -9,12 +9,18 @@
     ExternalSetErrorMsg,
     FieldsetBindMsg,
     FieldsetBindRelayDetail,
+    FieldsetChangeMsg,
+    FieldsetChangeRelayDetail,
     FieldsetErrorRelayDetail,
+    FieldsetMountFormItemMsg,
+    FieldsetMountFormRelayDetail,
     FieldsetResetErrorsMsg,
     FieldsetSetErrorMsg,
     FieldsetSubmitMsg,
     FieldsetToggleActiveMsg,
     FieldsetToggleActiveRelayDetail,
+    FormDispatchStateMsg,
+    FormDispatchStateRelayDetail,
     FormFieldMountMsg,
     FormFieldMountRelayDetail,
     FormItemMountMsg,
@@ -36,6 +42,7 @@
   let _rootEl: HTMLElement;
   let _firstElement: boolean;
   let _active: boolean = false;
+  let _editting: boolean = false;
   let _detail: FieldsetBindRelayDetail;
 
   let _errors: Record<string, string> = {};
@@ -63,13 +70,16 @@
 
   function bindChannel() {
     receive(_rootEl, (action, data) => {
-      // console.log(`  RECEIVE(Fieldset:${action}):`, data);
+      console.log(`  RECEIVE(Fieldset:${action}):`, data);
       switch (action) {
         case FormSetFieldsetMsg:
-          onData(data as FormSetFieldsetRelayDetail);
+          onSetFieldset(data as FormSetFieldsetRelayDetail);
           break;
         case FormResetErrorsMsg:
           onErrorReset();
+          break;
+        case FormDispatchStateMsg:
+          onFormDispatch(data as FormDispatchStateRelayDetail);
           break;
         case FormItemMountMsg:
           onFormItemMount(data as FormItemMountRelayDetail);
@@ -91,29 +101,24 @@
   // Dispatch handlers
   // *****************
 
-  function onToggleActiveState(detail: FieldsetToggleActiveRelayDetail) {
-    _firstElement = detail.first;
-    _active = detail.active;
+  function onFormDispatch(detail: FormDispatchStateRelayDetail) {
+    _editting = detail.editting === id;
   }
 
-  function onFormItemMount(detail: FormItemMountRelayDetail) {
-    _formItems[detail.id] = detail.el;
-  }
+  // Set the child form elements values
+  function onSetFieldset(detail: FormSetFieldsetRelayDetail) {
+    const { name, value: values } = detail;
 
-  function onFieldsetMount(detail: FormFieldMountRelayDetail) {
-    _formFields[detail.name] = detail.el;
-  }
+    if (name !== id) return;
+    if (!values) return;
 
-  function onError(detail: ExternalErrorRelayDetail) {
-    _errors[detail.name] = detail.msg;
-
-    // dispatch error down to form items and fields
-    relay<FieldsetErrorRelayDetail>(_formFields[detail.name], FieldsetSetErrorMsg, {
-      error: detail.msg,
-    });
-    relay<FieldsetErrorRelayDetail>(_formItems[detail.name], FieldsetSetErrorMsg, {
-      error: detail.msg,
-    });
+    setTimeout(() => {
+      for (const [propName, value] of Object.entries(values)) {
+        if (Object.keys(_formFields).includes(propName)) {
+          _fieldState[name] = value;
+        }
+      }
+    }, 100);
   }
 
   function onErrorReset() {
@@ -126,25 +131,54 @@
     }
   }
 
-  // Set the child form elements values
-  function onData(props: FormSetFieldsetRelayDetail) {
-    const { name, value: values } = props;
+  function onToggleActiveState(detail: FieldsetToggleActiveRelayDetail) {
+    _firstElement = detail.first;
+    _active = detail.active;
+  }
 
-    if (name !== id) return;
+  function onFormItemMount(detail: FormItemMountRelayDetail) {
+    _formItems[detail.id] = detail.el;
+  }
 
-    setTimeout(() => {
-      for (const [propName, value] of Object.entries(values)) {
-        if (Object.keys(_formFields).includes(propName)) {
-          _fieldState[propName] = value;
-        }
-      }
-    }, 100);
+  // Collect list of child form item (input, dropdown, etc) elements
+  function onFieldsetMount(detail: FormFieldMountRelayDetail) {
+    const { name, el } = detail;
+    _formFields[name] = el;
+
+    // dispatch to the Form along with the fieldset id
+    relay<FieldsetMountFormRelayDetail>(
+      _rootEl,
+      FieldsetMountFormItemMsg,
+      { id, name, el },
+      { bubbles: true },
+    );
+  }
+
+  function onError(detail: ExternalErrorRelayDetail) {
+    _errors[detail.name] = detail.msg;
+
+    // dispatch error down to form items and fields
+    relay<FieldsetErrorRelayDetail>(
+      _formFields[detail.name],
+      FieldsetSetErrorMsg,
+      {
+        error: detail.msg,
+      },
+    );
+    relay<FieldsetErrorRelayDetail>(
+      _formItems[detail.name],
+      FieldsetSetErrorMsg,
+      {
+        error: detail.msg,
+      },
+    );
   }
 
   // **************
   // Event handlers
   // **************
 
+  // Dispatch _continue event to app's level allowing custom validation to be performed
   function handleClick() {
     dispatch(
       _rootEl,
@@ -171,6 +205,14 @@
     _rootEl.addEventListener("_change", (e: Event) => {
       const { name, value } = (e as CustomEvent).detail;
       _fieldState[name] = value;
+
+      // redispatch message with value grouped under fieldset name
+      relay<FieldsetChangeRelayDetail>(
+        _rootEl,
+        FieldsetChangeMsg,
+        { id, name, value },
+        { bubbles: true },
+      );
     });
   }
 
@@ -189,7 +231,7 @@
       `display: ${_active ? "block" : "none"}`,
     )}
   >
-    {#if !_firstElement}
+    {#if !_firstElement && !_editting}
       <button on:click={handleBack}>
         <goa-link type="tertiary" leadingicon="chevron-back" mb="2xl">
           Back
