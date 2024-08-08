@@ -47,7 +47,7 @@
 
   let _errors: Record<string, string> = {};
   let _fieldState: Record<string, string> = {};
-  let _formItems: Record<string, HTMLElement> = {};
+  let _formItems: Record<string, {label: string, el: HTMLElement }> = {};
   let _formFields: Record<string, HTMLElement> = {};
 
   $: if (_active) {
@@ -137,7 +137,8 @@
   }
 
   function onFormItemMount(detail: FormItemMountRelayDetail) {
-    _formItems[detail.id] = detail.el;
+    const { id, label, el } = detail;
+    _formItems[id] = { label, el };
   }
 
   // Collect list of child form item (input, dropdown, etc) elements
@@ -166,7 +167,7 @@
       },
     );
     relay<FieldsetErrorRelayDetail>(
-      _formItems[detail.name],
+      _formItems[detail.name].el,
       FieldsetSetErrorMsg,
       {
         error: detail.msg,
@@ -206,11 +207,13 @@
       const { name, value } = (e as CustomEvent).detail;
       _fieldState[name] = value;
 
+      const label = _formItems[name].label;
+
       // redispatch message with value grouped under fieldset name
       relay<FieldsetChangeRelayDetail>(
         _rootEl,
         FieldsetChangeMsg,
-        { id, name, value },
+        { id, name, value, label },
         { bubbles: true },
       );
     });
@@ -255,7 +258,9 @@
       </goa-callout>
     {/if}
 
-    <goa-text as="h2" size="heading-l">{heading}</goa-text>
+    {#if heading}
+      <goa-text as="h2" size="heading-l">{heading}</goa-text>
+    {/if}
 
     <slot />
 

@@ -1,5 +1,5 @@
 export type FormState = {
-  form: Record<string, Record<string, string>>;
+  form: Record<string, Record<string, { label: string; value: string }>>;
   history: string[];
   editting: string;
   lastModified?: Date;
@@ -64,6 +64,7 @@ export type FieldsetChangeRelayDetail = {
   id: string;
   name: string;
   value: string;
+  label: string;
 };
 
 export type FieldsetMountFormRelayDetail = {
@@ -80,6 +81,7 @@ export const FormItemMountMsg = "form-item::mount";
 
 export type FormItemMountRelayDetail = {
   id: string;
+  label: string;
   el: HTMLElement;
 };
 

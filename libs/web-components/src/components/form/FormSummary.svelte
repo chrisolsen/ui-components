@@ -45,21 +45,30 @@
   function changePage(pageId: string) {
     relay<FormSummaryEditPageRelayDetail>(_rootEl, FormSummaryEditPageMsg, { id: pageId }, { bubbles: true })
   }
+
+  function format(value: string): string {
+    if (!value) return "";
+    const str = value.replace(/-/g, " ");
+    return str[0].toUpperCase() + str.slice(1);
+  }
   
 </script>
 
 <div bind:this={_rootEl}>
-
   {#if _state}
     {#each _state.history as page}
       {#if _state.form[page]}
-        {#each Object.entries(_state.form[page]) as [key, value] }
-          {key} - {value} 
-        {/each}
-        <goa-button type="tertiary" on:_click={() => changePage(page)}>Change</goa-button>
-        <br />
+        <goa-container>
+          <div>{format(page)}</div>
+          <goa-button type="tertiary" leadingicon="pencil" on:_click={() => changePage(page)}>Change</goa-button>
+          {#each Object.entries(_state.form[page]) as [key, value] }
+            <goa-grid mincolwidth="20ch">
+              <div>{key}</div>
+              <div>{value}</div>
+            </goa-grid>
+          {/each}
+        </goa-container>
       {/if}
     {/each}
   {/if}
-
 </div>

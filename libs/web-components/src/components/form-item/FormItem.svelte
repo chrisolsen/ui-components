@@ -12,6 +12,7 @@
     FieldsetSetErrorMsg,
     FormFieldMountMsg,
     FormFieldMountRelayDetail,
+    FormItemMountMsg,
     FormItemMountRelayDetail,
   } from "../../types/relay-types";
 
@@ -73,8 +74,8 @@
   function bindElement() {
     relay<FormItemMountRelayDetail>(
       _rootEl,
-      "form-item::mount",
-      { id, el: _rootEl },
+      FormItemMountMsg,
+      { id, label, el: _rootEl },
       { bubbles: true, timeout: 10 },
     );
   }
