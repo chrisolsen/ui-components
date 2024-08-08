@@ -29,6 +29,8 @@
     FormSummaryEditPageMsg,
     FormSummaryEditPageRelayDetail,
   } from "../../types/relay-types";
+
+  // Don't remove this, otherwise the summary doesn't render
   import FormSummary from "./FormSummary.svelte";
 
   // Required
@@ -67,7 +69,7 @@
 
   function addRelayListener() {
     receive(_formEl, (type, data) => {
-      console.log(`  RECEIVE(Form:${type}):`, type, data);
+      // console.log(`  RECEIVE(Form:${type}):`, type, data);
       switch (type) {
         case FieldsetBindMsg:
           onFieldsetBind(data as FieldsetBindRelayDetail);
@@ -132,7 +134,7 @@
     const { id, name, label, value } = detail;
     const old = _state.form[id] || {};
 
-    _state.form[id] = { ...old, [name]: {label, value} };
+    _state.form[id] = { ...old, [name]: { label, value } };
     _state.lastModified = new Date();
 
     saveState(_state);
@@ -176,7 +178,11 @@
   }
 
   function syncFormSummaryState() {
-    relay<FormDispatchStateRelayDetail>(_formSummary, FormDispatchStateMsg, _state);
+    relay<FormDispatchStateRelayDetail>(
+      _formSummary,
+      FormDispatchStateMsg,
+      _state,
+    );
   }
 
   function onSetPage(detail: FormSummaryEditPageRelayDetail) {
@@ -265,25 +271,28 @@
   function bindChildren() {
     // restore state in fieldsets
     for (const [name, detail] of Object.entries(_fieldsets)) {
-      relay<FormSetFieldsetRelayDetail>(detail.el, FormSetFieldsetMsg, {
-        name,
-        value: _state.form[name]["value"],
-      });
+      const fieldset = _state.form[name];
+      if (fieldset)
+        relay<FormSetFieldsetRelayDetail>(detail.el, FormSetFieldsetMsg, {
+          name,
+          value: fieldset["value"],
+        });
     }
 
     // restore state in form items
     for (const id of Object.keys(_formFields)) {
       for (const [name, el] of Object.entries(_formFields[id])) {
-        relay<FormSetValueRelayDetail>(el, FormSetValueMsg, {
-          name,
-          value: _state.form[id][name]["value"],
-        });
+        const data = _state.form[id]?.[name];
+        if (data) {
+          relay<FormSetValueRelayDetail>(el, FormSetValueMsg, {
+            name,
+            value: data["value"],
+          });
+        }
       }
     }
   }
 
-  // TODO: talk to Tom to when form first loads, and storage data exists, whether a modal should
-  // ask user whether or not to restore the previous data
   function resetState() {
     const storage = getStorage();
     if (!storage) return;

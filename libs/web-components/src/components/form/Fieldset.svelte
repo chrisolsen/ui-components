@@ -70,7 +70,7 @@
 
   function bindChannel() {
     receive(_rootEl, (action, data) => {
-      console.log(`  RECEIVE(Fieldset:${action}):`, data);
+      // console.log(`  RECEIVE(Fieldset:${action}):`, data);
       switch (action) {
         case FormSetFieldsetMsg:
           onSetFieldset(data as FormSetFieldsetRelayDetail);

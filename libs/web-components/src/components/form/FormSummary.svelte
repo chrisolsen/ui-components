@@ -39,7 +39,6 @@
 
   function onFormDispatch(detail: FormDispatchStateRelayDetail) {
     _state = detail
-    console.log(_state)
   }
 
   function changePage(pageId: string) {
@@ -48,6 +47,7 @@
 
   function format(value: string): string {
     if (!value) return "";
+
     const str = value.replace(/-/g, " ");
     return str[0].toUpperCase() + str.slice(1);
   }
@@ -59,16 +59,37 @@
     {#each _state.history as page}
       {#if _state.form[page]}
         <goa-container>
-          <div>{format(page)}</div>
-          <goa-button type="tertiary" leadingicon="pencil" on:_click={() => changePage(page)}>Change</goa-button>
-          {#each Object.entries(_state.form[page]) as [key, value] }
-            <goa-grid mincolwidth="20ch">
-              <div>{key}</div>
-              <div>{value}</div>
-            </goa-grid>
+          <goa-block>
+            <div class="page">{format(page)}</div>
+            <goa-spacer hspacing="fill" />
+            <goa-button type="tertiary" size="compact" leadingicon="pencil" on:_click={() => changePage(page)}>Change</goa-button>
+          </goa-block>
+          {#each Object.entries(_state.form[page]) as [_, value] }
+            <dl>
+              <dt>{value.label}</dt>
+              <dd>{value.value}</dd>
+            </dl>
           {/each}
         </goa-container>
       {/if}
     {/each}
   {/if}
 </div>
+
+<style>
+  .page {
+    color: var(--goa-color-greyscale-700);
+  }
+    
+  dl {
+    margin: 0.5rem 0;
+  }
+  dt {
+    display: inline-block;  
+    width: 50%;
+    font: var(--goa-typography-heading-s);
+  }
+  dd {
+    display: inline-block;  
+  }
+</style>
