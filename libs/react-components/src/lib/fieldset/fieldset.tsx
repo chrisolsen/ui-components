@@ -26,9 +26,10 @@ interface GoAFieldsetProps extends Margins {
   heading: string;
   buttonText?: string;
   errors?: Record<string, string>;
-  onContinue?: () => void
+  onContinue?: (e: Event) => void
   children: ReactNode;
 }
+
 
 export function GoAFieldset({
   heading, 
@@ -40,7 +41,6 @@ export function GoAFieldset({
   mr, 
   mb, 
   ml, 
-  errors = {} 
 }: GoAFieldsetProps) {
   const ref = useRef<HTMLElement>(null);
 
@@ -67,19 +67,6 @@ export function GoAFieldset({
       ml={ml}
       last={!!onContinue ? null : true}
     >
-      <div slot="errors"></div>
-      {Object.keys(errors).length > 0 &&
-        <>
-          <section slot="errors">
-            <goa-callout mb="2xl" type="emergency" heading="Please correct the following errors on this page:">
-              <ul>
-                {Object.keys(errors).map(key => <li key={key}>{errors[key]}</li>)}
-              </ul>
-            </goa-callout>
-          </section>
-        </>
-      }
-
       {children}
     </goa-fieldset>
   );

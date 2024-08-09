@@ -69,7 +69,7 @@
 
   function addRelayListener() {
     receive(_formEl, (type, data) => {
-      // console.log(`  RECEIVE(Form:${type}):`, type, data);
+      console.log(`  RECEIVE(Form:${type}):`, type, data);
       switch (type) {
         case FieldsetBindMsg:
           onFieldsetBind(data as FieldsetBindRelayDetail);
@@ -91,6 +91,7 @@
           break;
         case FieldsetSubmitMsg:
           onFormSubmit();
+          break;
       }
     });
   }

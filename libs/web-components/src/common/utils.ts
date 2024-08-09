@@ -24,6 +24,11 @@ export function style(name: string, value: string | number): string {
   return value ? `${name}: ${value}` : "";
 }
 
+export const msg = {
+  receive,
+  relay,
+};
+
 export function receive(
   el: HTMLElement | Element | null | undefined,
   handler: (action: string, data: Record<string, unknown>) => void,

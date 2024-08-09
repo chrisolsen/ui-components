@@ -3,9 +3,17 @@ import { Margins } from "../../common/styling";
 
 // TODO: move these types into the common lib for the upcoming major release
 
+export type FormState = {
+  form: Record<string, Record<string, { label: string; value: string }>>;
+  history: string[];
+  editting: string;
+  lastModified?: Date;
+};
+
 interface WCProps extends Margins {
-  ref?: React.MutableRefObject<HTMLElement | null>;
-  page: string;
+  ref?: React.MutableRefObject<HTMLElement | undefined>; 
+  name: string;
+  storage: "none" | "local" | "session";
 }
 
 declare global {
@@ -13,52 +21,72 @@ declare global {
   namespace JSX {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
     interface IntrinsicElements {
-      "goa-form": WCProps & React.HTMLAttributes<HTMLElement>;
+      "goa-simple-form": WCProps & React.HTMLAttributes<HTMLElement>;
     }
   }
 }
 
 interface GoAFormProps extends Margins {
-  ref: React.MutableRefObject<HTMLElement>;
-  page: string;
-  onFormPopState: () => void;
-  onChange: (name: string, value: string) => void;
   children: ReactNode;
+  name: string;
+  storage: "none" | "local" | "session";
+  onMount: (el: HTMLElement) => void;
 }
 
-export function GoAForm(props: GoAFormProps) {
-  const ref = useRef<HTMLInputElement>(null);
+// FIXME: the issue is that we need to relay the message to the Form element and the element 
+// available in the `e` is the fieldset
+export function continueTo(el: HTMLElement | undefined, next: string) {
+  if (!el) {
+    console.error("external::continue el is undefined")
+  }
+  console.log("form el", el)
+  relay<{next: string}>(el, "external::continue", {
+    next
+  })
+}
 
-  // onChange
+export function relay<T>(
+  el: HTMLElement | Element | null | undefined,
+  eventName: string,
+  data: T,
+  opts?: { bubbles?: boolean; },
+) {  
+  if (!el) {
+    console.error("dispatch element is null");
+    return;
+  }
+  el.dispatchEvent(
+    new CustomEvent<{action: string, data: T}>("msg", {
+      composed: true,
+      bubbles: opts?.bubbles,
+      detail: {
+        action: eventName,
+        data
+      },
+    }),
+  );
+}
+
+export function GoASimpleForm(props: GoAFormProps) {
+  const el = useRef<HTMLElement>();
+
   useEffect(() => {
-    const handle = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      props.onChange(detail.name, detail.value);
+    if (el.current) {
+      const form = el.current.shadowRoot?.querySelector("form");
+      form && props.onMount(form);
     }
-
-    ref.current?.addEventListener("_change", handle);
-    return () => {
-      ref.current?.removeEventListener("_change", handle);
-    }
-  }, [props.onChange])
-
-  // onFormPopState
-  useEffect(() => {
-    ref.current?.addEventListener("_formPopState", props.onFormPopState);
-    return () => {
-      ref.current?.removeEventListener("_formPopState", props.onFormPopState);
-    }
-  }, [props.onFormPopState])
-
+  }, [el.current])
+  
   return (
-    <goa-form ref={ref} 
-      page={props.page}
+    <goa-simple-form ref={el}
+      name={props.name}
+      storage={props.storage}
       mt={props.mt}
       mr={props.mr}
       mb={props.mb}
       ml={props.ml}
     >
       {props.children}
-    </goa-form>
+    </goa-simple-form>
   );
 }

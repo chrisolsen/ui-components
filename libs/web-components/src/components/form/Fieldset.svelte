@@ -5,6 +5,7 @@
   import { calculateMargin, Spacing } from "../../common/styling";
   import { dispatch, receive, relay, styles } from "../../common/utils";
   import {
+  ExternalContinueRelayDetail,
     ExternalErrorRelayDetail,
     ExternalSetErrorMsg,
     FieldsetBindMsg,
@@ -47,7 +48,7 @@
 
   let _errors: Record<string, string> = {};
   let _fieldState: Record<string, string> = {};
-  let _formItems: Record<string, {label: string, el: HTMLElement }> = {};
+  let _formItems: Record<string, { label: string; el: HTMLElement }> = {};
   let _formFields: Record<string, HTMLElement> = {};
 
   $: if (_active) {
@@ -70,7 +71,7 @@
 
   function bindChannel() {
     receive(_rootEl, (action, data) => {
-      // console.log(`  RECEIVE(Fieldset:${action}):`, data);
+      console.log(`  RECEIVE(Fieldset:${action}):`, data);
       switch (action) {
         case FormSetFieldsetMsg:
           onSetFieldset(data as FormSetFieldsetRelayDetail);
@@ -93,6 +94,9 @@
         case ExternalSetErrorMsg:
           onError(data as ExternalErrorRelayDetail);
           break;
+        // case ExternalContinueMsg:
+        //   onContinue(data as ExternalContinueRelayDetail);
+        //   break;
       }
     });
   }
@@ -100,6 +104,13 @@
   // *****************
   // Dispatch handlers
   // *****************
+
+  // This function is only here due to React not having an element ref to the Form component,
+  // and being unable to dispatch a message directly to the Form.
+  // BUT, this function will result in a relay/receive loop
+  function onContinue(detail: ExternalContinueRelayDetail) {
+    relay(_rootEl, )  
+  }
 
   function onFormDispatch(detail: FormDispatchStateRelayDetail) {
     _editting = detail.editting === id;
@@ -234,13 +245,13 @@
       `display: ${_active ? "block" : "none"}`,
     )}
   >
-    {#if !_firstElement && !_editting}
+    {#if !_firstElement && !_editting && !last}
       <button on:click={handleBack}>
         <goa-link type="tertiary" leadingicon="chevron-back" mb="2xl">
           Back
         </goa-link>
       </button>
-    {:else}
+    {:else if !last}
       <div style="visibility: hidden">&nbsp;</div>
       <goa-spacer vspacing="2xl" />
     {/if}
@@ -267,7 +278,7 @@
     {#if last}
       <goa-block mt="xl">
         <goa-button on:_click={handleSubmit} type="primary">
-          {buttonText || "Submit"}
+          {buttonText || "Confirm"}
         </goa-button>
       </goa-block>
     {:else}

@@ -42,8 +42,8 @@ export const FieldsetSubmitMsg = "fieldset::submit";
 export const FieldsetSetErrorMsg = "fieldset::set:error";
 // Sent after fieldset handles _change events from goa input-like components
 export const FieldsetChangeMsg = "fieldset::change";
-// Sent to form containing the name and el of the mounted child, along with the fieldset id
-export const FieldsetMountFormItemMsg = "fieldset::mount:form-item";
+// Sent to form containing the name and el of the bound child, along with the fieldset id
+export const FieldsetMountFormItemMsg = "fieldset::bind:form-item";
 
 export type FieldsetBindRelayDetail = {
   id: string;
@@ -77,7 +77,7 @@ export type FieldsetMountFormRelayDetail = {
 // FormItem
 // ========
 
-export const FormItemMountMsg = "form-item::mount";
+export const FormItemMountMsg = "form-item::bind";
 
 export type FormItemMountRelayDetail = {
   id: string;
@@ -105,7 +105,7 @@ export type ExternalErrorRelayDetail = {
 // FormField
 // =========
 
-export const FormFieldMountMsg = "form-field::mount";
+export const FormFieldMountMsg = "form-field::bind";
 
 // ===========
 // FormSummary
