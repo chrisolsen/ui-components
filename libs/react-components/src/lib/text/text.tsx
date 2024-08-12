@@ -6,7 +6,7 @@ import { Margins } from "../../common/styling";
 type MaxWidth = string | "none";
 
 interface WCProps extends Margins {
-  as?: TextElement;
+  as?: TextElement | HeadingElement;
   size?: Size;
   maxwidth?: MaxWidth;
 }
@@ -40,7 +40,7 @@ type BodySize
 export type Size = HeadingSize | BodySize;
 
 interface GoATextProps extends Margins {
-  as?: TextElement;
+  as?: TextElement | HeadingElement;
   size?: Size;
   maxWidth?: MaxWidth;
   children: ReactNode;
@@ -49,9 +49,9 @@ interface GoATextProps extends Margins {
 export function GoAText(props: GoATextProps): JSX.Element {
   return (
     <goa-text
-      as={props.as}
+      as={props.as || "div"}
       size={props.size}
-      maxwidth={props.maxWidth}
+      maxwidth={props.maxWidth || "65ch"}
       mt={props.mt}
       mb={props.mb}
       ml={props.ml}

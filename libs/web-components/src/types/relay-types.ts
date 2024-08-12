@@ -35,7 +35,7 @@ export type FormDispatchStateRelayDetail = FormState;
 // Fieldset
 // ========
 
-export const FieldsetToggleActiveMsg = "fieldset:toggle-active";
+export const FieldsetToggleActiveMsg = "fieldset::toggle-active";
 export const FieldsetResetErrorsMsg = "fieldset::reset:errors";
 export const FieldsetBindMsg = "fieldset::bind";
 export const FieldsetSubmitMsg = "fieldset::submit";

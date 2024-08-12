@@ -36,7 +36,7 @@
   import { styles } from "../../common/utils";
 
   export let as: TextElement | HeadingElement = "div";
-  export let size: Size
+  export let size: Size = "body-m";
   export let maxWidth: string | "none" = "65ch";
 
   export let mt: Spacing = null;
