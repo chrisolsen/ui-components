@@ -69,7 +69,7 @@
 
   function addRelayListener() {
     receive(_formEl, (type, data) => {
-      console.log(`  RECEIVE(Form:${type}):`, type, data);
+      console.log(`  RECEIVE(Form => ${type}):`, type, data);
       switch (type) {
         case FieldsetBindMsg:
           onFieldsetBind(data as FieldsetBindRelayDetail);
@@ -119,7 +119,6 @@
     if (!lastPage && !_firstElement) {
       _firstElement = detail.id;
       sendToggleActiveStateMsg(detail.id);
-
       if (_state.history.length === 0) {
         _state.history.push(detail.id);
         saveState(_state);

@@ -9,6 +9,7 @@
   import { receive, relay, typeValidator } from "../../common/utils";
   import {
     FieldsetErrorRelayDetail,
+    FieldsetResetErrorsMsg,
     FieldsetSetErrorMsg,
     FormFieldMountMsg,
     FormFieldMountRelayDetail,
@@ -61,6 +62,9 @@
           break;
         case FieldsetSetErrorMsg:
           onSetError(data as FieldsetErrorRelayDetail);
+          break;
+        case FieldsetResetErrorsMsg:
+          error = "";
           break;
       }
     });

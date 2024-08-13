@@ -6,7 +6,7 @@
     "serve:web": "nx run web:serve:development",
     "serve:react": "nx run react:serve:development",
     "serve:angular": "nx run angular:serve:development",
-    "svelte:watch": "vite build --watch libs/web-components",
+    "watch": "vite build --watch libs/web-components",
     "build": "nx affected --base=alpha -t build --exclude=angular --exclude=react --exclude=web",
     "build:vscode-doc": "node libs/web-components/custom-element-manifest-analyze.js",
     "test": "vitest",

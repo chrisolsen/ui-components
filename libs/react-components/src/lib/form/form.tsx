@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useRef } from "react";
 import { Margins } from "../../common/styling";
+import { relay } from "../../common/validators";
 
 // TODO: move these types into the common lib for the upcoming major release
 
@@ -30,50 +31,32 @@ interface GoAFormProps extends Margins {
   children: ReactNode;
   name: string;
   storage: "none" | "local" | "session";
-  onMount: (el: HTMLElement) => void;
-}
-
-// FIXME: the issue is that we need to relay the message to the Form element and the element 
-// available in the `e` is the fieldset
-export function continueTo(el: HTMLElement | undefined, next: string) {
-  if (!el) {
-    console.error("external::continue el is undefined")
-  }
-  console.log("form el", el)
-  relay<{next: string}>(el, "external::continue", {
-    next
-  })
-}
-
-export function relay<T>(
-  el: HTMLElement | Element | null | undefined,
-  eventName: string,
-  data: T,
-  opts?: { bubbles?: boolean; },
-) {  
-  if (!el) {
-    console.error("dispatch element is null");
-    return;
-  }
-  el.dispatchEvent(
-    new CustomEvent<{action: string, data: T}>("msg", {
-      composed: true,
-      bubbles: opts?.bubbles,
-      detail: {
-        action: eventName,
-        data
-      },
-    }),
-  );
+  onMount: (fn: (next: string) => void) => void;
 }
 
 export function GoASimpleForm(props: GoAFormProps) {
   const el = useRef<HTMLElement>();
 
   useEffect(() => {
+    const _continueTo = (el: HTMLElement | undefined, next: string) => {
+      console.log("_continueTo being called")
+      if (!el) {
+        console.error("external::continue el is undefined")
+      }
+      console.log("relaying to", el)
+      relay<{next: string}>(el, "external::continue", {
+        next
+      })
+    }
+
     if (el.current) {
       const form = el.current.shadowRoot?.querySelector("form");
-      form && props.onMount(form);
+      if (!form) return;
+
+      const onContinue = (next: string) => {
+        _continueTo(form, next)  
+      }
+      props.onMount(onContinue);
     }
   }, [el.current])
   

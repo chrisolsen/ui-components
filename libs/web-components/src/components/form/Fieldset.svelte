@@ -5,13 +5,14 @@
   import { calculateMargin, Spacing } from "../../common/styling";
   import { dispatch, receive, relay, styles } from "../../common/utils";
   import {
-  ExternalContinueRelayDetail,
+    ExternalContinueRelayDetail,
     ExternalErrorRelayDetail,
     ExternalSetErrorMsg,
     FieldsetBindMsg,
     FieldsetBindRelayDetail,
     FieldsetChangeMsg,
     FieldsetChangeRelayDetail,
+    FieldsetContinueMsg,
     FieldsetErrorRelayDetail,
     FieldsetMountFormItemMsg,
     FieldsetMountFormRelayDetail,
@@ -20,6 +21,7 @@
     FieldsetSubmitMsg,
     FieldsetToggleActiveMsg,
     FieldsetToggleActiveRelayDetail,
+    FieldsetValidationRelayDetail,
     FormDispatchStateMsg,
     FormDispatchStateRelayDetail,
     FormFieldMountMsg,
@@ -71,7 +73,7 @@
 
   function bindChannel() {
     receive(_rootEl, (action, data) => {
-      console.log(`  RECEIVE(Fieldset:${action}):`, data);
+      console.log(`  RECEIVE(Fieldset => ${action}):`, data);
       switch (action) {
         case FormSetFieldsetMsg:
           onSetFieldset(data as FormSetFieldsetRelayDetail);
@@ -94,9 +96,6 @@
         case ExternalSetErrorMsg:
           onError(data as ExternalErrorRelayDetail);
           break;
-        // case ExternalContinueMsg:
-        //   onContinue(data as ExternalContinueRelayDetail);
-        //   break;
       }
     });
   }
@@ -104,13 +103,6 @@
   // *****************
   // Dispatch handlers
   // *****************
-
-  // This function is only here due to React not having an element ref to the Form component,
-  // and being unable to dispatch a message directly to the Form.
-  // BUT, this function will result in a relay/receive loop
-  function onContinue(detail: ExternalContinueRelayDetail) {
-    relay(_rootEl, )  
-  }
 
   function onFormDispatch(detail: FormDispatchStateRelayDetail) {
     _editting = detail.editting === id;
@@ -138,6 +130,9 @@
 
     // reset children
     for (const [_, el] of Object.entries(_formFields)) {
+      relay(el, FieldsetResetErrorsMsg, null);
+    }
+    for (const [_, {el}] of Object.entries(_formItems)) {
       relay(el, FieldsetResetErrorsMsg, null);
     }
   }
@@ -169,7 +164,7 @@
   function onError(detail: ExternalErrorRelayDetail) {
     _errors[detail.name] = detail.msg;
 
-    // dispatch error down to form items and fields
+    // dispatch error down to fields
     relay<FieldsetErrorRelayDetail>(
       _formFields[detail.name],
       FieldsetSetErrorMsg,
@@ -177,6 +172,8 @@
         error: detail.msg,
       },
     );
+
+    // dispatch error down to form items
     relay<FieldsetErrorRelayDetail>(
       _formItems[detail.name].el,
       FieldsetSetErrorMsg,
@@ -191,16 +188,16 @@
   // **************
 
   // Dispatch _continue event to app's level allowing custom validation to be performed
-  function handleClick() {
-    dispatch(
+  function onSaveAndContinue() {
+    dispatch<FieldsetValidationRelayDetail>(
       _rootEl,
-      "_continue",
+      FieldsetContinueMsg,
       { el: _rootEl, state: _fieldState },
       { bubbles: true },
     );
   }
 
-  function handleSubmit() {
+  function onSubmit() {
     relay(_rootEl, FieldsetSubmitMsg, {}, { bubbles: true });
   }
 
@@ -236,6 +233,11 @@
       timeout: 10,
     });
   }
+
+  function jumpToFormItem(e: Event, id: string) {
+    _formFields[id].focus();
+    e.preventDefault();
+  }
 </script>
 
 <section bind:this={_rootEl}>
@@ -246,11 +248,9 @@
     )}
   >
     {#if !_firstElement && !_editting && !last}
-      <button on:click={handleBack}>
-        <goa-link type="tertiary" leadingicon="chevron-back" mb="2xl">
-          Back
-        </goa-link>
-      </button>
+      <goa-link-button leadingicon="chevron-back" mb="2xl" on:_click={handleBack}>
+        Back
+      </goa-link-button>
     {:else if !last}
       <div style="visibility: hidden">&nbsp;</div>
       <goa-spacer vspacing="2xl" />
@@ -261,9 +261,15 @@
         type="emergency"
         heading="Please correct the following errors on this page:"
       >
-        <ul>
+        <ul class="errors">
           {#each Object.keys(_errors) as key}
-            <li>{_errors[key]}</li>
+            <li>
+              <a
+                class="error"
+                href={`#${key}`}
+                on:click={(e) => jumpToFormItem(e, key)}>{_errors[key]}</a
+              >
+            </li>
           {/each}
         </ul>
       </goa-callout>
@@ -277,13 +283,13 @@
 
     {#if last}
       <goa-block mt="xl">
-        <goa-button on:_click={handleSubmit} type="primary">
+        <goa-button on:_click={onSubmit} type="primary">
           {buttonText || "Confirm"}
         </goa-button>
       </goa-block>
     {:else}
       <goa-block mt="xl">
-        <goa-button on:_click={handleClick} type="primary">
+        <goa-button on:_click={onSaveAndContinue} type="primary">
           {buttonText || "Save and continue"}
         </goa-button>
       </goa-block>
@@ -301,5 +307,11 @@
     background: transparent;
     padding: 0;
     border: none;
+  }
+
+  .errors li::marker,
+  a.error,
+  a.error:visited {
+    color: var(--goa-color-emergency-dark);
   }
 </style>

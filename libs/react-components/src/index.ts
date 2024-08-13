@@ -27,6 +27,7 @@ export * from "./lib/footer/footer";
 export * from "./lib/footer-meta-section/footer-meta-section";
 export * from "./lib/footer-nav-section/footer-nav-section";
 export * from "./lib/form/form";
+export * from "./lib/form/form-summary";
 export * from "./lib/form-item/form-item";
 export * from "./lib/form-step/form-step";
 export * from "./lib/form-stepper/form-stepper";

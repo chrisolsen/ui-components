@@ -26,31 +26,36 @@ interface GoAFieldsetProps extends Margins {
   heading: string;
   buttonText?: string;
   errors?: Record<string, string>;
-  onContinue?: (e: Event) => void
+  onContinue?: (el: HTMLElement, state: Record<string, string>) => boolean | void | undefined;
   children: ReactNode;
 }
 
 
 export function GoAFieldset({
-  heading, 
-  buttonText, 
-  id, 
-  onContinue, 
-  children, 
-  mt, 
-  mr, 
-  mb, 
-  ml, 
+  heading,
+  buttonText,
+  id,
+  onContinue,
+  children,
+  mt,
+  mr,
+  mb,
+  ml,
 }: GoAFieldsetProps) {
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    const _continue = (e: Event) => {
+      const { el, state } = (e as CustomEvent).detail;
+      return onContinue?.(el, state);
+    }
+
     if (onContinue) {
-      ref.current?.addEventListener("_continue", onContinue)
+      ref.current?.addEventListener("fieldset::continue", _continue)
     }
     return () => {
       if (onContinue) {
-        ref.current?.removeEventListener("_continue", onContinue)
+        ref.current?.removeEventListener("fieldset::continue", _continue)
       }
     }
   }, [ref.current, onContinue])

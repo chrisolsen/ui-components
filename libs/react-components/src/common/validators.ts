@@ -29,6 +29,40 @@ export class FormValidator {
   }
 }
 
+export function relay<T>(
+  el: HTMLElement | Element | null | undefined,
+  eventName: string,
+  data: T,
+  opts?: { bubbles?: boolean },
+) {
+  if (!el) {
+    console.error("dispatch element is null");
+    return;
+  }
+  el.dispatchEvent(
+    new CustomEvent<{ action: string; data: T }>("msg", {
+      composed: true,
+      bubbles: opts?.bubbles,
+      detail: {
+        action: eventName,
+        data,
+      },
+    }),
+  );
+}
+
+export type RelayedError = {
+  name: string;
+  msg: string;
+};
+
+export function relayErrors(el: HTMLElement, errors: Record<string, string>): boolean {
+  for (const [name, msg] of Object.entries(errors)) {
+    relay<RelayedError>(el, "external::set:error", { name, msg });
+  }
+  return Object.keys(errors).length === 0;
+}
+
 // **********
 // Validators
 // **********
