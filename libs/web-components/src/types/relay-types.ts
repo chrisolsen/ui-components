@@ -45,7 +45,7 @@ export const FieldsetChangeMsg = "fieldset::change";
 // Sent to form containing the name and el of the bound child, along with the fieldset id
 export const FieldsetMountFormItemMsg = "fieldset::bind:form-item";
 // Sent when the continue button is clicked
-export const FieldsetContinueMsg = "fieldset::continue";
+export const FieldsetContinueMsg = "_continue";
 
 export type FieldsetBindRelayDetail = {
   id: string;

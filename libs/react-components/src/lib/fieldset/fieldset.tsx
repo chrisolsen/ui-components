@@ -51,11 +51,11 @@ export function GoAFieldset({
     }
 
     if (onContinue) {
-      ref.current?.addEventListener("fieldset::continue", _continue)
+      ref.current?.addEventListener("_continue", _continue)
     }
     return () => {
       if (onContinue) {
-        ref.current?.removeEventListener("fieldset::continue", _continue)
+        ref.current?.removeEventListener("_continue", _continue)
       }
     }
   }, [ref.current, onContinue])

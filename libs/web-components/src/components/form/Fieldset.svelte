@@ -5,7 +5,6 @@
   import { calculateMargin, Spacing } from "../../common/styling";
   import { dispatch, receive, relay, styles } from "../../common/utils";
   import {
-    ExternalContinueRelayDetail,
     ExternalErrorRelayDetail,
     ExternalSetErrorMsg,
     FieldsetBindMsg,
