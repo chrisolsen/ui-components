@@ -32,6 +32,10 @@
     FormSetFieldsetRelayDetail,
   } from "../../types/relay-types";
 
+  // ======
+  // Public
+  // ======
+  
   export let id: string = "";
   export let heading: string = "";
   export let buttonText: string = "";
@@ -39,10 +43,10 @@
   export let mr: Spacing = null;
   export let mb: Spacing = null;
   export let ml: Spacing = null;
+  export let first: boolean = false;
   export let last: boolean = false;
 
   let _rootEl: HTMLElement;
-  let _firstElement: boolean;
   let _active: boolean = false;
   let _editting: boolean = false;
   let _detail: FieldsetBindRelayDetail;
@@ -137,7 +141,6 @@
   }
 
   function onToggleActiveState(detail: FieldsetToggleActiveRelayDetail) {
-    _firstElement = detail.first;
     _active = detail.active;
   }
 
@@ -246,11 +249,11 @@
       `display: ${_active ? "block" : "none"}`,
     )}
   >
-    {#if !_firstElement && !_editting && !last}
+    {#if !first && !_editting && !last}
       <goa-link-button leadingicon="chevron-back" mb="2xl" on:_click={handleBack}>
         Back
       </goa-link-button>
-    {:else if !last}
+    {:else if !last && !first}
       <div style="visibility: hidden">&nbsp;</div>
       <goa-spacer vspacing="2xl" />
     {/if}
@@ -300,12 +303,6 @@
   fieldset {
     border: none;
     padding: 0;
-  }
-
-  button {
-    background: transparent;
-    padding: 0;
-    border: none;
   }
 
   .errors li::marker,

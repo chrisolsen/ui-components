@@ -31,6 +31,8 @@ export { default as FooterMetaSection } from "./components/footer-meta-section/F
 export { default as FooterNavSection } from "./components/footer-nav-section/FooterNavSection.svelte";
 export { default as Fieldset } from "./components/form/Fieldset.svelte";
 export { default as Form } from "./components/form/Form.svelte";
+export { default as Task } from "./components/form/Task.svelte";
+export { default as TaskList } from "./components/form/TaskList.svelte";
 export { default as FormItem } from "./components/form-item/FormItem.svelte";
 export { default as FormStep } from "./components/form-step/FormStep.svelte";
 export { default as FormStepper } from "./components/form-stepper/FormStepper.svelte";

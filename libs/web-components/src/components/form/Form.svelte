@@ -49,6 +49,7 @@
   let _formFields: Record<string, Record<string, HTMLElement>> = {};
   let _formSummary: HTMLElement;
   let _firstElement: string;
+  let _formItemBindingTimeoutId: any;
   let _state: FormState = {
     form: {},
     history: [],
@@ -115,18 +116,25 @@
   function onFieldsetBind(detail: FieldsetBindRelayDetail) {
     _fieldsets[detail.id] = detail;
 
-    // no previous history and first child event (first child in list)
-    if (!lastPage && !_firstElement) {
-      _firstElement = detail.id;
-      sendToggleActiveStateMsg(detail.id);
-      if (_state.history.length === 0) {
-        _state.history.push(detail.id);
-        saveState(_state);
-      }
-    } else if (lastPage === detail.id) {
-      _firstElement = detail.id;
-      sendToggleActiveStateMsg(detail.id);
+    // run the final binding once    
+    if (_formItemBindingTimeoutId) {
+      clearTimeout(_formItemBindingTimeoutId);
     }
+    _formItemBindingTimeoutId = setTimeout(() => {
+      if (lastPage) {
+        // last page has priority
+        const item = _fieldsets[lastPage];
+        _firstElement = item.id;
+        sendToggleActiveStateMsg(item.id);
+      } else {
+        // mark the first fieldset as active
+        const [id] = Object.entries(_fieldsets)[0];
+        _firstElement = id;
+        _state.history.push(id);
+        saveState(_state);
+        sendToggleActiveStateMsg(id);
+      }          
+    }, 100)
   }
 
   // listen to `_change` events by input elemented nested within fieldsets and update the state
@@ -222,7 +230,7 @@
         _fieldsets[key].el,
         FieldsetToggleActiveMsg,
         {
-          first: key === keys[0],
+          first: key === _firstElement,
           active: key === page,
         },
       );
