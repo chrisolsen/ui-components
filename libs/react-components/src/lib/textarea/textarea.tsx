@@ -43,7 +43,7 @@ export interface GoATextAreaProps extends Margins {
   countBy?: CountBy;
   maxCount?: number;
 
-  onChange: (name: string, value: string) => void;
+  onChange?: (name: string, value: string) => void;
   onKeyPress?: (name: string, value: string, key: string) => void;
 }
 

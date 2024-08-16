@@ -56,6 +56,7 @@
     bindElement();
 
     receive(_rootEl, (action, data) => {
+      console.log(`  RECEIVE(FormItem => ${action}):`, data);
       switch (action) {
         case FormFieldMountMsg:
           onInputMount(data as FormFieldMountRelayDetail);
@@ -64,6 +65,7 @@
           onSetError(data as FieldsetErrorRelayDetail);
           break;
         case FieldsetResetErrorsMsg:
+          console.log('in form item resetting errors -> ', error)
           error = "";
           break;
       }
@@ -71,6 +73,7 @@
   });
 
   function onSetError(d: FieldsetErrorRelayDetail) {
+    console.log("form item onSetError", d)
     error = (d as Record<string, string>)["error"];
   }
 
@@ -120,7 +123,7 @@
     <div class="error-msg">
       <goa-icon type="warning" size="small" theme="filled" mt="2xs" />
       <slot name="error">
-        {error}
+        {error} here
       </slot>
     </div>
   {/if}

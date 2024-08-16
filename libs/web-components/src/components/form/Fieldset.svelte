@@ -1,7 +1,7 @@
 <svelte:options customElement="goa-fieldset" />
 
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import { calculateMargin, Spacing } from "../../common/styling";
   import { dispatch, receive, relay, styles } from "../../common/utils";
   import {
@@ -63,6 +63,7 @@
   }
 
   onMount(() => {
+    console.log("Fieldset mount", id)
     _detail = {
       id,
       heading,
@@ -109,6 +110,7 @@
 
   function onFormDispatch(detail: FormDispatchStateRelayDetail) {
     _editting = detail.editting === id;
+    console.log("editting", id, detail, _editting)
   }
 
   // Set the child form elements values
@@ -128,6 +130,8 @@
   }
 
   function onErrorReset() {
+    // FIXME: these values are occasionally empty
+    console.log("in fieldset resetting errors", _formFields, _formItems)
     // fieldset error summar
     _errors = {};
 
@@ -140,13 +144,16 @@
     }
   }
 
-  function onToggleActiveState(detail: FieldsetToggleActiveRelayDetail) {
+  async function onToggleActiveState(detail: FieldsetToggleActiveRelayDetail) {
+    console.log("active", detail.active)
     _active = detail.active;
+    await tick();
   }
 
   function onFormItemMount(detail: FormItemMountRelayDetail) {
     const { id, label, el } = detail;
     _formItems[id] = { label, el };
+    console.log("Mounting formItems", _formItems)
   }
 
   // Collect list of child form item (input, dropdown, etc) elements
@@ -191,6 +198,7 @@
 
   // Dispatch _continue event to app's level allowing custom validation to be performed
   function onSaveAndContinue() {
+    console.log("onSaveAndContinue", FieldsetContinueMsg, _rootEl, _fieldState)
     dispatch<FieldsetValidationRelayDetail>(
       _rootEl,
       FieldsetContinueMsg,
@@ -253,9 +261,6 @@
       <goa-link-button leadingicon="chevron-back" mb="2xl" on:_click={handleBack}>
         Back
       </goa-link-button>
-    {:else if !last && !first}
-      <div style="visibility: hidden">&nbsp;</div>
-      <goa-spacer vspacing="2xl" />
     {/if}
 
     {#if Object.keys(_errors).length}
@@ -283,7 +288,7 @@
 
     <slot />
 
-    {#if last}
+    {#if false}
       <goa-block mt="xl">
         <goa-button on:_click={onSubmit} type="primary">
           {buttonText || "Confirm"}

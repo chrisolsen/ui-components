@@ -1,0 +1,6 @@
+/* Your styles goes here. */
+@import "../../../../dist/libs/web-components/index.css";
+.customized-description-title {
+  font-size: 14px;
+  font-style: italic;
+}

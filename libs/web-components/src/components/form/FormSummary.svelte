@@ -69,7 +69,7 @@
   {#if _state}
     {#each _state.history as page}
       {#if _state.form[page]}
-        <goa-container>
+        <goa-container maxwidth="800px">
           <div class="summary">
             <div class="page">{formatName(page)}</div>
             <div class="action">

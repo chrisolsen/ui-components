@@ -6,9 +6,10 @@ import { Margins } from "../../common/styling";
 interface WCProps extends Margins {
   ref?: React.MutableRefObject<HTMLElement | null>;
   id: string;
-  heading: string;
+  heading?: string;
   buttontext?: string;
   last?: boolean | null;
+  first?: boolean | null;
 }
 
 declare global {
@@ -23,7 +24,9 @@ declare global {
 
 interface GoAFieldsetProps extends Margins {
   id: string;
-  heading: string;
+  first?: boolean;
+  last?: boolean;
+  heading?: string;
   buttonText?: string;
   errors?: Record<string, string>;
   onContinue?: (el: HTMLElement, state: Record<string, string>) => boolean | void | undefined;
@@ -41,6 +44,8 @@ export function GoAFieldset({
   mr,
   mb,
   ml,
+  first,
+  last,
 }: GoAFieldsetProps) {
   const ref = useRef<HTMLElement>(null);
 
@@ -64,13 +69,14 @@ export function GoAFieldset({
     <goa-fieldset
       ref={ref}
       id={id}
+      first={first}
+      last={last}
       heading={heading}
       buttontext={buttonText}
       mt={mt}
       mr={mr}
       mb={mb}
       ml={ml}
-      last={!!onContinue ? null : true}
     >
       {children}
     </goa-fieldset>

@@ -10,7 +10,10 @@ export class FormValidator {
     this.validators[fieldName] = validators;
   }
 
-  validate(data: Record<string, string>): Record<string, string> {
+  validate(data: Record<string, string>): {
+    errors: Record<string, string>;
+    valid: boolean;
+  } {
     const errors: Record<string, string> = {};
 
     Object.entries(this.validators).forEach(([name, validators]) => {
@@ -25,7 +28,7 @@ export class FormValidator {
       }
     });
 
-    return errors;
+    return { errors, valid: Object.keys(errors).length === 0 };
   }
 }
 
@@ -56,11 +59,10 @@ export type RelayedError = {
   msg: string;
 };
 
-export function relayErrors(el: HTMLElement, errors: Record<string, string>): boolean {
+export function relayErrors(el: HTMLElement, errors: Record<string, string>) {
   for (const [name, msg] of Object.entries(errors)) {
     relay<RelayedError>(el, "external::set:error", { name, msg });
   }
-  return Object.keys(errors).length === 0;
 }
 
 // **********

@@ -122,6 +122,7 @@
     }
     _formItemBindingTimeoutId = setTimeout(() => {
       if (lastPage) {
+        console.log("onFieldsetBind", _fieldsets, lastPage)
         // last page has priority
         const item = _fieldsets[lastPage];
         _firstElement = item.id;
@@ -230,7 +231,7 @@
         _fieldsets[key].el,
         FieldsetToggleActiveMsg,
         {
-          first: key === _firstElement,
+          first: false, //key === _firstElement,
           active: key === page,
         },
       );
