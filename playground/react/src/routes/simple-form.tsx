@@ -21,7 +21,6 @@ const page2Validation = new FormValidator({
 function validatePage1(el: HTMLElement, state: Record<string, string>): boolean {
   const { errors, valid } = page1Validation.validate(state);
   relayErrors(el, errors);
-  console.log("continuing", valid, errors)
   return valid;
 }
 
@@ -47,14 +46,12 @@ export function SimpleForm() {
   }
 
   function onStateChange(id: string, state: Record<string, Record<string, {label: string, value: string}>>) {
-    console.log("state change", id, state)
     const data = state[id];
     switch (id) {
       case "income": {
         const salary = parseInt(data["salary"].value);
         const colors = salary > 1e5 ? ["brown", "red"] : ["green", "blue"];
         setColors(colors)
-        console.log("setting color", salary, colors)
         break;
       }
     }
@@ -99,12 +96,11 @@ export function SimpleForm() {
           onContinue={(_, state) => continueTo(state["favcolor"] !== "red" ? "music" : "birthdate")}
         >
           <GoAFormItem id="favcolor" label="Favourite color" mb="l">
-            {colors}
-            {JSON.stringify(colors)}
             <GoADropdown name="favcolor">
               {colors.map(color =>              
                 <GoADropdownItem key={color} value={color} label={color} />
               )}
+              <span />
             </GoADropdown>
           </GoAFormItem>
         </GoAFieldset>

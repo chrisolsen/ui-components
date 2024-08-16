@@ -52,7 +52,6 @@ export default function Dropdown() {
   ])
 
   function onChange(name: string, value: string | string[]) {
-    console.log(name, value)
     setSelectedColor(value as string);
   }
 
