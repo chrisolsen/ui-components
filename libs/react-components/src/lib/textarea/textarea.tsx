@@ -76,7 +76,7 @@ export function GoATextarea({
     const current = el.current;
     const listener: EventListener = (e: unknown) => {
       const { name, value } = (e as CustomEvent).detail;
-      onChange(name, value);
+      onChange?.(name, value);
     };
 
     current.addEventListener("_change", listener);

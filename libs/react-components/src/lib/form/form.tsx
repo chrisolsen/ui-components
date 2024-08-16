@@ -12,7 +12,7 @@ export type FormState = {
 };
 
 interface WCProps extends Margins {
-  ref?: React.MutableRefObject<HTMLElement | undefined>; 
+  ref?: React.MutableRefObject<HTMLElement | undefined>;
   name: string;
   storage: "none" | "local" | "session";
 }
@@ -32,19 +32,19 @@ interface GoAFormProps extends Margins {
   name: string;
   storage: "none" | "local" | "session";
   onMount: (fn: (next: string) => void) => void;
+  onStateChange?: (id: string, state: Record<string, Record<string, {label: string, value: string}>>) => void;
 }
 
-export function GoASimpleForm(props: GoAFormProps) {
+export function GoASimpleForm({name, storage, onMount, onStateChange, mt, mr, mb, ml, children}: GoAFormProps) {
   const el = useRef<HTMLElement>();
 
   useEffect(() => {
     const _continueTo = (el: HTMLElement | undefined, next: string) => {
-      console.log("_continueTo being called")
       if (!el) {
         console.error("external::continue el is undefined")
+        return;
       }
-      console.log("relaying to", el)
-      relay<{next: string}>(el, "external::continue", {
+      relay<{ next: string }>(el, "external::continue", {
         next
       })
     }
@@ -54,22 +54,38 @@ export function GoASimpleForm(props: GoAFormProps) {
       if (!form) return;
 
       const onContinue = (next: string) => {
-        _continueTo(form, next)  
+        _continueTo(form, next)
       }
-      props.onMount(onContinue);
+      onMount(onContinue);
     }
   }, [el.current])
-  
+
+  useEffect(() => {
+    const _stateChange = (e: Event) => {
+      const { id, state }= (e as CustomEvent).detail;
+      return onStateChange?.(id, state);
+    }
+
+    if (onStateChange) {
+      el.current?.addEventListener("_stateChange", _stateChange)
+    }
+    return () => {
+      if (onStateChange) {
+        el.current?.removeEventListener("_stateChange", _stateChange)
+      }
+    }
+  }, [el.current, onStateChange])
+
   return (
     <goa-simple-form ref={el}
-      name={props.name}
-      storage={props.storage}
-      mt={props.mt}
-      mr={props.mr}
-      mb={props.mb}
-      ml={props.ml}
+      name={name}
+      storage={storage}
+      mt={mt}
+      mr={mr}
+      mb={mb}
+      ml={ml}
     >
-      {props.children}
+      {children}
     </goa-simple-form>
   );
 }

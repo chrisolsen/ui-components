@@ -1,7 +1,7 @@
 <svelte:options customElement="goa-fieldset" />
 
 <script lang="ts">
-  import { onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import { calculateMargin, Spacing } from "../../common/styling";
   import { dispatch, receive, relay, styles } from "../../common/utils";
   import {
@@ -63,7 +63,6 @@
   }
 
   onMount(() => {
-    console.log("Fieldset mount", id)
     _detail = {
       id,
       heading,
@@ -77,11 +76,11 @@
 
   function bindChannel() {
     receive(_rootEl, (action, data) => {
-      console.log(`  RECEIVE(Fieldset => ${action}):`, data);
+      // console.log(`  RECEIVE(Fieldset => ${action}):`, data);
       switch (action) {
-        case FormSetFieldsetMsg:
-          onSetFieldset(data as FormSetFieldsetRelayDetail);
-          break;
+        // case FormSetFieldsetMsg:
+        //   onSetFieldset(data as FormSetFieldsetRelayDetail);
+        //   break;
         case FormResetErrorsMsg:
           onErrorReset();
           break;
@@ -109,29 +108,29 @@
   // *****************
 
   function onFormDispatch(detail: FormDispatchStateRelayDetail) {
+    // allow customization of form if user has jumped back to a question (editting mode)
     _editting = detail.editting === id;
-    console.log("editting", id, detail, _editting)
   }
 
   // Set the child form elements values
-  function onSetFieldset(detail: FormSetFieldsetRelayDetail) {
-    const { name, value: values } = detail;
+  // function onSetFieldset(detail: FormSetFieldsetRelayDetail) {
+  //   const { name, value: values } = detail;
 
-    if (name !== id) return;
-    if (!values) return;
+  //   if (name !== id) return;
+  //   if (!values) return;
 
-    setTimeout(() => {
-      for (const [propName, value] of Object.entries(values)) {
-        if (Object.keys(_formFields).includes(propName)) {
-          _fieldState[name] = value;
-        }
-      }
-    }, 100);
-  }
+  //   setTimeout(() => {
+  //     for (const [propName, value] of Object.entries(values)) {
+  //       if (Object.keys(_formFields).includes(propName)) {
+  //         _fieldState[name] = value;
+  //       }
+  //     }
+  //   }, 100);
+  // }
 
   function onErrorReset() {
     // FIXME: these values are occasionally empty
-    console.log("in fieldset resetting errors", _formFields, _formItems)
+    // console.log("in fieldset resetting errors", _formFields, _formItems)
     // fieldset error summar
     _errors = {};
 
@@ -144,16 +143,13 @@
     }
   }
 
-  async function onToggleActiveState(detail: FieldsetToggleActiveRelayDetail) {
-    console.log("active", detail.active)
+  function onToggleActiveState(detail: FieldsetToggleActiveRelayDetail) {
     _active = detail.active;
-    await tick();
   }
 
   function onFormItemMount(detail: FormItemMountRelayDetail) {
     const { id, label, el } = detail;
     _formItems[id] = { label, el };
-    console.log("Mounting formItems", _formItems)
   }
 
   // Collect list of child form item (input, dropdown, etc) elements
@@ -198,7 +194,6 @@
 
   // Dispatch _continue event to app's level allowing custom validation to be performed
   function onSaveAndContinue() {
-    console.log("onSaveAndContinue", FieldsetContinueMsg, _rootEl, _fieldState)
     dispatch<FieldsetValidationRelayDetail>(
       _rootEl,
       FieldsetContinueMsg,

@@ -128,6 +128,7 @@
 
   function getChildren() {
     _rootEl?.addEventListener("dropdown-item:mounted", (e: Event) => {
+      console.log("dropdownitem mount listener", e)
       const ce = e as CustomEvent<Option>;
       _options = [..._options, ce.detail];
 

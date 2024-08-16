@@ -61,16 +61,19 @@
 
   onMount(() => {
     restoreState();
-
     addWindowPopStateListener();
     addRelayListener();
+
+    for (const page of _state.history || []) {
+      dispatchFormState(page);
+    }
 
     setTimeout(bindChildren, 100);
   });
 
   function addRelayListener() {
     receive(_formEl, (type, data) => {
-      console.log(`  RECEIVE(Form => ${type}):`, type, data);
+      // console.log(`  RECEIVE(Form => ${type}):`, type, data);
       switch (type) {
         case FieldsetBindMsg:
           onFieldsetBind(data as FieldsetBindRelayDetail);
@@ -122,7 +125,6 @@
     }
     _formItemBindingTimeoutId = setTimeout(() => {
       if (lastPage) {
-        console.log("onFieldsetBind", _fieldsets, lastPage)
         // last page has priority
         const item = _fieldsets[lastPage];
         _firstElement = item.id;
@@ -157,6 +159,9 @@
     const page = _state.history[_state.history.length - 1];
     resetFieldsetErrors(page);
 
+    // dispatch state to app to allow dynamic binding, along with the page where a state change occured
+    dispatchFormState(page);
+
     // if no page is currently being editted just go to the next page
     if (!_state.editting) {
       _state.history.push(next);
@@ -184,6 +189,13 @@
 
     syncFormSummaryState();
     saveState(_state);
+  }
+
+  function dispatchFormState(page: string) {
+    dispatch(_formEl, "_stateChange", {
+      id: page,
+      state: _state.form,
+    }, { bubbles: true, timeout: 100});   
   }
 
   function syncFormSummaryState() {

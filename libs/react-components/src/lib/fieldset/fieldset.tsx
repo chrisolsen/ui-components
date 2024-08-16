@@ -33,7 +33,6 @@ interface GoAFieldsetProps extends Margins {
   children: ReactNode;
 }
 
-
 export function GoAFieldset({
   heading,
   buttonText,

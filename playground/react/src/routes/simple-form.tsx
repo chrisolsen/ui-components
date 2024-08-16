@@ -40,19 +40,39 @@ export function SimpleForm() {
   const { onMount, continueTo } = useSimpleForm();
   const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false);
 
+  const [colors, setColors] = useState<string[]>([]);
+
   function submitForm() {
     setShowConfirmationModal(false);
   }
 
+  function onStateChange(id: string, state: Record<string, Record<string, {label: string, value: string}>>) {
+    console.log("state change", id, state)
+    const data = state[id];
+    switch (id) {
+      case "income": {
+        const salary = parseInt(data["salary"].value);
+        const colors = salary > 1e5 ? ["brown", "red"] : ["green", "blue"];
+        setColors(colors)
+        console.log("setting color", salary, colors)
+        break;
+      }
+    }
+  }
+
   return (
     <>
-      <GoASimpleForm name="react-simple-form" storage="local" onMount={onMount}>
+      <GoASimpleForm 
+        name="react-simple-form" 
+        storage="local" 
+        onMount={onMount} 
+        onStateChange={onStateChange}>
 
         <GoAFieldset
           id="name"
           first
           heading="What is your name?"
-          onContinue={(el, state) => validatePage1(el, state) && continueTo("occupation")}
+          onContinue={(el, state) => validatePage1(el, state) && continueTo("income")}
         >
           <GoABlock direction="column" gap="l">
             <GoAFormItem id="firstname" label="First name">
@@ -65,12 +85,12 @@ export function SimpleForm() {
         </GoAFieldset>
 
         <GoAFieldset
-          id="occupation"
-          heading="What do you do for work?"
-          onContinue={(el, state) => validatePage2(el, state) && continueTo("color")}
+          id="income"
+          heading="What is your yearly salary?"
+          onContinue={() => continueTo("color")}
         >
-          <GoAFormItem id="occupation" label="Occupation">
-            <GoAInput id="occupation" name="occupation" />
+          <GoAFormItem id="salary" label="Salary">
+            <GoAInput id="salary" name="salary" />
           </GoAFormItem>
         </GoAFieldset>
 
@@ -79,10 +99,12 @@ export function SimpleForm() {
           onContinue={(_, state) => continueTo(state["favcolor"] !== "red" ? "music" : "birthdate")}
         >
           <GoAFormItem id="favcolor" label="Favourite color" mb="l">
+            {colors}
+            {JSON.stringify(colors)}
             <GoADropdown name="favcolor">
-              <GoADropdownItem value="red" label="Red" />
-              <GoADropdownItem value="green" label="Green" />
-              <GoADropdownItem value="blue" label="Blue" />
+              {colors.map(color =>              
+                <GoADropdownItem key={color} value={color} label={color} />
+              )}
             </GoADropdown>
           </GoAFormItem>
         </GoAFieldset>
