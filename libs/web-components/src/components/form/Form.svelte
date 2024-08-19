@@ -142,10 +142,10 @@
 
   // listen to `_change` events by input elemented nested within fieldsets and update the state
   function onFieldsetChange(detail: FieldsetChangeRelayDetail) {
-    const { id, name, label, value } = detail;
-    const old = _state.form[id] || {};
+    const { id, state } = detail;
+    // const old = _state.form[id] || {};
 
-    _state.form[id] = { ...old, [name]: { label, value } };
+    _state.form[id] = state;  // { ...old, [name]: { label, value } };
     _state.lastModified = new Date();
 
     saveState(_state);
@@ -292,22 +292,22 @@
   function bindChildren() {
     // restore state in fieldsets
     for (const [name, detail] of Object.entries(_fieldsets)) {
-      const fieldset = _state.form[name];
-      if (fieldset)
+      const value = _state.form[name];
+      if (value)
         relay<FormSetFieldsetRelayDetail>(detail.el, FormSetFieldsetMsg, {
           name,
-          value: fieldset["value"],
+          value,
         });
     }
 
     // restore state in form items
     for (const id of Object.keys(_formFields)) {
       for (const [name, el] of Object.entries(_formFields[id])) {
-        const data = _state.form[id]?.[name];
-        if (data) {
+        const value = _state.form[id]?.[name].value;
+        if (value) {
           relay<FormSetValueRelayDetail>(el, FormSetValueMsg, {
             name,
-            value: data["value"],
+            value,
           });
         }
       }

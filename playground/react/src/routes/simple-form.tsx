@@ -39,22 +39,8 @@ export function SimpleForm() {
   const { onMount, continueTo } = useSimpleForm();
   const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false);
 
-  const [colors, setColors] = useState<string[]>([]);
-
   function submitForm() {
     setShowConfirmationModal(false);
-  }
-
-  function onStateChange(id: string, state: Record<string, Record<string, {label: string, value: string}>>) {
-    const data = state[id];
-    switch (id) {
-      case "income": {
-        const salary = parseInt(data["salary"].value);
-        const colors = salary > 1e5 ? ["brown", "red"] : ["green", "blue"];
-        setColors(colors)
-        break;
-      }
-    }
   }
 
   return (
@@ -62,9 +48,8 @@ export function SimpleForm() {
       <GoASimpleForm 
         name="react-simple-form" 
         storage="local" 
-        onMount={onMount} 
-        onStateChange={onStateChange}>
-
+        onMount={onMount}
+      >
         <GoAFieldset
           id="name"
           first
@@ -97,10 +82,9 @@ export function SimpleForm() {
         >
           <GoAFormItem id="favcolor" label="Favourite color" mb="l">
             <GoADropdown name="favcolor">
-              {colors.map(color =>              
-                <GoADropdownItem key={color} value={color} label={color} />
-              )}
-              <span />
+              <GoADropdownItem key="red" value="red" label="Red" />
+              <GoADropdownItem key="blue" value="blue" label="Blue" />
+              <GoADropdownItem key="green" value="green" label="Green" />
             </GoADropdown>
           </GoAFormItem>
         </GoAFieldset>

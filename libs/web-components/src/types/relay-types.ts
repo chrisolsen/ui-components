@@ -1,5 +1,5 @@
 export type FormState = {
-  form: Record<string, Record<string, { label: string; value: string }>>;
+  form: Record<string, Record<string, FieldsetItemState>>;
   history: string[];
   editting: string;
   lastModified?: Date;
@@ -21,12 +21,12 @@ export type FormFieldMountRelayDetail = {
 
 export type FormSetFieldsetRelayDetail = {
   name: string;
-  value: Record<string, string>;
+  value: Record<string, FieldsetItemState>;
 };
 
 export type FormSetValueRelayDetail = {
   name: string;
-  value: string;
+  value: string | number | Date;
 };
 
 export type FormDispatchStateRelayDetail = FormState;
@@ -64,9 +64,7 @@ export type FieldsetToggleActiveRelayDetail = {
 
 export type FieldsetChangeRelayDetail = {
   id: string;
-  name: string;
-  value: string;
-  label: string;
+  state: Record<string, FieldsetItemState>;
 };
 
 export type FieldsetMountFormRelayDetail = {
@@ -75,9 +73,15 @@ export type FieldsetMountFormRelayDetail = {
   el: HTMLElement;
 };
 
+export type FieldsetItemState = {
+  name: string;
+  label: string;
+  value: string | number | Date;
+};
+
 export type FieldsetValidationRelayDetail = {
   el: HTMLElement;
-  state: Record<string, string>;
+  state: Record<string, FieldsetItemState>;
 };
 
 // ========

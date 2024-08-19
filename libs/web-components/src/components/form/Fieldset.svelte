@@ -13,6 +13,7 @@
     FieldsetChangeRelayDetail,
     FieldsetContinueMsg,
     FieldsetErrorRelayDetail,
+    FieldsetItemState,
     FieldsetMountFormItemMsg,
     FieldsetMountFormRelayDetail,
     FieldsetResetErrorsMsg,
@@ -29,13 +30,12 @@
     FormItemMountRelayDetail,
     FormResetErrorsMsg,
     FormSetFieldsetMsg,
-    FormSetFieldsetRelayDetail,
   } from "../../types/relay-types";
 
   // ======
   // Public
   // ======
-  
+
   export let id: string = "";
   export let heading: string = "";
   export let buttonText: string = "";
@@ -52,8 +52,14 @@
   let _detail: FieldsetBindRelayDetail;
 
   let _errors: Record<string, string> = {};
-  let _fieldState: Record<string, string> = {};
+
+  // allows for the state to be sent to _continue event allowing for custom validation
+  let _state: Record<string, FieldsetItemState> = {};
+
+  // reference to child form-item components to allow for relaying of error state
   let _formItems: Record<string, { label: string; el: HTMLElement }> = {};
+
+  // reference to child form input, dropdown, etc components to allow for relaying of error state
   let _formFields: Record<string, HTMLElement> = {};
 
   $: if (_active) {
@@ -78,9 +84,10 @@
     receive(_rootEl, (action, data) => {
       // console.log(`  RECEIVE(Fieldset => ${action}):`, data);
       switch (action) {
-        // case FormSetFieldsetMsg:
-        //   onSetFieldset(data as FormSetFieldsetRelayDetail);
-        //   break;
+        case FormSetFieldsetMsg:
+          // onSetFieldset(data as FormSetFieldsetRelayDetail);
+          // console.error("NO handler for", FormSetFieldsetMsg)
+          break;
         case FormResetErrorsMsg:
           onErrorReset();
           break;
@@ -122,7 +129,7 @@
   //   setTimeout(() => {
   //     for (const [propName, value] of Object.entries(values)) {
   //       if (Object.keys(_formFields).includes(propName)) {
-  //         _fieldState[name] = value;
+  //         _state[name] = value;
   //       }
   //     }
   //   }, 100);
@@ -130,15 +137,14 @@
 
   function onErrorReset() {
     // FIXME: these values are occasionally empty
-    // console.log("in fieldset resetting errors", _formFields, _formItems)
-    // fieldset error summar
+    console.log("in fieldset resetting errors", _formFields, _formItems);
     _errors = {};
 
     // reset children
     for (const [_, el] of Object.entries(_formFields)) {
       relay(el, FieldsetResetErrorsMsg, null);
     }
-    for (const [_, {el}] of Object.entries(_formItems)) {
+    for (const [_, { el }] of Object.entries(_formItems)) {
       relay(el, FieldsetResetErrorsMsg, null);
     }
   }
@@ -194,10 +200,20 @@
 
   // Dispatch _continue event to app's level allowing custom validation to be performed
   function onSaveAndContinue() {
+
+    // send new state to higher power
+    relay<FieldsetChangeRelayDetail>(
+      _rootEl,
+      FieldsetChangeMsg,
+      { id, state: _state },
+      { bubbles: true },
+    );
+  
+    // dispatch to on:_continue method allowing users to validate the data
     dispatch<FieldsetValidationRelayDetail>(
       _rootEl,
       FieldsetContinueMsg,
-      { el: _rootEl, state: _fieldState },
+      { el: _rootEl, state: _state },
       { bubbles: true },
     );
   }
@@ -215,23 +231,6 @@
   // Functions
   // *********
 
-  function addChildChangeListener() {
-    _rootEl.addEventListener("_change", (e: Event) => {
-      const { name, value } = (e as CustomEvent).detail;
-      _fieldState[name] = value;
-
-      const label = _formItems[name].label;
-
-      // redispatch message with value grouped under fieldset name
-      relay<FieldsetChangeRelayDetail>(
-        _rootEl,
-        FieldsetChangeMsg,
-        { id, name, value, label },
-        { bubbles: true },
-      );
-    });
-  }
-
   function dispatchBindMsg() {
     relay<FieldsetBindRelayDetail>(_rootEl, FieldsetBindMsg, _detail, {
       bubbles: true,
@@ -239,7 +238,24 @@
     });
   }
 
-  function jumpToFormItem(e: Event, id: string) {
+  function addChildChangeListener() {
+    _rootEl.addEventListener("_change", (e: Event) => {
+      const { name, value } = (e as CustomEvent).detail;
+      _state[name] = { name, value, label: _formItems[name].label};
+
+      // const label = _formItems[name].label;
+
+      // // redispatch message with value grouped under fieldset name
+      // relay<FieldsetChangeRelayDetail>(
+      //   _rootEl,
+      //   FieldsetChangeMsg,
+      //   { id, name, value, label },
+      //   { bubbles: true },
+      // );
+    });
+  }
+
+  function jumpToError(e: Event, id: string) {
     _formFields[id].focus();
     e.preventDefault();
   }
@@ -253,7 +269,11 @@
     )}
   >
     {#if !first && !_editting && !last}
-      <goa-link-button leadingicon="chevron-back" mb="2xl" on:_click={handleBack}>
+      <goa-link-button
+        leadingicon="chevron-back"
+        mb="2xl"
+        on:_click={handleBack}
+      >
         Back
       </goa-link-button>
     {/if}
@@ -269,8 +289,10 @@
               <a
                 class="error"
                 href={`#${key}`}
-                on:click={(e) => jumpToFormItem(e, key)}>{_errors[key]}</a
+                on:click={(e) => jumpToError(e, key)}
               >
+                {_errors[key]}
+              </a>
             </li>
           {/each}
         </ul>
