@@ -1,5 +1,8 @@
 export type FormState = {
-  form: Record<string, Record<string, FieldsetItemState>>;
+  form: Record<
+    string,
+    Record<string, FieldsetItemState> | Record<string, FieldsetItemState>[]
+  >;
   history: string[];
   editting: string;
   lastModified?: Date;
@@ -13,15 +16,21 @@ export const FormResetErrorsMsg = "form::reset:errors";
 export const FormSetFieldsetMsg = "form::set:fieldset";
 export const FormSetValueMsg = "form::set:value";
 export const FormDispatchStateMsg = "form::dispatch:state";
+export const FormToggleActiveMsg = "form::toggle-active";
 
 export type FormFieldMountRelayDetail = {
   name: string;
   el: HTMLElement;
 };
 
+export type FormToggleActiveRelayDetail = {
+  first: boolean;
+  active: boolean;
+};
+
 export type FormSetFieldsetRelayDetail = {
   name: string;
-  value: Record<string, FieldsetItemState>;
+  value: Record<string, FieldsetItemState> | Record<string, FieldsetItemState>[];
 };
 
 export type FormSetValueRelayDetail = {
@@ -55,11 +64,6 @@ export type FieldsetBindRelayDetail = {
 
 export type FieldsetErrorRelayDetail = {
   error: string;
-};
-
-export type FieldsetToggleActiveRelayDetail = {
-  first: boolean;
-  active: boolean;
 };
 
 export type FieldsetChangeRelayDetail = {
@@ -131,4 +135,16 @@ export type FormSummaryBindRelayDetail = {
 
 export type FormSummaryEditPageRelayDetail = {
   id: string;
+};
+
+// ========
+// FormLoop
+// ========
+
+export const FormLoopBreakMsg = "form-loop::break";
+export const FormLoopPauseHistory = "form-loop::pause-history";
+
+export type FormLoopChangeRelayDetail = {
+  id: string;
+  state: Record<string, FieldsetItemState>[];
 };

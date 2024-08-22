@@ -1,11 +1,11 @@
 import { useState } from "react";
 
-export type FormState = {
-  form: Record<string, string>;
-  errors: Record<string, string>;
-  history: string[];
-  lastModified?: Date;
-};
+// export type FormState = {
+//   form: Record<string, string>;
+//   errors: Record<string, string>;
+//   history: string[];
+//   lastModified?: Date;
+// };
 
 // useSimpleForm types
 type ContinueTo = (next: string) => void;

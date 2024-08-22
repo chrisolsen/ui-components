@@ -12,7 +12,7 @@
     FormSummaryEditPageRelayDetail,
   } from "../../types/relay-types";
   import { receive, relay } from "../../common/utils";
-  import { format } from "date-fns";
+  import { format, isDate } from "date-fns";
 
   let _rootEl: HTMLElement;
   let _state: FormState;
@@ -54,13 +54,11 @@
     return str[0].toUpperCase() + str.slice(1);
   }
 
-  function formatValue(value: string): string {
-    const date = Date.parse(value);
-    if (date) {
-      return format(date, "PPP");
-    } else {
-      return value;      
+  function formatValue(value: unknown): unknown {
+    if (isDate(value)) {
+      return format(value, "PPP");
     }
+    return value;      
   }
   
 </script>
@@ -76,12 +74,23 @@
               <goa-link leadingicon="pencil" on:click={(e) => changePage(e, page)}>Change</goa-link>
             </div>
             <div class="details">
-              {#each Object.entries(_state.form[page]) as [_, value] }
-                <dl>
-                  <dt>{value.label}</dt>
-                  <dd>{formatValue(value.value)}</dd>
-                </dl>
-              {/each}
+              {#if Array.isArray(_state.form[page])}
+                {#each _state.form[page] as item}
+                  {#each Object.entries(item) as [_, value] }
+                    <dl>
+                      <dt>{value.label}</dt>
+                      <dd>{formatValue(value.value)}</dd>
+                    </dl>
+                  {/each}
+                {/each}
+              {:else}
+                {#each Object.entries(_state.form[page]) as [_, value] }
+                  <dl>
+                    <dt>{value.label}</dt>
+                    <dd>{formatValue(value.value)}</dd>
+                  </dl>
+                {/each}
+              {/if}
             </div>
           </div>
         </goa-container>

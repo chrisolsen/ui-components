@@ -1,6 +1,14 @@
 <script lang="ts">
 
   let _formEl: HTMLElement;
+  let _children: Record<string, string>[] = [];
+
+  function collectChildren(e: Event) {
+    const detail = (e as CustomEvent<Record<string, string>>).detail;
+    _children = [..._children, detail];
+    console.log("collectChildren", detail)
+    e.stopPropagation();
+  }
 
   type Validator = (
     name: string,
@@ -148,7 +156,7 @@
 
   <!-- First / last name -->
 
-  <goa-fieldset id="name" first heading="What is your name?" on:_continue={nameValidation}>
+  <goa-fieldset id="name" first heading="What is your name?" on:_continue={() => onContinue("children")}>
     <goa-block direction="column" gap="l">
       <goa-form-item id="firstname" label="First name">
         <goa-input name="firstname" />
@@ -159,31 +167,49 @@
     </goa-block>
   </goa-fieldset>
 
-  <!-- Occupation -->
+  <!-- Children -->
 
-  <goa-fieldset
-    id="occupation"
-    on:_continue={occupationValidation}
-  >
-    <goa-form-item id="occupation" label="What is your occupation?" labelsize="large">
-      <goa-input name="occupation" />
-    </goa-form-item>
-  </goa-fieldset>
+  <goa-form-loop id="children" breakmsg="_break" on:_change={collectChildren}>
+  
+    <goa-fieldset
+      id="children"
+      buttonText="Add child"
+      secondaryButtonText="Done"
+      secondaryButtonEvent="_break"
+      on:_secondaryClick={() => onContinue("music")}
+      on:_continue={() => onContinue("child-form")}
+    >
+      <goa-table>
+        {#each _children as child}
+          <tr>
+            <td>{child["child-firstname"]}</td>
+            <td>{child["child-lastname"]}</td>
+          </tr>
+        {/each}
+        <span/>
+      </goa-table>
+    </goa-fieldset>
 
-  <!-- Music -->
+    <goa-fieldset
+      id="child-form"
+      on:_continue={() => onContinue("children")}
+    >
+      <goa-block direction="column" gap="l">
+        <goa-form-item id="child-firstname" label="First name">
+          <goa-input name="child-firstname" />
+        </goa-form-item>
+        <goa-form-item id="child-lastname" label="Last name">
+          <goa-input name="child-lastname" />
+        </goa-form-item>
+        <!--
+        <goa-form-item id="child-age" label="Age">
+          <goa-input name="age" type="number" />
+        </goa-form-item>
+        -->
+      </goa-block>
+    </goa-fieldset>
 
-  <goa-fieldset
-    id="favcolor"
-    on:_continue={() => onContinue("music")}
-  >
-    <goa-form-item id="favcolor" label="Favourite color" mb="l">
-      <goa-dropdown name="favcolor">
-        <goa-dropdown-item value="red" label="Red" />
-        <goa-dropdown-item value="green" label="Green" />
-        <goa-dropdown-item value="blue" label="Blue" />
-      </goa-dropdown>
-    </goa-form-item>
-  </goa-fieldset>
+  </goa-form-loop>
 
   <!-- Birthdate -->
   

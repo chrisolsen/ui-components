@@ -9,6 +9,9 @@
 // )}>
 //   ...
 // </div>
+
+import { EventDispatcher } from "svelte";
+
 // ```
 export function styles(...css: (string | boolean)[]): string {
   return css
@@ -31,7 +34,7 @@ export const msg = {
 
 export function receive(
   el: HTMLElement | Element | null | undefined,
-  handler: (action: string, data: Record<string, unknown>) => void,
+  handler: (action: string, data: Record<string, unknown>, event: Event) => void,
 ) {
   if (!el) {
     console.warn("receive() el is null | undefined");
@@ -39,7 +42,7 @@ export function receive(
 
   el?.addEventListener("msg", (e: Event) => {
     const ce = e as CustomEvent;
-    handler(ce.detail.action, ce.detail.data);
+    handler(ce.detail.action, ce.detail.data, e);
   });
 }
 

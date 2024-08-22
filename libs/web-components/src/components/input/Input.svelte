@@ -132,7 +132,7 @@
 
   function addRelayListener() {
     receive(inputEl, (action, data) => {
-      // console.log(`  RECEIVE(FormField:${action}):`, data);
+      console.log(`  RECEIVE(FormField:${action}):`, data);
       switch (action) {
         case FormSetValueMsg:
           onSetValue(data as FormSetValueRelayDetail);

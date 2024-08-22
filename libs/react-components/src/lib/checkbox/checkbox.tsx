@@ -88,7 +88,7 @@ export function GoACheckbox({
       id={id}
       name={name}
       error={error}
-      checked={checked}
+      checked={checked || false}
       disabled={disabled}
       text={text}
       value={value}

@@ -15,9 +15,11 @@
     FieldsetMountFormRelayDetail,
     FieldsetSubmitMsg,
     FieldsetToggleActiveMsg,
-    FieldsetToggleActiveRelayDetail,
     FormDispatchStateMsg,
     FormDispatchStateRelayDetail,
+    FormLoopBreakMsg,
+    FormLoopChangeRelayDetail,
+    FormLoopPauseHistory,
     FormResetErrorsMsg,
     FormSetFieldsetMsg,
     FormSetFieldsetRelayDetail,
@@ -28,6 +30,8 @@
     FormSummaryBindRelayDetail,
     FormSummaryEditPageMsg,
     FormSummaryEditPageRelayDetail,
+    FormToggleActiveMsg,
+    FormToggleActiveRelayDetail,
   } from "../../types/relay-types";
 
   // Don't remove this, otherwise the summary doesn't render
@@ -56,6 +60,7 @@
     editting: "",
     lastModified: undefined,
   };
+  let _historyPaused: boolean = false;
 
   let lastPage: string;
 
@@ -81,6 +86,9 @@
         case FieldsetChangeMsg:
           onFieldsetChange(data as FieldsetChangeRelayDetail);
           break;
+        case FormLoopBreakMsg:
+          onFormLoopBreak(data as FormLoopChangeRelayDetail);
+          break;
         case FieldsetMountFormItemMsg:
           onFieldsetMountFormItem(data as FieldsetMountFormRelayDetail);
           break;
@@ -96,6 +104,11 @@
         case FieldsetSubmitMsg:
           onFormSubmit();
           break;
+        case FormLoopPauseHistory:
+          onPauseHistory();
+          break;
+        case FieldsetToggleActiveMsg:
+          break;
       }
     });
   }
@@ -103,6 +116,10 @@
   // ***************
   // Relay listeners
   // ***************
+
+  function onPauseHistory() {
+    _historyPaused = !_historyPaused;  
+  }
 
   function onFormSummaryBind(detail: FormSummaryBindRelayDetail) {
     _formSummary = detail.el;
@@ -119,7 +136,7 @@
   function onFieldsetBind(detail: FieldsetBindRelayDetail) {
     _fieldsets[detail.id] = detail;
 
-    // run the final binding once    
+    // run the final binding once
     if (_formItemBindingTimeoutId) {
       clearTimeout(_formItemBindingTimeoutId);
     }
@@ -136,16 +153,24 @@
         _state.history.push(id);
         saveState(_state);
         sendToggleActiveStateMsg(id);
-      }          
-    }, 100)
+      }
+    }, 100);
   }
 
   // listen to `_change` events by input elemented nested within fieldsets and update the state
   function onFieldsetChange(detail: FieldsetChangeRelayDetail) {
     const { id, state } = detail;
-    // const old = _state.form[id] || {};
 
-    _state.form[id] = state;  // { ...old, [name]: { label, value } };
+    _state.form[id] = state;
+    _state.lastModified = new Date();
+
+    saveState(_state);
+  }
+
+  function onFormLoopBreak(detail: FormLoopChangeRelayDetail) {    
+    const id = detail.id;
+
+    _state.form[id] = detail.state;
     _state.lastModified = new Date();
 
     saveState(_state);
@@ -163,8 +188,14 @@
     dispatchFormState(page);
 
     // if no page is currently being editted just go to the next page
+    console.debug("About to save history", _historyPaused, _state)
     if (!_state.editting) {
-      _state.history.push(next);
+      if (!_historyPaused) {
+        // prevent duplicates in history
+        if (_state.history[_state.history.length - 1] !== next) {
+          _state.history.push(next);
+        }
+      }
       sendToggleActiveStateMsg(next);
     } else {
       // when editting a previous value, we need to determine if the `next` page is in the same
@@ -192,10 +223,15 @@
   }
 
   function dispatchFormState(page: string) {
-    dispatch(_formEl, "_stateChange", {
-      id: page,
-      state: _state.form,
-    }, { bubbles: true, timeout: 100});   
+    dispatch(
+      _formEl,
+      "_stateChange",
+      {
+        id: page,
+        state: _state.form,
+      },
+      { bubbles: true, timeout: 100 },
+    );
   }
 
   function syncFormSummaryState() {
@@ -239,9 +275,9 @@
   function sendToggleActiveStateMsg(page: string) {
     const keys = Object.keys(_fieldsets);
     keys.forEach((key) => {
-      relay<FieldsetToggleActiveRelayDetail>(
+      relay<FormToggleActiveRelayDetail>(
         _fieldsets[key].el,
-        FieldsetToggleActiveMsg,
+        FormToggleActiveMsg,
         {
           first: false, //key === _firstElement,
           active: key === page,
@@ -300,15 +336,24 @@
         });
     }
 
+    console.log(_state.form)
+    console.log(_formFields)
     // restore state in form items
     for (const id of Object.keys(_formFields)) {
       for (const [name, el] of Object.entries(_formFields[id])) {
-        const value = _state.form[id]?.[name].value;
-        if (value) {
-          relay<FormSetValueRelayDetail>(el, FormSetValueMsg, {
-            name,
-            value,
-          });
+        const fieldset = _state.form[id];
+        if (Array.isArray(fieldset)) {
+          // TODO: restore the state when multiple items exist
+          console.log("Array is multiple values!!", fieldset)
+        } else {
+          const value = fieldset?.[name]?.value;
+          console.log("Dispatching value", name, value)
+          if (value) {
+            relay<FormSetValueRelayDetail>(el, FormSetValueMsg, {
+              name,
+              value,
+            });
+          }
         }
       }
     }

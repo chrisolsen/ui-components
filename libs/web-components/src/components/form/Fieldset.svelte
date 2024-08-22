@@ -20,16 +20,18 @@
     FieldsetSetErrorMsg,
     FieldsetSubmitMsg,
     FieldsetToggleActiveMsg,
-    FieldsetToggleActiveRelayDetail,
     FieldsetValidationRelayDetail,
     FormDispatchStateMsg,
     FormDispatchStateRelayDetail,
     FormFieldMountMsg,
     FormFieldMountRelayDetail,
     FormItemMountMsg,
+    // FormItemMountMsg,
     FormItemMountRelayDetail,
     FormResetErrorsMsg,
     FormSetFieldsetMsg,
+    FormToggleActiveMsg,
+    FormToggleActiveRelayDetail,
   } from "../../types/relay-types";
 
   // ======
@@ -39,6 +41,8 @@
   export let id: string = "";
   export let heading: string = "";
   export let buttonText: string = "";
+  export let secondaryButtonText: string = "";
+  export let secondaryButtonEvent: string = "";
   export let mt: Spacing = null;
   export let mr: Spacing = null;
   export let mb: Spacing = null;
@@ -82,7 +86,7 @@
 
   function bindChannel() {
     receive(_rootEl, (action, data) => {
-      // console.log(`  RECEIVE(Fieldset => ${action}):`, data);
+    //   console.log(`  RECEIVE(Fieldset => ${action}):`, data);
       switch (action) {
         case FormSetFieldsetMsg:
           // onSetFieldset(data as FormSetFieldsetRelayDetail);
@@ -100,8 +104,8 @@
         case FormFieldMountMsg:
           onFieldsetMount(data as FormFieldMountRelayDetail);
           break;
-        case FieldsetToggleActiveMsg:
-          onToggleActiveState(data as FieldsetToggleActiveRelayDetail);
+        case FormToggleActiveMsg:
+          onToggleActiveState(data as FormToggleActiveRelayDetail);
           break;
         case ExternalSetErrorMsg:
           onError(data as ExternalErrorRelayDetail);
@@ -149,8 +153,13 @@
     }
   }
 
-  function onToggleActiveState(detail: FieldsetToggleActiveRelayDetail) {
+  function onToggleActiveState(detail: FormToggleActiveRelayDetail) {
     _active = detail.active;
+
+    // resend the message back to allow FormLoop to know that a child element has become active
+    if (_active) {
+      relay(_rootEl, FieldsetToggleActiveMsg, {}, { bubbles: true})
+    }
   }
 
   function onFormItemMount(detail: FormItemMountRelayDetail) {
@@ -200,8 +209,7 @@
 
   // Dispatch _continue event to app's level allowing custom validation to be performed
   function onSaveAndContinue() {
-
-    // send new state to higher power
+    // send all the state of all the inputs within the fieldset to higher power
     relay<FieldsetChangeRelayDetail>(
       _rootEl,
       FieldsetChangeMsg,
@@ -220,6 +228,11 @@
 
   function onSubmit() {
     relay(_rootEl, FieldsetSubmitMsg, {}, { bubbles: true });
+  }
+
+  function onSecondaryClick() {
+    relay(_rootEl, secondaryButtonEvent, {}, { bubbles: true });
+    dispatch(_rootEl, "_secondaryClick", {}, { bubbles: true });
   }
 
   function handleBack(e: Event) {
@@ -305,19 +318,22 @@
 
     <slot />
 
-    {#if false}
-      <goa-block mt="xl">
+    <goa-block mt="xl">
+      {#if secondaryButtonEvent}
+        <goa-button on:_click={onSecondaryClick} type="secondary">
+          {secondaryButtonText}
+        </goa-button>
+      {/if}
+      {#if false}
         <goa-button on:_click={onSubmit} type="primary">
           {buttonText || "Confirm"}
         </goa-button>
-      </goa-block>
-    {:else}
-      <goa-block mt="xl">
-        <goa-button on:_click={onSaveAndContinue} type="primary">
-          {buttonText || "Save and continue"}
-        </goa-button>
-      </goa-block>
-    {/if}
+      {:else}
+          <goa-button on:_click={onSaveAndContinue} type="primary">
+            {buttonText || "Save and continue"}
+          </goa-button>
+      {/if}
+    </goa-block>
   </fieldset>
 </section>
 
