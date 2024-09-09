@@ -26,7 +26,6 @@
     FormFieldMountMsg,
     FormFieldMountRelayDetail,
     FormItemMountMsg,
-    // FormItemMountMsg,
     FormItemMountRelayDetail,
     FormResetErrorsMsg,
     FormSetFieldsetMsg,
@@ -86,7 +85,7 @@
 
   function bindChannel() {
     receive(_rootEl, (action, data) => {
-    //   console.log(`  RECEIVE(Fieldset => ${action}):`, data);
+      // console.log(`  RECEIVE(Fieldset => ${action}):`, data);
       switch (action) {
         case FormSetFieldsetMsg:
           // onSetFieldset(data as FormSetFieldsetRelayDetail);
@@ -222,7 +221,7 @@
       _rootEl,
       FieldsetContinueMsg,
       { el: _rootEl, state: _state },
-      { bubbles: true },
+      { bubbles: true, cancelable: true },
     );
   }
 
@@ -255,16 +254,7 @@
     _rootEl.addEventListener("_change", (e: Event) => {
       const { name, value } = (e as CustomEvent).detail;
       _state[name] = { name, value, label: _formItems[name].label};
-
-      // const label = _formItems[name].label;
-
-      // // redispatch message with value grouped under fieldset name
-      // relay<FieldsetChangeRelayDetail>(
-      //   _rootEl,
-      //   FieldsetChangeMsg,
-      //   { id, name, value, label },
-      //   { bubbles: true },
-      // );
+      e.stopPropagation();
     });
   }
 
@@ -314,6 +304,8 @@
 
     {#if heading}
       <goa-text as="h2" size="heading-l">{heading}</goa-text>
+    {:else}
+      <br/>
     {/if}
 
     <slot />
@@ -324,7 +316,7 @@
           {secondaryButtonText}
         </goa-button>
       {/if}
-      {#if false}
+      {#if last}
         <goa-button on:_click={onSubmit} type="primary">
           {buttonText || "Confirm"}
         </goa-button>

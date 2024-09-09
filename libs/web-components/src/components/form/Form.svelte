@@ -17,6 +17,10 @@
     FieldsetToggleActiveMsg,
     FormDispatchStateMsg,
     FormDispatchStateRelayDetail,
+    FormFormLoopSyncMsg,
+    FormFormLoopSyncRelayDetail,
+    FormLoopBindMsg,
+    FormLoopBindRelayDetail,
     FormLoopBreakMsg,
     FormLoopChangeRelayDetail,
     FormLoopPauseHistory,
@@ -51,6 +55,7 @@
   let _formEl: HTMLFormElement;
   let _fieldsets: Record<string, FieldsetBindRelayDetail> = {};
   let _formFields: Record<string, Record<string, HTMLElement>> = {};
+  let _formLoops: Record<string, HTMLElement> = {};
   let _formSummary: HTMLElement;
   let _firstElement: string;
   let _formItemBindingTimeoutId: any;
@@ -108,6 +113,10 @@
           onPauseHistory();
           break;
         case FieldsetToggleActiveMsg:
+          // TODO: why is this empty?
+          break;
+        case FormLoopBindMsg:
+          onFormLoopBind(data as FormLoopBindRelayDetail);
           break;
       }
     });
@@ -116,6 +125,10 @@
   // ***************
   // Relay listeners
   // ***************
+
+  function onFormLoopBind(detail: FormLoopBindRelayDetail) {
+    _formLoops = {..._formLoops, [detail.id]: detail.el};
+  }
 
   function onPauseHistory() {
     _historyPaused = !_historyPaused;  
@@ -188,7 +201,6 @@
     dispatchFormState(page);
 
     // if no page is currently being editted just go to the next page
-    console.debug("About to save history", _historyPaused, _state)
     if (!_state.editting) {
       if (!_historyPaused) {
         // prevent duplicates in history
@@ -336,8 +348,6 @@
         });
     }
 
-    console.log(_state.form)
-    console.log(_formFields)
     // restore state in form items
     for (const id of Object.keys(_formFields)) {
       for (const [name, el] of Object.entries(_formFields[id])) {
@@ -347,7 +357,6 @@
           console.log("Array is multiple values!!", fieldset)
         } else {
           const value = fieldset?.[name]?.value;
-          console.log("Dispatching value", name, value)
           if (value) {
             relay<FormSetValueRelayDetail>(el, FormSetValueMsg, {
               name,
@@ -356,6 +365,11 @@
           }
         }
       }
+    }
+
+    // restore state in form loops
+    for (const [id, el] of Object.entries(_formLoops)) {
+      relay<FormFormLoopSyncRelayDetail>(el, FormFormLoopSyncMsg, _state.form[id]);
     }
   }
 

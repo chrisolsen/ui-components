@@ -16,7 +16,8 @@ export const FormResetErrorsMsg = "form::reset:errors";
 export const FormSetFieldsetMsg = "form::set:fieldset";
 export const FormSetValueMsg = "form::set:value";
 export const FormDispatchStateMsg = "form::dispatch:state";
-export const FormToggleActiveMsg = "form::toggle-active";
+export const FormToggleActiveMsg = "form::toggle:active";
+export const FormFormLoopSyncMsg = "form::formloop:sync";
 
 export type FormFieldMountRelayDetail = {
   name: string;
@@ -39,6 +40,10 @@ export type FormSetValueRelayDetail = {
 };
 
 export type FormDispatchStateRelayDetail = FormState;
+
+export type FormFormLoopSyncRelayDetail =
+  | Record<string, FieldsetItemState>
+  | Record<string, FieldsetItemState>[];
 
 // ========
 // Fieldset
@@ -143,8 +148,14 @@ export type FormSummaryEditPageRelayDetail = {
 
 export const FormLoopBreakMsg = "form-loop::break";
 export const FormLoopPauseHistory = "form-loop::pause-history";
+export const FormLoopBindMsg = "form-loop::bind";
 
 export type FormLoopChangeRelayDetail = {
   id: string;
   state: Record<string, FieldsetItemState>[];
+};
+
+export type FormLoopBindRelayDetail = {
+  id: string;
+  el: HTMLElement;
 };

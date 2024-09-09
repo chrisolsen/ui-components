@@ -10,6 +10,13 @@
     e.stopPropagation();
   }
 
+  function bindChildren(e: Event) {
+    const detail = (e as CustomEvent<Record<string, string>[]>).detail;
+    console.log("bindChildren", detail)
+    _children = detail;
+    e.stopPropagation();
+  }
+
   type Validator = (
     name: string,
     el: HTMLElement,
@@ -145,9 +152,13 @@
     }
   }
 
+  let showModal = false;
+  let formData = {}
+
   function submitForm(e: Event) {
     const { form } = (e as CustomEvent).detail;
-    console.log("submitting", form)
+    formData = form;
+    showModal = true;
   }
 
 </script>
@@ -169,21 +180,26 @@
 
   <!-- Children -->
 
-  <goa-form-loop id="children" breakmsg="_break" on:_change={collectChildren}>
+  <goa-form-loop id="children" breakmsg="_break" on:_change={collectChildren} on:_bind={bindChildren}>
   
     <goa-fieldset
       id="children"
+      heading="Children"
       buttonText="Add child"
       secondaryButtonText="Done"
       secondaryButtonEvent="_break"
       on:_secondaryClick={() => onContinue("music")}
       on:_continue={() => onContinue("child-form")}
     >
-      <goa-table>
-        {#each _children as child}
+      {#if _children.length === 0}
+        <center>Add children</center>
+      {/if}
+      <goa-table width="100%">
+        {#each _children as child, index}
           <tr>
             <td>{child["child-firstname"]}</td>
             <td>{child["child-lastname"]}</td>
+            <td><goa-button data-pf-action="remove" data-pf-index={index} type="tertiary" variant="destructive">Remove</goa-button></td>
           </tr>
         {/each}
         <span/>
@@ -255,9 +271,20 @@
 
   <!-- Summary -->
 
-  <goa-fieldset id="summary" heading="Review your answers" last on:_continue={submitForm}>
+  <goa-fieldset id="summary" heading="Review your answers" last on:_submit={submitForm}>
     <goa-simple-form-summary />  
   </goa-fieldset>
+
+  <goa-modal open={showModal}>
+    <div>
+      {JSON.stringify(formData, null, "  ")}
+    </div>
+    <goa-button-group alignment="end">
+      <goa-button type="primary" on:_click={() => showModal = false}>
+        Done
+      </goa-button>
+    </goa-button-group>
+  </goa-modal>
     
   <!-- Ineligible -->
 

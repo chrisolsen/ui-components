@@ -12,7 +12,7 @@
     FormSummaryEditPageRelayDetail,
   } from "../../types/relay-types";
   import { receive, relay } from "../../common/utils";
-  import { format, isDate } from "date-fns";
+  import { format, isBefore, isDate, parseISO } from "date-fns";
 
   let _rootEl: HTMLElement;
   let _state: FormState;
@@ -55,6 +55,16 @@
   }
 
   function formatValue(value: unknown): unknown {
+    let parsedDate: Date;
+    console.log("formatValue", value)
+    if (typeof value === "string") {
+      try {
+        parsedDate = parseISO(value);
+        return format(parsedDate, "PPP");
+      } catch (e) {
+        return value;  
+      }
+    }
     if (isDate(value)) {
       return format(value, "PPP");
     }
@@ -75,7 +85,10 @@
             </div>
             <div class="details">
               {#if Array.isArray(_state.form[page])}
-                {#each _state.form[page] as item}
+                {#each _state.form[page] as item, i}
+                  {#if i > 0}
+                    <goa-divider />
+                  {/if}
                   {#each Object.entries(item) as [_, value] }
                     <dl>
                       <dt>{value.label}</dt>

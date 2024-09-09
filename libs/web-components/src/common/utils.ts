@@ -50,7 +50,7 @@ export function relay<T>(
   el: HTMLElement | Element | null | undefined,
   eventName: string,
   data: T,
-  opts?: { bubbles?: boolean; timeout?: number },
+  opts?: { bubbles?: boolean; cancelable?: boolean; timeout?: number },
 ) {
   // console.log(`RELAY(${eventName}):`, data, el);
 
@@ -59,6 +59,7 @@ export function relay<T>(
       new CustomEvent<{ action: string; data: T }>("msg", {
         composed: true,
         bubbles: opts?.bubbles,
+        cancelable: opts?.cancelable,
         detail: {
           action: eventName,
           data,
@@ -78,7 +79,7 @@ export function dispatch<T>(
   el: HTMLElement | Element | null | undefined,
   eventName: string,
   detail: T,
-  opts?: { bubbles?: boolean; timeout?: number },
+  opts?: { bubbles?: boolean; cancelable?: boolean; timeout?: number },
 ) {
   console.log(`DISPATCH(${eventName}):`, detail, el);
 
@@ -87,6 +88,7 @@ export function dispatch<T>(
       new CustomEvent<T>(eventName, {
         composed: true,
         bubbles: opts?.bubbles,
+        cancelable: opts?.cancelable,
         detail,
       }),
     );
