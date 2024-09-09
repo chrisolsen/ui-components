@@ -1,11 +1,18 @@
-<svelte:options customElement="goa-button" />
+<svelte:options customElement={{
+  tag: "goa-button",
+  props: {
+    datapfaction: { reflect: true, type: "String", attribute: "data-pf-action" },
+    datapfindex: { reflect: true, type: "Number", attribute: "data-pf-index" },
+  }
+}} />
 
 <script lang="ts">
   import { onMount } from "svelte";
   import type { Spacing } from "../../common/styling";
   import { calculateMargin } from "../../common/styling";
-  import { typeValidator, toBoolean } from "../../common/utils";
+  import { typeValidator, toBoolean, dispatch } from "../../common/utils";
   import type { GoAIconType } from "../icon/Icon.svelte";
+
 
   // Validators
   const [Types, validateType] = typeValidator(
@@ -37,6 +44,8 @@
   export let leadingicon: GoAIconType | null = null;
   export let trailingicon: GoAIconType | null = null;
   export let testid: string = "";
+  export let datapfaction: string = "";
+  export let datapfindex: number = -1;
 
   export let mt: Spacing = null;
   export let mr: Spacing = null;
@@ -46,13 +55,15 @@
   $: isDisabled = toBoolean(disabled);
   $: isButtonDark = type === "primary" || type === "start";
 
-  function clickHandler(_e: Event) {
-    // TODO: use e.target??
-    if (!isDisabled) {
-      // @ts-expect-error
-      this.dispatchEvent(
-        new CustomEvent("_click", { composed: true, bubbles: true }),
-      );
+  function clickHandler(e: Event) {
+    if (!isDisabled && e.target) {
+      dispatch(e.target as Element, "_click", {
+        action: datapfaction,
+        index: datapfindex,
+      }, { bubbles: true})
+      // this.dispatchEvent(
+      //   new CustomEvent("_click", { composed: true, bubbles: true }),
+      // );
     }
   }
 

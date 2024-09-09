@@ -8,6 +8,7 @@
     FieldsetChangeRelayDetail,
     FieldsetItemState,
     FieldsetToggleActiveMsg,
+    FormDispatchStateMsg,
     FormFormLoopSyncMsg,
     FormFormLoopSyncRelayDetail,
     FormLoopBindMsg,
@@ -15,6 +16,7 @@
     FormLoopBreakMsg,
     FormLoopChangeRelayDetail,
     FormLoopPauseHistory,
+    FormLoopPauseRelayDetail,
   } from "../../types/relay-types";
 
   export let id: string = "";
@@ -39,6 +41,8 @@
           e.stopPropagation();
           break;
 
+        // This is a user defined msg usually associated with the secondary button action to 
+        // break out of the loop
         case breakmsg:
           handleBreak();
           break;
@@ -59,12 +63,20 @@
   // Functions
   // =========
 
+  // Dispatches the form loop data to the dev allowing them to show the data contained within
+  // the form loop, also provides the ability to add the binding to allow for updates and deletion
   function handleSync(detail: FormFormLoopSyncRelayDetail) {
+    // The detail should always be a list for the Form loop, it is a single item for other components
     if (!Array.isArray(detail)) {
       return;
     }
+
+    // set previous stored items
+    _data.id = id;
+    _data.state = detail;
+
+    // send data to dev to allow them to display the data
     const data = detail.map(item => remapData(item));
-  
     dispatch(_dispatcher, "_bind", data, { bubbles: true});
   }
 
@@ -76,7 +88,7 @@
   // When an active child exists a message needs to be sent to the Form, telling it to pause
   // recording of the history, which will prevent recording of the loop.
   function handleActiveChild() {
-    relay(_dispatcher, FormLoopPauseHistory, null, { bubbles: true })
+    relay<FormLoopPauseRelayDetail>(_dispatcher, FormLoopPauseHistory, { paused: true }, { bubbles: true })
   }
 
   // 1. Store data locally for later _change relay
@@ -96,11 +108,16 @@
   }
 
   function handleBreak() {
+    console.log("handleBreak _data", _data)
     // dispatch data list
     relay(_dispatcher, FormLoopBreakMsg, _data, { bubbles: true });
 
     // unpause history
-    relay(_dispatcher, FormLoopPauseHistory, null, { bubbles: true });
+    relay<FormLoopPauseRelayDetail>(_dispatcher, FormLoopPauseHistory, { paused: false }, { bubbles: true });
+
+    console.log("dispathcing data", _data)
+    const data = _data.state.map(item => remapData(item));
+    dispatch(_dispatcher, "_bind", data, { bubbles: true});
   }
 
   function remapData(data: Record<string, FieldsetItemState>) {

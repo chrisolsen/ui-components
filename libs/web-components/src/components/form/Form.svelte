@@ -24,6 +24,7 @@
     FormLoopBreakMsg,
     FormLoopChangeRelayDetail,
     FormLoopPauseHistory,
+    FormLoopPauseRelayDetail,
     FormResetErrorsMsg,
     FormSetFieldsetMsg,
     FormSetFieldsetRelayDetail,
@@ -110,7 +111,7 @@
           onFormSubmit();
           break;
         case FormLoopPauseHistory:
-          onPauseHistory();
+          onPauseHistory(data as FormLoopPauseRelayDetail);
           break;
         case FieldsetToggleActiveMsg:
           // TODO: why is this empty?
@@ -130,8 +131,9 @@
     _formLoops = {..._formLoops, [detail.id]: detail.el};
   }
 
-  function onPauseHistory() {
-    _historyPaused = !_historyPaused;  
+  function onPauseHistory(detail: FormLoopPauseRelayDetail) {
+    console.log("History Paused: ", detail.paused)
+    _historyPaused = detail.paused;  
   }
 
   function onFormSummaryBind(detail: FormSummaryBindRelayDetail) {
@@ -200,34 +202,48 @@
     // dispatch state to app to allow dynamic binding, along with the page where a state change occured
     dispatchFormState(page);
 
+    console.log("editting: ", _state.editting)
+
     // if no page is currently being editted just go to the next page
-    if (!_state.editting) {
-      if (!_historyPaused) {
-        // prevent duplicates in history
-        if (_state.history[_state.history.length - 1] !== next) {
-          _state.history.push(next);
-        }
-      }
-      sendToggleActiveStateMsg(next);
-    } else {
+    if (_state.editting) {
       // when editting a previous value, we need to determine if the `next` page is in the same
       // "direction" as was previously followed, and if so send them back to the last page in their
       // history (summary). If the `next` is different then the previous history must be cleared
       // from that point on.
       const oldNextIndex = _state.history.indexOf(_state.editting) + 1;
 
+      console.log("oldNextIndex", oldNextIndex)
+      console.log("oldNext", _state.history[oldNextIndex])
+      console.log("newNext", next)
+
       // user input did not affect their path, so forward them back to the end, otherwise the user
       // has altered their path and the history must be clear from this point forward
-      if (_state.history[oldNextIndex] === next) {
+      const jumpToSummary = _state.history[oldNextIndex] === next;
+      if (jumpToSummary) {
+        console.log("User is being sent back to summary")
         const last = _state.history[_state.history.length - 1];
         sendToggleActiveStateMsg(last);
-      } else {
-        _state.history = [..._state.history.slice(0, oldNextIndex), next];
-        saveState(_state);
+
+      } else if (_historyPaused) {
         sendToggleActiveStateMsg(next);
         sendEdittingStateMsg();
+
+      } else {
+        _state.history = [..._state.history.slice(0, oldNextIndex), next];
+        sendToggleActiveStateMsg(next);
+        sendEdittingStateMsg();
+
+        console.log("exiting editting state")
+        _state.editting = "";
       }
-      _state.editting = "";
+
+
+    } else {
+      // prevent duplicates in history
+      if (!_historyPaused && _state.history[_state.history.length - 1] !== next) {
+        _state.history.push(next);
+      }
+      sendToggleActiveStateMsg(next);
     }
 
     syncFormSummaryState();
@@ -255,7 +271,7 @@
   }
 
   function onSetPage(detail: FormSummaryEditPageRelayDetail) {
-    _state.editting = detail.id; // editting mode is an ephemoral value and is *not* saved to local storage
+    _state.editting = detail.id; // editting mode is an ephemeral value and is *not* saved to local storage
 
     sendToggleActiveStateMsg(detail.id);
     sendEdittingStateMsg();

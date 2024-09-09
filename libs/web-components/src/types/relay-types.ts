@@ -146,6 +146,10 @@ export type FormSummaryEditPageRelayDetail = {
 // FormLoop
 // ========
 
+export type FormLoopPauseRelayDetail = {
+  paused: boolean;
+};
+
 export const FormLoopBreakMsg = "form-loop::break";
 export const FormLoopPauseHistory = "form-loop::pause-history";
 export const FormLoopBindMsg = "form-loop::bind";

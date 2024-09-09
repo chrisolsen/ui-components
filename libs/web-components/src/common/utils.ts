@@ -10,8 +10,6 @@
 //   ...
 // </div>
 
-import { EventDispatcher } from "svelte";
-
 // ```
 export function styles(...css: (string | boolean)[]): string {
   return css
@@ -81,7 +79,7 @@ export function dispatch<T>(
   detail: T,
   opts?: { bubbles?: boolean; cancelable?: boolean; timeout?: number },
 ) {
-  console.log(`DISPATCH(${eventName}):`, detail, el);
+  // console.log(`DISPATCH(${eventName}):`, detail, el);
 
   const dispatch = () => {
     el?.dispatchEvent(

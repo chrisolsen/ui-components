@@ -56,7 +56,6 @@
 
   function formatValue(value: unknown): unknown {
     let parsedDate: Date;
-    console.log("formatValue", value)
     if (typeof value === "string") {
       try {
         parsedDate = parseISO(value);
