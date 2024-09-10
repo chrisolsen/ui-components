@@ -6,6 +6,7 @@
   import {
     FieldsetChangeMsg,
     FieldsetChangeRelayDetail,
+    FieldsetContinueMsg,
     FieldsetItemState,
     FieldsetToggleActiveMsg,
     FormDispatchStateMsg,
@@ -17,6 +18,7 @@
     FormLoopChangeRelayDetail,
     FormLoopPauseHistory,
     FormLoopPauseRelayDetail,
+    PublicFormButtonClick,
   } from "../../types/relay-types";
 
   export let id: string = "";
@@ -33,8 +35,7 @@
     bind();
 
     receive(_dispatcher, (action, data, e) => {
-      console.log(`  RECEIVE(FormLoop => ${action}):`, data);
-
+      // console.log(`  RECEIVE(FormLoop => ${action}):`, data);
       switch (action) {
         case FieldsetChangeMsg:
           handleFieldsetChange(data as FieldsetChangeRelayDetail);
@@ -57,6 +58,20 @@
           break;
       }
     });
+
+    // handle certain button events
+    _dispatcher.addEventListener("_click", (e: Event) => {
+      const { action, index } = (e as CustomEvent<PublicFormButtonClick>).detail;
+      if (!action || !index) return;
+
+      if (action === "remove") {
+        _data.state = _data.state.filter((_, i) => i !== index);
+
+        // send data to dev to allow them to display the data
+        const data = _data.state.map(item => remapData(item));
+        dispatch(_dispatcher, "_bind", data, { bubbles: true});
+      }
+    })
   });
 
   // =========
@@ -108,14 +123,12 @@
   }
 
   function handleBreak() {
-    console.log("handleBreak _data", _data)
     // dispatch data list
     relay(_dispatcher, FormLoopBreakMsg, _data, { bubbles: true });
 
     // unpause history
     relay<FormLoopPauseRelayDetail>(_dispatcher, FormLoopPauseHistory, { paused: false }, { bubbles: true });
 
-    console.log("dispathcing data", _data)
     const data = _data.state.map(item => remapData(item));
     dispatch(_dispatcher, "_bind", data, { bubbles: true});
   }

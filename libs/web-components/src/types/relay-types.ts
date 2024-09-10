@@ -91,6 +91,7 @@ export type FieldsetItemState = {
 export type FieldsetValidationRelayDetail = {
   el: HTMLElement;
   state: Record<string, FieldsetItemState>;
+  inLoop?: boolean;
 };
 
 // ========
@@ -162,4 +163,13 @@ export type FormLoopChangeRelayDetail = {
 export type FormLoopBindRelayDetail = {
   id: string;
   el: HTMLElement;
+};
+
+// ======
+// Button
+// ======
+
+export type PublicFormButtonClick = {
+  action: string;
+  index: number;
 };

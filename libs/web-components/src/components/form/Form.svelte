@@ -202,8 +202,6 @@
     // dispatch state to app to allow dynamic binding, along with the page where a state change occured
     dispatchFormState(page);
 
-    console.log("editting: ", _state.editting)
-
     // if no page is currently being editted just go to the next page
     if (_state.editting) {
       // when editting a previous value, we need to determine if the `next` page is in the same
@@ -220,7 +218,6 @@
       // has altered their path and the history must be clear from this point forward
       const jumpToSummary = _state.history[oldNextIndex] === next;
       if (jumpToSummary) {
-        console.log("User is being sent back to summary")
         const last = _state.history[_state.history.length - 1];
         sendToggleActiveStateMsg(last);
 
@@ -233,10 +230,8 @@
         sendToggleActiveStateMsg(next);
         sendEdittingStateMsg();
 
-        console.log("exiting editting state")
         _state.editting = "";
       }
-
 
     } else {
       // prevent duplicates in history
