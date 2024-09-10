@@ -39,7 +39,7 @@
     FormToggleActiveRelayDetail,
   } from "../../types/relay-types";
 
-  // Don't remove this, otherwise the summary doesn't render
+  // @ts-ignore Don't remove this, otherwise the summary doesn't render
   import FormSummary from "./FormSummary.svelte";
 
   // Required
@@ -132,7 +132,6 @@
   }
 
   function onPauseHistory(detail: FormLoopPauseRelayDetail) {
-    console.log("History Paused: ", detail.paused)
     _historyPaused = detail.paused;  
   }
 
@@ -209,10 +208,6 @@
       // history (summary). If the `next` is different then the previous history must be cleared
       // from that point on.
       const oldNextIndex = _state.history.indexOf(_state.editting) + 1;
-
-      console.log("oldNextIndex", oldNextIndex)
-      console.log("oldNext", _state.history[oldNextIndex])
-      console.log("newNext", next)
 
       // user input did not affect their path, so forward them back to the end, otherwise the user
       // has altered their path and the history must be clear from this point forward

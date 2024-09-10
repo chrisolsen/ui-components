@@ -1,6 +1,17 @@
-<svelte:options customElement="goa-fieldset" />
+<svelte:options
+  customElement={{
+    tag: "goa-fieldset",
+    props: {
+      secondaryButtonText: { type: "String", attribute: "secondary-button-text" },
+      secondaryButtonEvent: { type: "String", attribute: "secondary-button-event" },
+      preserveState: { type: "String", attribute: "preserve-state" },
+      showBackButton: { type: "String", attribute: "show-back-button" },
+    },
+  }}
+/>
 
 <script lang="ts">
+  // dfd
   import { onMount } from "svelte";
   import { calculateMargin, Spacing } from "../../common/styling";
   import { dispatch, receive, relay, styles } from "../../common/utils";
@@ -17,6 +28,7 @@
     FieldsetMountFormItemMsg,
     FieldsetMountFormRelayDetail,
     FieldsetResetErrorsMsg,
+    FieldsetResetFieldsMsg,
     FieldsetSetErrorMsg,
     FieldsetSubmitMsg,
     FieldsetToggleActiveMsg,
@@ -42,6 +54,8 @@
   export let buttonText: string = "";
   export let secondaryButtonText: string = "";
   export let secondaryButtonEvent: string = "";
+  export let preserveState: string = "true";
+  export let showBackButton: string = "true";
   export let mt: Spacing = null;
   export let mr: Spacing = null;
   export let mb: Spacing = null;
@@ -49,11 +63,14 @@
   export let first: boolean = false;
   export let last: boolean = false;
 
+  // =======
+  // Private
+  // =======
+
   let _rootEl: HTMLElement;
   let _active: boolean = false;
   let _editting: boolean = false;
   let _detail: FieldsetBindRelayDetail;
-
   let _errors: Record<string, string> = {};
 
   // allows for the state to be sent to _continue event allowing for custom validation
@@ -65,11 +82,19 @@
   // reference to child form input, dropdown, etc components to allow for relaying of error state
   let _formFields: Record<string, HTMLElement> = {};
 
+  // ========
+  // Reactive
+  // ========
+
   $: if (_active) {
     const url = new URL(location.href);
     url.searchParams.set("page", id);
     history.pushState({ page: id }, "", url);
   }
+
+  // =====
+  // Hooks
+  // =====
 
   onMount(() => {
     _detail = {
@@ -82,6 +107,10 @@
     addChildChangeListener();
     bindChannel();
   });
+
+  // =========
+  // Functions
+  // =========
 
   function bindChannel() {
     receive(_rootEl, (action, data) => {
@@ -139,8 +168,6 @@
   // }
 
   function onErrorReset() {
-    // FIXME: these values are occasionally empty
-    console.log("in fieldset resetting errors", _formFields, _formItems);
     _errors = {};
 
     // reset children
@@ -157,7 +184,7 @@
 
     // resend the message back to allow FormLoop to know that a child element has become active
     if (_active) {
-      relay(_rootEl, FieldsetToggleActiveMsg, {}, { bubbles: true})
+      relay(_rootEl, FieldsetToggleActiveMsg, {}, { bubbles: true });
     }
   }
 
@@ -184,22 +211,14 @@
     _errors[detail.name] = detail.msg;
 
     // dispatch error down to fields
-    relay<FieldsetErrorRelayDetail>(
-      _formFields[detail.name],
-      FieldsetSetErrorMsg,
-      {
-        error: detail.msg,
-      },
-    );
+    relay<FieldsetErrorRelayDetail>(_formFields[detail.name], FieldsetSetErrorMsg, {
+      error: detail.msg,
+    });
 
     // dispatch error down to form items
-    relay<FieldsetErrorRelayDetail>(
-      _formItems[detail.name].el,
-      FieldsetSetErrorMsg,
-      {
-        error: detail.msg,
-      },
-    );
+    relay<FieldsetErrorRelayDetail>(_formItems[detail.name].el, FieldsetSetErrorMsg, {
+      error: detail.msg,
+    });
   }
 
   // **************
@@ -215,7 +234,7 @@
       { id, state: _state },
       { bubbles: true },
     );
-  
+
     // dispatch to on:_continue method allowing users to validate the data
     dispatch<FieldsetValidationRelayDetail>(
       _rootEl,
@@ -223,6 +242,14 @@
       { el: _rootEl, state: _state },
       { bubbles: true, cancelable: true },
     );
+
+    console.log("onSaveAndContinue", preserveState);
+    if (preserveState === "false") {
+      // relay message to children to reset their state
+      for (const [_, el] of Object.entries(_formFields)) {
+        relay(el, FieldsetResetFieldsMsg, null);
+      }
+    }
   }
 
   function onSubmit() {
@@ -253,7 +280,7 @@
   function addChildChangeListener() {
     _rootEl.addEventListener("_change", (e: Event) => {
       const { name, value } = (e as CustomEvent).detail;
-      _state[name] = { name, value, label: _formItems[name].label};
+      _state[name] = { name, value, label: _formItems[name].label };
       e.stopPropagation();
     });
   }
@@ -271,12 +298,8 @@
       `display: ${_active ? "block" : "none"}`,
     )}
   >
-    {#if !first && !_editting && !last}
-      <goa-link-button
-        leadingicon="chevron-back"
-        mb="2xl"
-        on:_click={handleBack}
-      >
+    {#if !first && !_editting && !last && showBackButton === "true"}
+      <goa-link-button leadingicon="chevron-back" mb="2xl" on:_click={handleBack}>
         Back
       </goa-link-button>
     {/if}
@@ -289,11 +312,7 @@
         <ul class="errors">
           {#each Object.keys(_errors) as key}
             <li>
-              <a
-                class="error"
-                href={`#${key}`}
-                on:click={(e) => jumpToError(e, key)}
-              >
+              <a class="error" href={`#${key}`} on:click={(e) => jumpToError(e, key)}>
                 {_errors[key]}
               </a>
             </li>
@@ -305,7 +324,7 @@
     {#if heading}
       <goa-text as="h2" size="heading-l">{heading}</goa-text>
     {:else}
-      <br/>
+      <br />
     {/if}
 
     <slot />
@@ -321,9 +340,9 @@
           {buttonText || "Confirm"}
         </goa-button>
       {:else}
-          <goa-button on:_click={onSaveAndContinue} type="primary">
-            {buttonText || "Save and continue"}
-          </goa-button>
+        <goa-button on:_click={onSaveAndContinue} type="primary">
+          {buttonText || "Save and continue"}
+        </goa-button>
       {/if}
     </goa-block>
   </fieldset>

@@ -51,6 +51,7 @@ export type FormFormLoopSyncRelayDetail =
 
 export const FieldsetToggleActiveMsg = "fieldset::toggle-active";
 export const FieldsetResetErrorsMsg = "fieldset::reset:errors";
+export const FieldsetResetFieldsMsg = "fieldset::reset:Fields";
 export const FieldsetBindMsg = "fieldset::bind";
 export const FieldsetSubmitMsg = "fieldset::submit";
 export const FieldsetSetErrorMsg = "fieldset::set:error";

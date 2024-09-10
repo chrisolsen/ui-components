@@ -1,18 +1,17 @@
 <script lang="ts">
-
   let _formEl: HTMLElement;
   let _children: Record<string, string>[] = [];
 
   function collectChildren(e: Event) {
     const detail = (e as CustomEvent<Record<string, string>>).detail;
     _children = [..._children, detail];
-    console.log("collectChildren", detail)
+    console.log("collectChildren", detail);
     e.stopPropagation();
   }
 
   function bindChildren(e: Event) {
     const detail = (e as CustomEvent<Record<string, string>[]>).detail;
-    console.log("bindChildren", detail)
+    console.log("bindChildren", detail);
     _children = detail;
     e.stopPropagation();
   }
@@ -52,17 +51,17 @@
           data: {
             name,
             msg,
-          }
+          },
         },
       }),
     );
   }
-  
+
   export function dispatch<T>(
     el: HTMLElement | Element | null | undefined,
     eventName: string,
     detail: T,
-    opts: { bubbles?: boolean; },
+    opts: { bubbles?: boolean },
   ) {
     if (!el) {
       console.error("dispatch element is null");
@@ -76,47 +75,47 @@
       }),
     );
   }
-  
+
   export function relay<T>(
     el: HTMLElement | Element | null | undefined,
     eventName: string,
     data: T,
-    opts?: { bubbles?: boolean; },
-  ) {  
+    opts?: { bubbles?: boolean },
+  ) {
     if (!el) {
       console.error("dispatch element is null");
       return;
     }
     // console.log(`RELAY(${eventName}):`, data, el);
     el.dispatchEvent(
-      new CustomEvent<{action: string, data: T}>("msg", {
+      new CustomEvent<{ action: string; data: T }>("msg", {
         composed: true,
         bubbles: opts?.bubbles,
         detail: {
           action: eventName,
-          data
+          data,
         },
       }),
     );
   }
 
   // TODO: Logic simular to this needs to be done on the React side as well i.e. an initial onMount
-  // event that passes a ref to the form, 
+  // event that passes a ref to the form,
   function onContinue(name: string) {
     const form = _formEl.shadowRoot?.querySelector("form");
-    relay<{next: string}>(form, "external::continue", {
-      next: name
-    })
+    relay<{ next: string }>(form, "external::continue", {
+      next: name,
+    });
   }
 
   function validate(
     field: string,
     fieldsetEl: HTMLElement,
     fieldsetState: Record<string, string>,
-    validators: Validator[]
+    validators: Validator[],
   ): boolean {
     for (const _validate of validators) {
-      const valid = _validate(field, fieldsetEl, fieldsetState)
+      const valid = _validate(field, fieldsetEl, fieldsetState);
       if (!valid) return false;
     }
     return true;
@@ -126,10 +125,10 @@
     const { el: fieldset, state } = (e as CustomEvent).detail;
     const firstNameValid = validate("firstname", fieldset, state, [
       validateRequired("First name is required"),
-      validateLength("First name must be longer than 1 character")
+      validateLength("First name must be longer than 1 character"),
     ]);
     const lastNameValid = validate("lastname", fieldset, state, [
-      validateRequired("Last name is required")
+      validateRequired("Last name is required"),
     ]);
 
     if (firstNameValid && lastNameValid) {
@@ -140,7 +139,7 @@
   function occupationValidation(e: Event) {
     const { el, state } = (e as CustomEvent).detail;
     const occupationValid = validate("occupation", el, state, [
-      validateRequired("Occupation is required")
+      validateRequired("Occupation is required"),
     ]);
 
     if (state.occupation !== "dev") {
@@ -153,21 +152,29 @@
   }
 
   let showModal = false;
-  let formData = {}
+  let formData = {};
 
   function submitForm(e: Event) {
     const { form } = (e as CustomEvent).detail;
     formData = form;
     showModal = true;
   }
-
 </script>
 
-<goa-simple-form name="public-form-1" bind:this={_formEl} on:_submit={submitForm} storage="local">
-
+<goa-simple-form
+  name="public-form-1"
+  bind:this={_formEl}
+  on:_submit={submitForm}
+  storage="local"
+>
   <!-- First / last name -->
 
-  <goa-fieldset id="name" first heading="What is your name?" on:_continue={() => onContinue("children")}>
+  <goa-fieldset
+    id="name"
+    first
+    heading="What is your name?"
+    on:_continue={() => onContinue("children")}
+  >
     <goa-block direction="column" gap="l">
       <goa-form-item id="firstname" label="First name">
         <goa-input name="firstname" />
@@ -180,8 +187,12 @@
 
   <!-- Children -->
 
-  <goa-form-loop id="children" breakmsg="_break" on:_change={collectChildren} on:_bind={bindChildren}>
-  
+  <goa-form-loop
+    id="children"
+    breakmsg="_break"
+    on:_change={collectChildren}
+    on:_bind={bindChildren}
+  >
     <goa-fieldset
       id="children"
       heading="Children"
@@ -199,15 +210,27 @@
           <tr>
             <td>{child["child-firstname"]}</td>
             <td>{child["child-lastname"]}</td>
-            <td><goa-button data-pf-action="remove" data-pf-index={index} type="tertiary" variant="destructive">Remove</goa-button></td>
+            <td
+              ><goa-button
+                data-pf-action="remove"
+                data-pf-index={index}
+                type="tertiary"
+                variant="destructive">Remove</goa-button
+              ></td
+            >
           </tr>
         {/each}
-        <span/>
+        <span />
       </goa-table>
     </goa-fieldset>
 
     <goa-fieldset
       id="child-form"
+      preserve-state="false"
+      secondary-button-text="Cancel"
+      secondary-button-event="_"
+      show-back-button="false"
+      on:_secondaryClick={() => onContinue("children")}
       on:_continue={() => onContinue("children")}
     >
       <goa-block direction="column" gap="l">
@@ -217,22 +240,13 @@
         <goa-form-item id="child-lastname" label="Last name">
           <goa-input name="child-lastname" />
         </goa-form-item>
-        <!--
-        <goa-form-item id="child-age" label="Age">
-          <goa-input name="age" type="number" />
-        </goa-form-item>
-        -->
       </goa-block>
     </goa-fieldset>
-
   </goa-form-loop>
 
   <!-- Birthdate -->
-  
-  <goa-fieldset
-    id="music"
-    on:_continue={() => onContinue("birthdate")}
-  >
+
+  <goa-fieldset id="music" on:_continue={() => onContinue("birthdate")}>
     <goa-form-item id="favmusic" label="Favourite music" mb="l">
       <goa-radio-group name="favmusic">
         <goa-radio-item value="rock" />
@@ -247,23 +261,30 @@
   <goa-fieldset id="birthdate" on:_continue={() => onContinue("questions")}>
     <goa-form-item id="when" label="Birthdate">
       <goa-date-picker name="when" />
-    <goa-form-item>
-  </goa-fieldset>
+      <goa-form-item> </goa-form-item></goa-form-item
+    ></goa-fieldset
+  >
 
   <!-- Questions -->
-  
-  <goa-fieldset
-    id="questions"
-    on:_continue={() => onContinue("accept")}
-  >
-    <goa-form-item id="questions" label="Additional questions you have" labelsize="large" mb="l">
+
+  <goa-fieldset id="questions" on:_continue={() => onContinue("accept")}>
+    <goa-form-item
+      id="questions"
+      label="Additional questions you have"
+      labelsize="large"
+      mb="l"
+    >
       <goa-textarea name="questions" />
     </goa-form-item>
   </goa-fieldset>
 
   <!-- Accept -->
 
-  <goa-fieldset id="accept" heading="Accept the conditions you didn't read?"  on:_continue={() => onContinue("summary")}>
+  <goa-fieldset
+    id="accept"
+    heading="Accept the conditions you didn't read?"
+    on:_continue={() => onContinue("summary")}
+  >
     <goa-form-item id="accept" label mb="l">
       <goa-checkbox name="accept" value="yes">I do</goa-checkbox>
     </goa-form-item>
@@ -272,7 +293,7 @@
   <!-- Summary -->
 
   <goa-fieldset id="summary" heading="Review your answers" last on:_submit={submitForm}>
-    <goa-simple-form-summary />  
+    <goa-simple-form-summary />
   </goa-fieldset>
 
   <goa-modal open={showModal}>
@@ -280,18 +301,11 @@
       {JSON.stringify(formData, null, "  ")}
     </div>
     <goa-button-group alignment="end">
-      <goa-button type="primary" on:_click={() => showModal = false}>
-        Done
-      </goa-button>
+      <goa-button type="primary" on:_click={() => (showModal = false)}> Done </goa-button>
     </goa-button-group>
   </goa-modal>
-    
+
   <!-- Ineligible -->
 
-  <goa-fieldset id="ineligible" heading="You are not eligible" last>
-    :(
-  </goa-fieldset>
-
-
-
+  <goa-fieldset id="ineligible" heading="You are not eligible" last> :( </goa-fieldset>
 </goa-simple-form>
