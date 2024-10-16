@@ -6,6 +6,7 @@
       secondaryButtonText: { type: "String", attribute: "secondary-button-text" },
       preserveState: { type: "String", attribute: "preserve-state" },
       showBackButton: { type: "String", attribute: "show-back-button" },
+      dispatchOn: { attribute: "dispatch-on"}
     },
   }}
 />
@@ -54,6 +55,7 @@
   export let secondaryButtonText: string = "";
   export let showBackButton: string = "true";
   export let state: "subform" | "default" = "default";
+  export let dispatchOn: "change" | "continue" = "continue";
   export let mt: Spacing = null;
   export let mr: Spacing = null;
   export let mb: Spacing = null;
@@ -211,7 +213,7 @@
   // **************
 
   // Dispatch _continue event to app's level allowing custom validation to be performed
-  function onSaveAndContinue() {
+  function saveAndContinue() {
     // Prevents looping form sections from sending no data to the form, thereby overwritting data
     // already collected and saved at the form level
     const isDirty = Object.keys(_state).length > 0
@@ -287,6 +289,14 @@
       
       _state[name] = { name, value, label: _formItems[name].label };
 
+
+      // TODO: dispatch up changes to allow `Form` `_stateChange` event to handle
+      // immediate changes
+      // fire event immediate changes up to the form component if configured
+      // if (dispatchOn === "change") {
+      //   saveAndContinue();
+      // }
+
       e.stopPropagation();
     });
   }
@@ -353,7 +363,7 @@
             {buttonText || "Confirm"}
           </goa-button>
         {:else}
-          <goa-button on:_click={onSaveAndContinue} type="primary">
+          <goa-button on:_click={saveAndContinue} type="primary">
             {buttonText || "Continue"}
           </goa-button>
         {/if}
