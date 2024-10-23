@@ -76,6 +76,7 @@ export type FieldsetErrorRelayDetail = {
 export type FieldsetChangeRelayDetail = {
   id: string;
   state: Record<string, FieldsetItemState>;
+  dispatchOn: "change" | "continue";
 };
 
 export type FieldsetMountFormRelayDetail = {

@@ -8,6 +8,7 @@ export type AppState = {
 export type FieldsetItemState = {
   name: string;
   label: string;
+  // value: string | number | Date;
   value: string;
 };
 

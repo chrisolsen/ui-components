@@ -195,6 +195,10 @@
     _state.form[id] = state;
     _state.lastModified = new Date();
 
+    if (detail.dispatchOn === "change") {
+      dispatchStateChange(detail.id);
+    }
+
     saveState(_state);
   }
 
@@ -249,8 +253,8 @@
     saveState(_state);
   }
 
-  function dispatchStateChange() {
-    dispatch(_formEl, "_stateChange", {..._state}, { bubbles: true, timeout: 100 });
+  function dispatchStateChange(fieldSetId?: string) {
+    dispatch(_formEl, "_stateChange", {..._state, page: fieldSetId }, { bubbles: true, timeout: 100 });
   }
 
   function syncFormSummaryState() {
