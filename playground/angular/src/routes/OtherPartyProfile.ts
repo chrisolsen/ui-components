@@ -25,7 +25,7 @@ export class OtherPartyProfile {
   // Props
   // =====
 
-  _state: AppState = { form: {}, history: [], editting: "" };
+  _state: AppState = { form: {}, history: [], editting: "", status: "not-started" };
   _formData?: Record<string, string> = undefined;
   _formRef?: HTMLElement = undefined;
 

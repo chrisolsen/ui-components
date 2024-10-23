@@ -1,18 +1,12 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from "@angular/core";
 import { Router } from "@angular/router";
 
-import { continueTo } from "../app/public-form-utils";
-import type { AppState } from "../app/public-form-utils";
 import {
-  dateValidator,
-  emailValidator,
+  AppState,
+  continueTo,
   FieldsetItemState,
   FieldsetState,
-  numericValidator,
-  postalCodeValidator,
-  regexValidator,
   requiredValidator,
-  SINValidator,
   validate,
 } from "@abgov/angular-components";
 
@@ -32,7 +26,7 @@ export class SupportOrderDetails {
   // Props
   // =====
 
-  _state: AppState = { form: {}, history: [], editting: "" };
+  _state: AppState = { form: {}, history: [], editting: "", status: "not-started" };
   _formData?: Record<string, string> = undefined;
   _formRef?: HTMLElement = undefined;
 

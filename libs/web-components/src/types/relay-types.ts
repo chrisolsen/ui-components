@@ -1,8 +1,11 @@
+export type FormStatus = "not-started" | "incomplete"| "complete";
+
 export type FormState = {
   form: Record<string, FieldsetData>;
   history: string[];
   editting: string;
   lastModified?: Date;
+  status: FormStatus;
 };
 
 export type FieldsetData =

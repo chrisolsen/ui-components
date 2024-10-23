@@ -60,6 +60,7 @@
     history: [],
     editting: "",
     lastModified: undefined,
+    status: "not-started",
   };
 
   let lastPage: string;
@@ -276,6 +277,9 @@
   }
 
   function onFormComplete() {
+    _state.status = "complete";
+    saveState(_state);
+
     const cleanedState = _state.history.reduce<Record<string, FieldsetData>>((acc, fieldsetId) => {
       acc[fieldsetId] = _state.form[fieldsetId]
       return acc;
@@ -381,6 +385,7 @@
       history: [_fieldsets[0]?.id],
       editting: "",
       lastModified: undefined,
+      status: "not-started",
     };
   }
 </script>

@@ -42,7 +42,7 @@
       <goa-badge [type]="getType(status['other-party-profile'])" [content]="status['other-party-profile']" />
     </td>
   </tr>
-  <tr>
+  <tr *ngIf="state.hasChildSupport">
     <td>
       <a href="/#">Children's profile</a>
     </td>
