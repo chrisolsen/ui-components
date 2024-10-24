@@ -11,7 +11,8 @@ type Data = {
 
 type State = {
   hasChildSupport?: boolean;
-}
+  userRole?: "payor" | "recipient";
+};
 
 @Component({
   standalone: true,
@@ -21,7 +22,7 @@ type State = {
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class FSOS implements OnInit {
-  state: State = {}
+  state: State = {};
   data: Data = {};
 
   status: Record<string, Status> = {
@@ -31,22 +32,30 @@ export class FSOS implements OnInit {
   };
 
   ngOnInit() {
-    try {
-      this.data.supportOrderDetails = this.getData("support-order-details");
-      this.data.otherPartProfile = this.getData("other-party-profile");
-      this.data.priorRegistrations = this.getData("previous-registrations");
-    } catch (e) {
-      console.error(e);
-    }
+    this.data.supportOrderDetails = this.getData("support-order-details");
+    this.data.otherPartProfile = this.getData("other-party-profile");
+    this.data.priorRegistrations = this.getData("previous-registrations");
 
     this.setState();
   }
 
   setState() {
-    this.state.hasChildSupport = 
-      "Yes" === this.getValue(this.data.supportOrderDetails, "do-you-receive-support", "support");
+    this.state.hasChildSupport =
+      this.getValue(
+        this.data.supportOrderDetails,
+        "do-you-receive-support",
+        "support",
+      ) === "Yes";
 
-    this.status["support-order-details"] = this.convertToStatus(this.data.supportOrderDetails?.["status"]);
+    this.state.userRole = this.getValue(
+      this.data.supportOrderDetails,
+      "what-is-your-role",
+      "role",
+    ).toLowerCase();
+
+    this.status["support-order-details"] = this.convertToStatus(
+      this.data.supportOrderDetails?.["status"],
+    );
   }
 
   convertToStatus(status: unknown): Status {
@@ -66,10 +75,10 @@ export class FSOS implements OnInit {
     return data["form"][section]?.[id].value;
   }
 
-  getData(key: string): Record<string, unknown> {
+  getData(key: string): Record<string, unknown> | undefined {
     const raw = localStorage.getItem(key);
     if (!raw) {
-      throw "Unable to get " + key;
+      return;
     }
     return JSON.parse(raw);
   }

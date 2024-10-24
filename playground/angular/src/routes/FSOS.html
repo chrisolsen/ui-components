@@ -62,9 +62,41 @@
 
 <goa-text as="h3">3. Financials</goa-text>
 <goa-table width="100%" mb="xl">
+  <tr *ngIf="state.userRole === 'payor'">
+    <td width="100%">
+      <a href="/employment-and-banking-details">Your employment and banking details</a>
+    </td>
+    <td>
+      <goa-badge type="information" content="Not started" />
+    </td>
+  </tr>
+  <tr *ngIf="state.userRole === 'recipient'">
+    <td width="100%">
+      <a href="/other-partys-employment-and-banking-details">The other party's employment and banking details</a>
+    </td>
+    <td>
+      <goa-badge type="information" content="Not started" />
+    </td>
+  </tr>
+  <tr *ngIf="state.userRole === 'payor'">
+    <td width="100%">
+      <a href="/preauth-bank-withdrawls">Setup pre-autorized bank withdrawls</a>
+    </td>
+    <td>
+      <goa-badge type="information" content="Not started" />
+    </td>
+  </tr>
+  <tr *ngIf="state.userRole === 'recipient'">
+    <td width="100%">
+      <a href="/receiving-support">Receiving your support</a>
+    </td>
+    <td>
+      <goa-badge type="information" content="Not started" />
+    </td>
+  </tr>
   <tr>
     <td width="100%">
-      <a href="/#">Blah blah</a>
+      <a href="/recalc-program">Recalculation program</a>
     </td>
     <td>
       <goa-badge type="information" content="Not started" />
