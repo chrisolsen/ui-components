@@ -21,14 +21,7 @@
     toBoolean,
   } from "../../common/utils";
   import { calculateMargin } from "../../common/styling";
-  import {
-    FieldsetResetErrorsMsg,
-    FieldsetSetErrorMsg,
-    FormFieldMountMsg,
-    FormFieldMountRelayDetail,
-    FormSetValueMsg,
-    FormSetValueRelayDetail,
-  } from "../../types/relay-types";
+  import { FieldsetErrorRelayDetail, FieldsetResetErrorsMsg, FieldsetSetErrorMsg, FormFieldMountMsg, FormFieldMountRelayDetail, FormSetValueMsg, FormSetValueRelayDetail } from "../../types/relay-types";
 
   interface EventHandler {
     handleKeyUp: (e: KeyboardEvent) => void;
@@ -149,7 +142,7 @@
           onSetValue(data as FormSetValueRelayDetail);
           break;
         case FieldsetSetErrorMsg:
-          error = "true";
+          setError(data as FieldsetErrorRelayDetail);
           break;
         case FieldsetResetErrorsMsg:
           error = "false";
@@ -162,6 +155,10 @@
           break;
       }
     });
+  }
+
+  function setError(detail: FieldsetErrorRelayDetail) {
+    error = detail.error ? "true" : "false";
   }
 
   function onSetValue(detail: FormSetValueRelayDetail) {
