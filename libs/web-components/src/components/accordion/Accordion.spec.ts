@@ -1,7 +1,6 @@
 import Accordion from "./Accordion.svelte";
 import AccordionWithHeadingContent from "./AccordionWithHeadingContentWrapper.test.svelte";
 import { fireEvent, render, waitFor } from "@testing-library/svelte";
-import { it, describe } from "vitest";
 
 describe("Accordion", () => {
   it("renders", async () => {

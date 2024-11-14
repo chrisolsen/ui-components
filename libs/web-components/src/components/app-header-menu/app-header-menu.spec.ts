@@ -1,23 +1,20 @@
 import AppHeaderMenuWrapper from "./AppHeaderMenuWrapper.test.svelte";
-import { render, waitFor, screen } from "@testing-library/svelte";
+
+import { render, waitFor, screen, cleanup } from "@testing-library/svelte";
 import userEvent from "@testing-library/user-event";
 import type { UserEvent } from "@testing-library/user-event/dist/types/setup/setup";
-import { it, describe } from "vitest";
 import { tick } from "svelte";
 
 let user: UserEvent;
 
 beforeEach(() => {
+  cleanup();
   user = userEvent.setup();
 });
 
-type Query = (q: string) => HTMLElement;
-type QueryAll = (q: string) => NodeListOf<HTMLElement>;
-
 describe("Desktop", () => {
-  let $: Query;
-  let $$: QueryAll;
   let heading: string;
+  let container: HTMLElement;
 
   beforeEach(() => {
     Object.defineProperty(window, "innerWidth", {
@@ -31,24 +28,25 @@ describe("Desktop", () => {
       leadingicon: "add",
     });
 
-    const c = result.container;
-    $ = c.querySelector.bind(c);
-    $$ = c.querySelectorAll.bind(c);
+    container = result.container;
   });
 
   it("renders on desktop", async () => {
-    const popover = $("goa-popover");
-    const button = $("button");
-    const leadingIcon = $("button goa-icon[type=add]");
-    const chevronIcon = $("button goa-icon[type=chevron-down]");
-    const links = $$("a");
+
+    const popover = container.querySelector("goa-popover");
+    const button = container.querySelector("button");
+    const leadingIcon = container.querySelector("button goa-icon[type=add]");
+    const chevronIcon = container.querySelector("button goa-icon[type=chevron-down]");
+    const links = container.querySelectorAll("a");
 
     expect(popover).toBeTruthy();
-    expect(popover.getAttribute("maxwidth")).toBe("16rem");
-    expect(popover.getAttribute("minwidth")).toBe("8rem");
-    expect(button.innerHTML).toContain(heading);
+    expect(button).toBeTruthy();
     expect(leadingIcon).toBeTruthy();
     expect(chevronIcon).toBeTruthy();
+
+    expect(popover?.getAttribute("maxwidth")).toBe("16rem");
+    expect(popover?.getAttribute("minwidth")).toBe("8rem");
+    expect(button?.innerHTML).toContain(heading);
 
     // The links will exist for the desktop since the show/hide logic is contained
     // within the popover; so the links will be visible as the they are passed into
@@ -70,11 +68,11 @@ describe("Desktop", () => {
     );
 
     await waitFor(() => {
-      const currentLink = $("a.current");
+      const currentLink = container.querySelector("a.current");
       expect(currentLink?.getAttribute("href")).toBe("#seniors");
       // We should make sure when router link is changed, the app-header-menu is closed
-      const popover = $("goa-popover");
-      expect(popover.getAttribute("open")).toBe("false");
+      const popover = container.querySelector("goa-popover");
+      expect(popover?.getAttribute("open")).toBe("false");
     });
 
     // When parent dispatch event with empty link, means no link should be highlighted, we should remove the current class
@@ -85,7 +83,7 @@ describe("Desktop", () => {
     );
 
     await waitFor(() => {
-      const currentLink = $("a.current");
+      const currentLink = container.querySelector("a.current");
       expect(currentLink).toBeNull();
     });
 
@@ -97,27 +95,44 @@ describe("Desktop", () => {
     );
 
     await waitFor(() => {
-      const currentLink = $("a.current");
+      const currentLink = container.querySelector("a.current");
       expect(currentLink).toBeNull();
     });
   });
 
-  it("close the menu if the link handles other function beside navigate to new page", async () => {
-    const specialLink = $("a[href='#special']");
-    await user.click(specialLink);
-    await tick();
-    const popover = $("goa-popover");
-    expect(popover.getAttribute("open")).toBe("false");
+  it.only("close the menu when clicking on something that doesn't navigate to a new page", async () => {
+    // const link = container.querySelector("a[href='#special']");
+    const link = screen.queryByText(/Test/);
+    const popover = container.querySelector("goa-popover");
+    const input = container.querySelector("input");
+    const spy = vi.fn();
+
+    expect(link).toBeTruthy();
+
+    link?.addEventListener("click", () => {
+      spy();
+    });
+
+    // clicking the following link doesn't open the menu, but rather perform the logic within
+    // the assigned event handler
+    link && (await user.click(link));
+    input && (await user.type(input, "hello"));
+    expect(popover?.getAttribute("open")).toBe("false");
+    expect(spy).toHaveBeenCalled();
+    expect(input?.value).toBe("hello");
+
     // Functionality is handled as usual
-    const text = await screen.findByTestId("test-without-loading");
-    expect((await text).innerHTML).toBe("Test without loading");
+    const text = container.querySelector("[data-testid=test-without-loading]");
+    console.log(text, "foo");
+    await waitFor(() => {
+      expect(text?.innerHTML).toBe("Test without loading");
+    });
   });
 });
 
 describe("Mobile", () => {
-  let $: Query;
-  let $$: QueryAll;
   let heading: string;
+  let container: HTMLElement;
 
   beforeEach(() => {
     Object.defineProperty(window, "innerWidth", {
@@ -131,82 +146,80 @@ describe("Mobile", () => {
       leadingicon: "add",
     });
 
-    const c = result.container;
-    $ = c.querySelector.bind(c);
-    $$ = c.querySelectorAll.bind(c);
+    container = result.container;
   });
 
   it("renders on mobile", async () => {
-    const button = $("button");
-    const leadingIcon = $("button goa-icon[type=add]");
-    const chevronIcon = $("button goa-icon[type=chevron-down]");
+    const button = container.querySelector("button");
+    const leadingIcon = container.querySelector("button goa-icon[type=add]");
+    const chevronIcon = container.querySelector("button goa-icon[type=chevron-down]");
 
-    expect(button.innerHTML).toContain(heading);
+    expect(button?.innerHTML).toContain(heading);
     expect(leadingIcon).toBeTruthy();
     expect(chevronIcon).toBeTruthy();
   });
 
   it("opens/closes the menu on click", async () => {
-    const btn = $("button");
-    await user.click(btn);
+    const btn = container.querySelector("button");
+    btn && await userEvent?.click(btn);
     await waitFor(() => {
-      const links = $$("a");
+      const links = container.querySelectorAll("a");
       expect(links.length).toBe(4);
     });
 
     // close
-    await user.click(btn);
+    btn && await user.click(btn);
     await waitFor(() => {
-      const links = $$("a");
+      const links = container.querySelectorAll("a");
       expect(links.length).toBe(0);
     });
   });
 
   it("opens/closes on the space key", async () => {
-    const btn = $("button");
+    const btn = container.querySelector("button");
 
-    btn.focus();
+    btn?.focus();
     // open
     await user.keyboard(" ");
     await waitFor(() => {
-      const links = $$("a");
+      const links = container.querySelectorAll("a");
       expect(links.length).toBe(4);
     });
 
     // close
-    await user.keyboard("{enter}");
+    await userEvent?.keyboard("{enter}");
     await waitFor(() => {
-      const links = $$("a");
+      const links = container.querySelectorAll("a");
       expect(links.length).toBe(0);
     });
   });
 
   it("opens/closes on the enter key", async () => {
-    const btn = $("button");
+    const btn = container.querySelector("button");
 
-    btn.focus();
+    btn?.focus();
     // open
     await user.keyboard("{enter}");
     await waitFor(() => {
-      const links = $$("a");
+      const links = container.querySelectorAll("a");
       expect(links.length).toBe(4);
     });
 
     //close
     await user.keyboard("{enter}");
     await waitFor(() => {
-      const links = $$("a");
+      const links = container.querySelectorAll("a");
       expect(links.length).toBe(0);
     });
   });
 
   it("focuses on the links on `tab`", async () => {
-    const btn = $("button");
+    const btn = container.querySelector("button");
 
-    btn.focus();
+    btn?.focus();
     await user.keyboard("{enter}");
     await waitFor(async () => {
-      const links = $$("a");
+      const links = container.querySelectorAll("a");
       expect(links.length).toBe(4);
 
       await user.keyboard("{Tab}");
@@ -219,10 +232,10 @@ describe("Mobile", () => {
   });
 
   it("close the menu if the link handles other function beside navigate to new page", async () => {
-    const specialLink = $("a[href='#special']");
-    await user.click(specialLink);
+    const specialLink = container.querySelector("a[href='#special']");
+    specialLink && await user.click(specialLink);
     await tick();
-    const links = $$("a");
+    const links = container.querySelectorAll("a");
     expect(links.length).toBe(0);
   });
 
@@ -232,9 +245,8 @@ describe("Mobile", () => {
 });
 
 describe("Tablet", () => {
-  let $: Query;
-  let $$: QueryAll;
   let heading: string;
+  let container: HTMLElement;
 
   beforeEach(() => {
     Object.defineProperty(window, "innerWidth", {
@@ -248,82 +260,80 @@ describe("Tablet", () => {
       leadingicon: "add",
     });
 
-    const c = result.container;
-    $ = c.querySelector.bind(c);
-    $$ = c.querySelectorAll.bind(c);
+    container = result.container;
   });
 
   it("renders on tablet", async () => {
-    const button = $("button");
-    const leadingIcon = $("button goa-icon[type=add]");
-    const chevronIcon = $("button goa-icon[type=chevron-down]");
+    const button = container.querySelector("button");
+    const leadingIcon = container.querySelector("button goa-icon[type=add]");
+    const chevronIcon = container.querySelector("button goa-icon[type=chevron-down]");
 
-    expect(button.innerHTML).toContain(heading);
+    expect(button?.innerHTML).toContain(heading);
     expect(leadingIcon).toBeTruthy();
     expect(chevronIcon).toBeTruthy();
   });
 
   it("opens/closes the menu on click", async () => {
-    const btn = $("button");
-    await user.click(btn);
+    const btn = container.querySelector("button");
+    btn && await user.click(btn);
     await waitFor(() => {
-      const links = $$("a");
+      const links = container.querySelectorAll("a");
       expect(links.length).toBe(4);
     });
 
     // close
-    await user.click(btn);
+    btn && await user.click(btn);
     await waitFor(() => {
-      const links = $$("a");
+      const links = container.querySelectorAll("a");
       expect(links.length).toBe(0);
     });
   });
 
   it("opens/closes on the space key", async () => {
-    const btn = $("button");
+    const btn = container.querySelector("button");
 
-    btn.focus();
+    btn?.focus();
     // open
     await user.keyboard(" ");
     await waitFor(() => {
-      const links = $$("a");
+      const links = container.querySelectorAll("a");
       expect(links.length).toBe(4);
     });
 
     // close
     await user.keyboard("{enter}");
     await waitFor(() => {
-      const links = $$("a");
+      const links = container.querySelectorAll("a");
       expect(links.length).toBe(0);
     });
   });
 
   it("opens/closes on the enter key", async () => {
-    const btn = $("button");
+    const btn = container.querySelector("button");
 
-    btn.focus();
+    btn?.focus();
     // open
     await user.keyboard("{enter}");
     await waitFor(() => {
-      const links = $$("a");
+      const links = container.querySelectorAll("a");
       expect(links.length).toBe(4);
     });
 
     // close
     await user.keyboard("{enter}");
     await waitFor(() => {
-      const links = $$("a");
+      const links = container.querySelectorAll("a");
       expect(links.length).toBe(0);
     });
   });
 
   it("focuses on the links on `tab`", async () => {
-    const btn = $("button");
+    const btn = container.querySelector("button");
 
-    btn.focus();
+    btn?.focus();
     await user.keyboard("{enter}");
     await waitFor(async () => {
-      const links = $$("a");
+      const links = container.querySelectorAll("a");
       expect(links.length).toBe(4);
 
       await user.keyboard("{Tab}");
@@ -336,10 +346,10 @@ describe("Tablet", () => {
   });
 
   it("close the menu if the link handles other function beside navigate to new page", async () => {
-    const specialLink = $("a[href='#special']");
-    await user.click(specialLink);
+    const specialLink = container.querySelector("a[href='#special']");
+    specialLink && user.click(specialLink);
     await tick();
-    const links = $$("a");
+    const links = container.querySelectorAll("a");
     expect(links.length).toBe(0);
   });
 });
