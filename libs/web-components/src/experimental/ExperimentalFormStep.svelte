@@ -50,14 +50,12 @@
     // receive notification from parent of resize
     _rootEl.addEventListener("form-stepper:resized", (e: Event) => {
       const { mobile } = (e as CustomEvent).detail;
-      console.log("form-stepper:resized", mobile);
       _isMobile = mobile;
     });
 
     // receive parent el information
     _rootEl.addEventListener("formstepper:init", (e: Event) => {
       const ce = e as CustomEvent<FormStep>;
-      console.log("formstepper:init", ce.detail);
 
       arialabel = ce.detail.ariaLabel;
       enabled = ce.detail.enabled;
