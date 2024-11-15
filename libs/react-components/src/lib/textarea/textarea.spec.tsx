@@ -20,10 +20,8 @@ describe("TextArea", () => {
         mr="m"
         mb="l"
         ml="xl"
-        onChange={() => {
-          /* do nothing */
-        }}
-      />,
+        onChange={() => { /* do nothing */ }}
+      />
     );
 
     const el = document.querySelector("goa-textarea");

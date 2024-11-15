@@ -1,0 +1,103 @@
+<goa-public-form
+  name="parent-form"
+  (_complete)="onComplete()"
+  (_init)="_mainFormController.init($event)"
+  (_stateChange)="updateState($event)"
+  back-url="/fsos"
+>
+  <!--  Subform -->
+
+  <goa-subform
+    first
+    id="children-subform"
+    heading="Children"
+    name="children-subform"
+    (_continue)="onPageChange($event, 'children-subform')"
+    (_init)="_childFormController.initList($event)"
+    (_stateChange)="updateChildrenState($event)"
+  >
+    <goa-subform-index
+      slot="subform-index"
+      action-button-text="Add Child"
+      continue-button-text="Confirm"
+      [attr.continue-button-visibility]="continueButtonVisibility"
+    >
+      <h2>Child(ren)'s profile</h2>
+      <goa-text mb="l" *ngIf="children().length === 0">
+        Include the child(ren) listed in your court order or agreement that you want MEP to enforce support for. Select
+        ‘Add child’ to start.
+      </goa-text>
+
+      <div *ngFor="let item of children(); index as i">
+        <goa-button-group>
+          <goa-link-button (_click)="_childFormController.edit(i)">Edit</goa-link-button>
+          <goa-link-button (_click)="showModal(i)">Delete</goa-link-button>
+        </goa-button-group>
+        <dl>
+          <dt>First name</dt>
+          <dl>{{ item["firstName"] }}</dl>
+
+          <dt>Last name</dt>
+          <dl>{{ item["lastName"] }}</dl>
+        </dl>
+      </div>
+    </goa-subform-index>
+
+    <goa-public-form-page
+      id="name"
+      button-text="Continue"
+      (_continue)="onChildPageChange($event, 'name')"
+      last
+    >
+      <goa-form-item name="First name" label="First name">
+        <goa-input name="firstName"></goa-input>
+      </goa-form-item>
+      <goa-form-item name="Last name" label="Last name">
+        <goa-input name="lastName"></goa-input>
+      </goa-form-item>
+
+      <goa-form-item name="Alternate name" label="Alternate name">
+        <goa-input name="alternateName"></goa-input>
+      </goa-form-item>
+
+      <goa-form-item name="Date of birth" label="Date of birth">
+        <goa-date-picker type="input" name="dob"></goa-date-picker>
+      </goa-form-item>
+    </goa-public-form-page>
+  </goa-subform>
+
+  <!--  End of subform-->
+
+  <goa-public-form-page
+    id="summary"
+    button-text="Back to task list"
+    last
+  >
+    <goa-block alignment="center" gap="s">
+      <goa-icon type="checkmark-circle" size="large" fillcolor="green"></goa-icon>
+      <goa-text as="h2" mb="none">
+        Task completed
+      </goa-text>
+    </goa-block>
+
+    <goa-text mb="m">
+      Well done! When you are ready, proceed to the next task.
+    </goa-text>
+
+    <goa-text>
+      If you exit the form your progress will be saved. You can resume your registration anytime by logging in again.
+    </goa-text>
+  </goa-public-form-page>
+
+</goa-public-form>
+
+<goa-modal heading="Delete this child?" role="alertdialog" [attr.open]="showDeleteModal">
+  <goa-button-group alignment="end" mt="xl">
+    <goa-button type="tertiary" (_click)="onDeleteCancel()">
+      Cancel
+    </goa-button>
+    <goa-button type="primary" (_click)="onDeleteConfirm()">
+      Delete
+    </goa-button>
+  </goa-button-group>
+</goa-modal>

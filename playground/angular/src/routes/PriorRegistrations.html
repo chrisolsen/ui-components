@@ -1,0 +1,32 @@
+<goa-public-form
+  name="previous-registrations"
+  (_complete)="onComplete($event)"
+  (_init)="init($event)"
+  storage="local"
+>
+  <goa-public-form-page
+    id="previous-registration"
+    heading="Have you previously registered in a Maintenance Enforcement or Recalculation Program in Alberta?"
+    first
+    (_continue)="onPageChange($event, 'previous-registrations')"
+  >
+    <goa-form-item id="previous-registration">
+      <goa-radio-group name="previous-registration">
+        <goa-radio-item value="First time" label="No, this if my first time" />
+        <goa-radio-item value="Maintenance Enforcement Program" label="Yes, with Maintenance Enforcement Program" />
+        <goa-radio-item value="Recalculation Program" label="Yes, with the Recalculation Program" />
+        <goa-radio-item value="Maintenance Enforcement and Recalculation Program" label="Yes, with the Maintenance Enforcement and Recalculation Program" />
+      </goa-radio-group>
+    </goa-form-item>
+
+  </goa-public-form-page>
+
+  <goa-public-form-page
+    id="summary"
+    heading="Summary"
+    last
+  >
+    <goa-public-form-summary />
+  </goa-public-form-page>
+
+</goa-public-form>

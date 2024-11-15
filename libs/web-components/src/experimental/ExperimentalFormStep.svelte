@@ -56,6 +56,8 @@
     // receive parent el information
     _rootEl.addEventListener("formstepper:init", (e: Event) => {
       const ce = e as CustomEvent<FormStep>;
+      console.log("formstepper:init", ce.detail);
+
       arialabel = ce.detail.ariaLabel;
       enabled = ce.detail.enabled;
       childindex = ce.detail.childIndex;
