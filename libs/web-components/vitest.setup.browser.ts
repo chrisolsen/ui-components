@@ -1,7 +1,7 @@
 import * as matchers from "vitest-dom/matchers";
 import * as moreExpect from "vitest-dom/extend-expect";
 // import * as browser from "@vitest/browser/matchers";
-// import * as webdriver from "@vitest/browser/providers/webdriverio"
+import * as webdriver from "@vitest/browser/providers/webdriverio"
 
 import { expect } from "vitest";
 

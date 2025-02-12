@@ -1,4 +1,8 @@
 /// <reference types='vitest' />
+/// <reference types="vitest/config" />
+/// <reference types="@vitest/browser/matchers" />
+/// <reference types="@vitest/browser/providers/webdriverio" />
+
 import { defineConfig, loadEnv } from "vite";
 import dts from "vite-plugin-dts";
 import * as path from "path";
