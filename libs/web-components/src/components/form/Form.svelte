@@ -39,7 +39,7 @@
     FormPageBindRelayDetail,
     FieldsetBindRelayDetail,
     FieldsetBindMsg,
-    FormPageBackMsg,
+    FormPageBackMsg, Fieldset,
   } from "../../types/relay-types";
 
   // ========
@@ -81,6 +81,12 @@
 
   // Form state
   let _state: FormState;
+
+  // Initialized version of the form. This needs to be saved since the form init event
+  // is only fired once, on first load. This causes issues for the subforms since the
+  // form needs to be reset and reused. The _initForm allows the reset form's init state
+  // to be reused.
+  let _initForm: Record<string, Fieldset> = {};
 
   function getDefaultState(): FormState {
     return {
@@ -223,7 +229,8 @@
     _formPages[detail.id] = detail;
 
     // save the initial state of the fieldset (data prop not set)
-    _state.form[detail.id] = { ..._state.form[detail.id], heading: detail.heading };
+    _initForm[detail.id] = { ..._state.form[detail.id], heading: detail.heading };
+    _state.form = { ..._initForm };
 
     // Once all FormPages are obtained, set the visibility of the first item in the list
     // as visible for the default state; this may be overridden if the state is initialized
@@ -387,6 +394,7 @@
     const firstPage = _state.history[0];
     _state = getDefaultState();
     _state.history.push(firstPage);
+    _state.form = _initForm;
 
     // resetting html inputs within form components
     for (const { el } of Object.values(_fieldsets)) {
